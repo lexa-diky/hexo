@@ -1,5 +1,7 @@
 # Hexo
 
+![Crates.io License](https://img.shields.io/crates/l/hexo)
+
 Tiny binary writer utility, just enough for you
 
 ## Installation

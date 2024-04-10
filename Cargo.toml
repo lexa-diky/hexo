@@ -1,8 +1,8 @@
 [package]
 name = "hexo"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-license-file = "LICENSE.txt"
+license = "Apache-2.0"
 repository = "https://github.com/lexa-diky/hexo"
 readme = "README.md"
 documentation = "https://github.com/lexa-diky/hexo"
