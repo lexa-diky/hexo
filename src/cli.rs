@@ -14,8 +14,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    #[command(about = "Watch source and write compiled output on change")]
-    Watch {
+    #[command(about = "Compile source and write compiled output on change")]
+    Compile {
         #[arg(short, long)]
         source: String,
         #[arg(short, long)]
@@ -28,11 +28,11 @@ pub(crate) fn run_cli() {
 
     match cli.command {
         None => {}
-        Some(Commands::Watch { source, output }) => run_watch(source, output),
+        Some(Commands::Compile { source, output }) => run_compile(source, output),
     }
 }
 
-fn run_watch(source: String, output: String) {
+fn run_compile(source: String, output: String) {
     let mut source_buff = String::new();
     File::open(source)
         .unwrap()
