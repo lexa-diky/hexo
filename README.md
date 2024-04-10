@@ -13,12 +13,12 @@ cargo install hexo
 
 ## CLI
 
-### Compile
+### build
 
 Takes `source` file in hexo format and compiles it to binary file `output`
 
 ```bash
-hexo compile --source <path to source> --output <path to output>
+hexo build --source <path to source> --output <path to output>
 ```
 
 ## Syntax

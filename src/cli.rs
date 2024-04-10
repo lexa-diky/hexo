@@ -15,9 +15,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     #[command(about = "Compile source and write compiled output on change")]
-    Compile {
+    Build {
         #[arg(short, long)]
         source: String,
+
         #[arg(short, long)]
         output: String,
     },
@@ -28,11 +29,11 @@ pub(crate) fn run_cli() {
 
     match cli.command {
         None => {}
-        Some(Commands::Compile { source, output }) => run_compile(source, output),
+        Some(Commands::Build { source, output }) => run_build(source, output),
     }
 }
 
-fn run_compile(source: String, output: String) {
+fn run_build(source: String, output: String) {
     let mut source_buff = String::new();
     File::open(source)
         .unwrap()

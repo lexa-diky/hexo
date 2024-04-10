@@ -48,10 +48,21 @@ pub(crate) enum CstStatement {
 
 #[derive(Debug, Clone)]
 pub(crate) enum CstAtom {
-    Hex { value: Vec<u8> },
+    Bytes { value: Vec<u8> },
     Utf8 { value: String },
     Const { name: String },
     Fn { name: String, params: Vec<CstAtom> },
+}
+
+impl CstAtom {
+
+    pub(crate) fn len(&self) -> usize {
+        match self {
+            CstAtom::Bytes { value } => value.len(),
+            CstAtom::Utf8 { value } => value.len(),
+            _ => panic!("can't get len of unresolved atom")
+        }
+    }
 }
 
 pub(crate) fn parse_cst(ast_node: AstNode) -> CstFile {
@@ -106,8 +117,8 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             };
         }
         crate::ast::AstNodeType::AtomHex => {
-            return CstAtom::Hex {
-                value: encoding::decode_hex(node_value.unwrap()).unwrap(),
+            return CstAtom::Bytes {
+                value: encoding::decode_byte(node_value.unwrap()).unwrap(),
             };
         }
         crate::ast::AstNodeType::AtomConst => {
