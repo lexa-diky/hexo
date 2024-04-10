@@ -18,7 +18,7 @@ cargo install hexo
 Takes `source` file in hexo format and compiles it to binary file `output`
 
 ```bash
-hexo watch --source <path to source> --output <path to output>
+hexo compile --source <path to source> --output <path to output>
 ```
 
 ## Syntax
