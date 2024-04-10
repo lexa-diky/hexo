@@ -7,7 +7,9 @@ Tiny binary writer utility, just enough for you
 
 ## Installation
 
-// TODO
+```bash
+cargo install hexo
+```
 
 ## CLI
 
