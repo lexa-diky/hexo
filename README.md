@@ -1,6 +1,7 @@
 # Hexo
 
 ![Crates.io License](https://img.shields.io/crates/l/hexo)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/hexo)
 
 Tiny binary writer utility, just enough for you
 
