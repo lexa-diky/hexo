@@ -1,0 +1,28 @@
+WHITESPACE = _{ " "+ }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)+ }
+
+// IDENTIFIER
+identifier = _{ (ASCII_ALPHANUMERIC | "_")+ }
+
+
+file = _{ SOI ~ body ~ EOI }
+body = _{ "\n"* ~ (statement ~ "\n"+) * ~ statement? }
+
+statement = _{ const_statement | emit_statement }
+	emit_statement = { ">" ~ atomic_strip }
+    const_statement = { "$" ~ const_statement_name ~ atomic_strip }
+        const_statement_name = @{ identifier }
+
+atomic_strip = _{ atom+ }
+
+atom = _{ atom_body ~ WHITESPACE? }
+	atom_body = _{ atom_const_decor | atom_hex | atom_utf8_decor | atom_fn }
+	atom_hex = @{ ASCII_HEX_DIGIT+ }
+    atom_utf8 = { ( "''" | (!"'" ~ ANY) )* }
+   		atom_utf8_decor = _{ "'" ~ atom_utf8 ~ "'" }
+    atom_const = @{ identifier }
+		atom_const_decor = _{ "$" ~ atom_const }
+
+	atom_fn = { "#" ~ atom_fn_name ~ "(" ~ atom_fn_params ~ ")" }
+    	atom_fn_name = { identifier }
+        atom_fn_params = { (atomic_strip ~ ",")* ~ atomic_strip }
