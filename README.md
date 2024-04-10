@@ -21,6 +21,15 @@ Takes `source` file in hexo format and compiles it to binary file `output`
 hexo build --source <path to source> --output <path to output>
 ```
 
+### watch
+
+Takes `source` file in hexo format and compiles it to binary file `output`. Will recompile on `source` file change
+
+```bash
+hexo watch --source <path to source> --output <path to output>
+```
+
+
 ## Syntax
 
 ### Emitter

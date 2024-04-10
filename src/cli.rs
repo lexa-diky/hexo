@@ -4,6 +4,12 @@ use clap::{Parser, Subcommand};
 use pest::Parser as PestParser;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::panic::catch_unwind;
+use std::thread::sleep;
+use std::time::Duration;
+use notify::{Event, EventKind, RecursiveMode, Watcher};
+use notify::event::ModifyKind;
+use notify::EventKind::Modify;
 use pest::error::Error;
 use pest::iterators::Pairs;
 
@@ -24,6 +30,15 @@ enum Commands {
         #[arg(short, long)]
         output: String,
     },
+
+    #[command(about = "Watch source and write compiled output on change")]
+    Watch {
+        #[arg(short, long)]
+        source: String,
+
+        #[arg(short, long)]
+        output: String,
+    },
 }
 
 pub(crate) fn run_cli() {
@@ -31,8 +46,37 @@ pub(crate) fn run_cli() {
 
     match cli.command {
         None => {}
+        Some(Commands::Watch { source, output }) => run_watch(source, output),
         Some(Commands::Build { source, output }) => run_build(source, output),
     }
+}
+
+fn run_watch(source: String, output: String) {
+    let source_path_clone = source.clone();
+    let source_path =  source_path_clone.as_ref();
+
+    let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
+        match event {
+            Ok(e) => {
+                if let Modify(ModifyKind::Data(_)) = e.kind {
+                    print!("rebuilding...");
+                    let _ = catch_unwind(|| {
+                        run_build(source.clone(), output.clone())
+                    });
+                    println!(" done!");
+                }
+
+            }
+            Err(e) => { println!("watch error: {:?}", e) }
+        }
+    }).expect("Can't create watcher");
+
+    watcher.watch(source_path, RecursiveMode::NonRecursive)
+        .expect("Can't start watcher");
+
+    println!("watcher started");
+
+    sleep(Duration::MAX);
 }
 
 fn run_build(source: String, output: String) {
