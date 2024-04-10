@@ -1,6 +1,6 @@
-use std::fmt::Display;
 use pest::iterators::{Pair, Pairs};
 use pest_derive::Parser;
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub(crate) struct AstNode {
@@ -29,9 +29,7 @@ pub(crate) enum AstNodeType {
 
     // Fallback
     IGNORED,
-    Unknown {
-        rule_name: String
-    },
+    Unknown { rule_name: String },
 }
 
 impl AstNodeType {
@@ -42,7 +40,7 @@ impl AstNodeType {
             | AstNodeType::AtomFnName
             | AstNodeType::StatementConstName
             | AstNodeType::AtomConst => true,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -74,9 +72,15 @@ fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
         Rule::emit_statement => AstNodeType::StatementEmit,
 
         Rule::EOI => AstNodeType::IGNORED,
-        _ => { AstNodeType::Unknown { rule_name: format!("{:?}", p.as_rule()) } }
+        _ => AstNodeType::Unknown {
+            rule_name: format!("{:?}", p.as_rule()),
+        },
     };
-    let option = if node_type.must_capture_value() { Some(p.as_str().to_string()) } else { None };
+    let option = if node_type.must_capture_value() {
+        Some(p.as_str().to_string())
+    } else {
+        None
+    };
 
     AstNode {
         node_type: node_type,
@@ -84,7 +88,6 @@ fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
         children: p.into_inner().map(parse_ast_pair).collect(),
     }
 }
-
 
 impl Display for AstNode {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {

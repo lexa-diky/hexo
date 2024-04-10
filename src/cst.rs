@@ -9,17 +9,23 @@ pub(crate) struct CstFile {
 
 impl CstFile {
     pub(crate) fn constants(&self) -> Vec<&CstStatementConst> {
-        self.statements.iter().filter_map(|s| match s {
-            CstStatement::Const(it) => Some(it),
-            _ => None,
-        }).collect()
+        self.statements
+            .iter()
+            .filter_map(|s| match s {
+                CstStatement::Const(it) => Some(it),
+                _ => None,
+            })
+            .collect()
     }
 
     pub(crate) fn emits(&self) -> Vec<&CstStatementEmit> {
-        self.statements.iter().filter_map(|s| match s {
-            CstStatement::Emit(it) => Some(it),
-            _ => None,
-        }).collect()
+        self.statements
+            .iter()
+            .filter_map(|s| match s {
+                CstStatement::Emit(it) => Some(it),
+                _ => None,
+            })
+            .collect()
     }
 }
 
@@ -53,7 +59,11 @@ pub(crate) fn parse_cst(ast_node: AstNode) -> CstFile {
 
     return CstFile {
         file_name: ast_node.value.unwrap(),
-        statements: ast_node.children.into_iter().map(parse_cst_statement).collect(),
+        statements: ast_node
+            .children
+            .into_iter()
+            .map(parse_cst_statement)
+            .collect(),
     };
 }
 
@@ -91,13 +101,19 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
 
     match node.node_type {
         crate::ast::AstNodeType::AtomUtf8 => {
-            return CstAtom::Utf8 { value: node_value.unwrap() };
+            return CstAtom::Utf8 {
+                value: node_value.unwrap(),
+            };
         }
         crate::ast::AstNodeType::AtomHex => {
-            return CstAtom::Hex { value: encoding::decode_hex(node_value.unwrap()).unwrap() };
+            return CstAtom::Hex {
+                value: encoding::decode_hex(node_value.unwrap()).unwrap(),
+            };
         }
         crate::ast::AstNodeType::AtomConst => {
-            return CstAtom::Const { name: node_value.unwrap() };
+            return CstAtom::Const {
+                name: node_value.unwrap(),
+            };
         }
         AstNodeType::AtomFn => {
             let mut name = String::new();
