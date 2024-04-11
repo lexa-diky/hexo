@@ -2,6 +2,8 @@ use crate::ast::{AstNode, AstNodeType};
 use crate::encoding;
 use crate::encoding::to_shrunk_bytes;
 
+type CstAtomStrip = Vec<CstAtom>;
+
 #[derive(Debug)]
 pub(crate) struct CstFile {
     pub(crate) file_name: String,
@@ -33,12 +35,12 @@ impl CstFile {
 #[derive(Debug)]
 pub(crate) struct CstStatementConst {
     pub(crate) name: String,
-    pub(crate) atoms: Vec<CstAtom>,
+    pub(crate) atoms: CstAtomStrip,
 }
 
 #[derive(Debug)]
 pub(crate) struct CstStatementEmit {
-    pub(crate) atoms: Vec<CstAtom>,
+    pub(crate) atoms: CstAtomStrip,
 }
 
 #[derive(Debug)]
@@ -48,17 +50,21 @@ pub(crate) enum CstStatement {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum CstAtom {
-    Bytes { value: Vec<u8> },
+pub(crate) enum CstAtomUnresolved {
     Const { name: String },
-    Fn { name: String, params: Vec<CstAtom> },
+    Fn { name: String, params_flatten: Vec<CstAtom> },
+}
+
+#[derive(Debug, Clone)]
+pub(crate) enum CstAtom {
+    Resolved { value: Vec<u8> },
+    Unresolved(CstAtomUnresolved),
 }
 
 impl CstAtom {
-
     pub(crate) fn len(&self) -> usize {
         match self {
-            CstAtom::Bytes { value } => value.len(),
+            CstAtom::Resolved { value } => value.len(),
             _ => panic!("can't get len of unresolved atom")
         }
     }
@@ -111,19 +117,19 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
 
     match node.node_type {
         AstNodeType::AtomUtf8 => {
-            return CstAtom::Bytes {
+            return CstAtom::Resolved {
                 value: node_value.unwrap().into_bytes(),
             };
         }
         AstNodeType::AtomHex => {
-            return CstAtom::Bytes {
+            return CstAtom::Resolved {
                 value: encoding::decode_byte(node_value.unwrap()).unwrap(),
             };
         }
         AstNodeType::AtomConst => {
-            return CstAtom::Const {
-                name: node_value.unwrap(),
-            };
+            return CstAtom::Unresolved(
+                CstAtomUnresolved::Const { name: node_value.unwrap() }
+            );
         }
         AstNodeType::AtomFn => {
             let mut name = String::new();
@@ -141,7 +147,9 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                     _ => {}
                 }
             }
-            return CstAtom::Fn { name, params };
+            return CstAtom::Unresolved(
+                CstAtomUnresolved::Fn { name, params_flatten: params }
+            );
         }
         AstNodeType::AtomBaseNumber => {
             let mut base = 10;
@@ -159,7 +167,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             }
             let value = u32::from_str_radix(value.as_str(), base).unwrap();
 
-            return CstAtom::Bytes {
+            return CstAtom::Resolved {
                 value: to_shrunk_bytes(value),
             };
         }

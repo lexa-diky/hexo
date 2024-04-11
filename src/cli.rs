@@ -1,17 +1,17 @@
-use crate::ast::{HexoParser, Rule};
-use crate::{ast, cst, render};
-use clap::{Parser, Subcommand};
-use pest::Parser as PestParser;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::panic::catch_unwind;
 use std::thread::sleep;
 use std::time::Duration;
-use notify::{Event, EventKind, RecursiveMode, Watcher};
+
+use clap::{Parser, Subcommand};
+use notify::{Event, RecursiveMode, Watcher};
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
-use pest::error::Error;
-use pest::iterators::Pairs;
+use pest::Parser as PestParser;
+
+use crate::{ast, cst, render};
+use crate::ast::{HexoParser, Rule};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
