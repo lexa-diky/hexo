@@ -8,6 +8,7 @@ mod cli;
 mod cst;
 mod encoding;
 mod render;
+mod resovler;
 
 fn main() {
     run_cli()

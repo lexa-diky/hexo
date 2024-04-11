@@ -12,6 +12,7 @@ use pest::Parser as PestParser;
 
 use crate::ast::{HexoParser, Rule};
 use crate::{ast, cst, render};
+use crate::resovler::resolve_cst;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -91,10 +92,12 @@ fn run_build(source: String, output: String) {
     };
 
     let ast = ast::parse_ast(String::from("java_file"), pairs);
+
     let cst = cst::parse_cst(ast);
+    let resolved_cst = resolve_cst(cst);
 
     File::create(output)
         .unwrap()
-        .write_all(&render::render_cst(cst))
+        .write_all(&render::render_cst(resolved_cst))
         .unwrap();
 }

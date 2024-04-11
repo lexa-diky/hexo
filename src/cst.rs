@@ -2,7 +2,41 @@ use crate::ast::{AstNode, AstNodeType};
 use crate::encoding;
 use crate::encoding::to_shrunk_bytes;
 
-type CstAtomStrip = Vec<CstAtom>;
+#[derive(Debug, Clone)]
+pub(crate) struct CstAtomStrip(Vec<CstAtom>);
+
+impl CstAtomStrip {
+    pub(crate) fn from(atoms: Vec<CstAtom>) -> CstAtomStrip {
+        CstAtomStrip(atoms)
+    }
+
+    pub(crate) fn empty() -> CstAtomStrip {
+        CstAtomStrip(Vec::new())
+    }
+
+    pub(crate) fn iter(&self) -> std::slice::Iter<CstAtom> {
+        self.0.iter()
+    }
+
+    pub(crate) fn to_vec(&self) -> Vec<CstAtom> {
+        self.0.clone()
+    }
+
+    pub(crate) fn push(&mut self, atom: CstAtom) {
+        self.0.push(atom);
+    }
+
+    pub(crate) fn extend(&mut self, atoms: CstAtomStrip) {
+        self.0.extend(atoms.0);
+    }
+}
+
+impl FromIterator<CstAtom> for CstAtomStrip {
+    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
+        CstAtomStrip(iter.into_iter().collect())
+    }
+}
+
 
 #[derive(Debug)]
 pub(crate) struct CstFile {
@@ -108,10 +142,15 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
                     }
                 }
             }
-            return CstStatement::Const(CstStatementConst { name, atoms });
+            return CstStatement::Const(
+                CstStatementConst {
+                    name: name,
+                    atoms: CstAtomStrip::from(atoms),
+                }
+            );
         }
         AstNodeType::IGNORED => {
-            return CstStatement::Emit(CstStatementEmit { atoms: Vec::new() });
+            return CstStatement::Emit(CstStatementEmit { atoms: CstAtomStrip::empty() });
         }
         _ => panic!("Unexpected node type: {:?}", ast_node.node_type),
     }
