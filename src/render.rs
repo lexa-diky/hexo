@@ -41,7 +41,6 @@ pub(crate) fn build_const_map(constants: Vec<&CstStatementConst>) -> HashMap<Str
 pub(crate) fn eval_atom(atom: &CstAtom, context: HashMap<String, Vec<CstAtom>>) -> Vec<u8> {
     match atom {
         CstAtom::Bytes { value } => value.to_vec(),
-        CstAtom::Utf8 { value } => value.as_bytes().to_vec(),
         CstAtom::Const { name } => {
             let value = context.get(name).unwrap();
             value
@@ -58,9 +57,6 @@ pub(crate) fn resolve_atom(atom: &CstAtom, context: HashMap<String, Vec<CstAtom>
     match atom {
         CstAtom::Bytes { value } => vec![CstAtom::Bytes {
             value: value.to_vec(),
-        }],
-        CstAtom::Utf8 { value } => vec![CstAtom::Utf8 {
-            value: value.to_string(),
         }],
         CstAtom::Const { name } => {
             let value = context.get(name).unwrap();
