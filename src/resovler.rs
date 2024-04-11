@@ -88,12 +88,9 @@ fn resolve_function(name: &String, params: &Vec<CstFunctionParameter>, context: 
             assert_eq!(params.len(), 1);
             let param1 = params[0].clone();
 
-            let resolved_params = param1.params.iter()
-                .map(|atom| resolve_atom(context, atom))
-                .collect::<Vec<_>>();
-
-            let arg1 =  resolved_params[0].clone();
-            let size = arg1.iter().fold(0, |acc, it| it.len());
+            let resolved_params = resolve_param(context, param1);
+            let arg1 =  clamp_param(resolved_params);
+            let size = arg1.iter().fold(0, |acc, it| acc + it.len());
 
             return CstAtomStrip::from(vec![CstAtom::Resolved {
                 value: vec![size as u8],
@@ -101,4 +98,16 @@ fn resolve_function(name: &String, params: &Vec<CstFunctionParameter>, context: 
         }
         _ => { panic!("unknown function {}", name) }
     }
+}
+
+fn resolve_param(context: &ResolutionContext, param: CstFunctionParameter) -> Vec<CstAtomStrip> {
+    param.params.iter()
+        .map(|atom| resolve_atom(context, atom))
+        .collect::<Vec<_>>()
+}
+
+fn clamp_param(param: Vec<CstAtomStrip>) -> CstAtomStrip {
+    let mut buf = CstAtomStrip::empty();
+    param.iter().for_each(|it| buf.extend(it.clone()));
+    buf
 }
