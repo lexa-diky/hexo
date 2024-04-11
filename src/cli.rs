@@ -5,13 +5,13 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use notify::{Event, RecursiveMode, Watcher};
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
+use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
-use crate::{ast, cst, render};
 use crate::ast::{HexoParser, Rule};
+use crate::{ast, cst, render};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -53,25 +53,24 @@ pub(crate) fn run_cli() {
 
 fn run_watch(source: String, output: String) {
     let source_path_clone = source.clone();
-    let source_path =  source_path_clone.as_ref();
+    let source_path = source_path_clone.as_ref();
 
-    let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
-        match event {
-            Ok(e) => {
-                if let Modify(ModifyKind::Data(_)) = e.kind {
-                    print!("rebuilding...");
-                    let _ = catch_unwind(|| {
-                        run_build(source.clone(), output.clone())
-                    });
-                    println!(" done!");
-                }
-
+    let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| match event {
+        Ok(e) => {
+            if let Modify(ModifyKind::Data(_)) = e.kind {
+                print!("rebuilding...");
+                let _ = catch_unwind(|| run_build(source.clone(), output.clone()));
+                println!(" done!");
             }
-            Err(e) => { println!("watch error: {:?}", e) }
         }
-    }).expect("Can't create watcher");
+        Err(e) => {
+            println!("watch error: {:?}", e)
+        }
+    })
+    .expect("Can't create watcher");
 
-    watcher.watch(source_path, RecursiveMode::NonRecursive)
+    watcher
+        .watch(source_path, RecursiveMode::NonRecursive)
         .expect("Can't start watcher");
 
     println!("watcher started");
@@ -88,9 +87,8 @@ fn run_build(source: String, output: String) {
 
     let pairs = match HexoParser::parse(Rule::file, source_buff.as_str()) {
         Ok(pairs) => pairs,
-        Err(err) => panic!("Can't parse source file\n{}", err)
+        Err(err) => panic!("Can't parse source file\n{}", err),
     };
-
 
     let ast = ast::parse_ast(String::from("java_file"), pairs);
     let cst = cst::parse_cst(ast);

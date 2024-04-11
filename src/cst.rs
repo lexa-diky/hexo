@@ -51,8 +51,13 @@ pub(crate) enum CstStatement {
 
 #[derive(Debug, Clone)]
 pub(crate) enum CstAtomUnresolved {
-    Const { name: String },
-    Fn { name: String, params_flatten: Vec<CstAtom> },
+    Const {
+        name: String,
+    },
+    Fn {
+        name: String,
+        params_flatten: Vec<CstAtom>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -65,7 +70,7 @@ impl CstAtom {
     pub(crate) fn len(&self) -> usize {
         match self {
             CstAtom::Resolved { value } => value.len(),
-            _ => panic!("can't get len of unresolved atom")
+            _ => panic!("can't get len of unresolved atom"),
         }
     }
 }
@@ -127,9 +132,9 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             };
         }
         AstNodeType::AtomConst => {
-            return CstAtom::Unresolved(
-                CstAtomUnresolved::Const { name: node_value.unwrap() }
-            );
+            return CstAtom::Unresolved(CstAtomUnresolved::Const {
+                name: node_value.unwrap(),
+            });
         }
         AstNodeType::AtomFn => {
             let mut name = String::new();
@@ -147,9 +152,10 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                     _ => {}
                 }
             }
-            return CstAtom::Unresolved(
-                CstAtomUnresolved::Fn { name, params_flatten: params }
-            );
+            return CstAtom::Unresolved(CstAtomUnresolved::Fn {
+                name,
+                params_flatten: params,
+            });
         }
         AstNodeType::AtomBaseNumber => {
             let mut base = 10;

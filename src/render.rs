@@ -1,6 +1,6 @@
 use crate::cst::{CstAtom, CstAtomUnresolved, CstFile, CstStatementConst};
-use std::collections::HashMap;
 use crate::encoding::to_shrunk_bytes;
+use std::collections::HashMap;
 
 pub(crate) fn render_cst(cst_file: CstFile) -> Vec<u8> {
     let emits = cst_file.emits();
@@ -50,10 +50,11 @@ pub(crate) fn eval_atom(atom: &CstAtom, context: HashMap<String, Vec<CstAtom>>) 
                     .flatten()
                     .collect()
             }
-            CstAtomUnresolved::Fn { name, params_flatten: params } => {
-                eval_function(name, params.to_vec(), context.clone())
-            }
-        }
+            CstAtomUnresolved::Fn {
+                name,
+                params_flatten: params,
+            } => eval_function(name, params.to_vec(), context.clone()),
+        },
     }
 }
 
@@ -62,29 +63,28 @@ pub(crate) fn resolve_atom(atom: &CstAtom, context: HashMap<String, Vec<CstAtom>
         CstAtom::Resolved { value } => vec![CstAtom::Resolved {
             value: value.to_vec(),
         }],
-        CstAtom::Unresolved(unresolved) => {
-            match unresolved {
-                CstAtomUnresolved::Const { name } => {
-                    let value = context.get(name).unwrap();
-                    value
-                        .iter()
-                        .map(|atom| resolve_atom(atom, context.clone()))
-                        .flatten()
-                        .collect()
-                }
-                CstAtomUnresolved::Fn { name, params_flatten: params } => {
-                    let resolved_params = params
-                        .iter()
-                        .map(|param| resolve_atom(param, context.clone()))
-                        .flatten()
-                        .collect();
-                    vec![CstAtom::Unresolved(
-                        CstAtomUnresolved::Fn {
-                            name: name.to_string(),
-                            params_flatten: resolved_params,
-                        }
-                    )]
-                }
+        CstAtom::Unresolved(unresolved) => match unresolved {
+            CstAtomUnresolved::Const { name } => {
+                let value = context.get(name).unwrap();
+                value
+                    .iter()
+                    .map(|atom| resolve_atom(atom, context.clone()))
+                    .flatten()
+                    .collect()
+            }
+            CstAtomUnresolved::Fn {
+                name,
+                params_flatten: params,
+            } => {
+                let resolved_params = params
+                    .iter()
+                    .map(|param| resolve_atom(param, context.clone()))
+                    .flatten()
+                    .collect();
+                vec![CstAtom::Unresolved(CstAtomUnresolved::Fn {
+                    name: name.to_string(),
+                    params_flatten: resolved_params,
+                })]
             }
         },
     }
@@ -99,7 +99,8 @@ pub(crate) fn eval_function(
 
     match name {
         "len" => {
-            let len_sum = resolved_parameters.iter()
+            let len_sum = resolved_parameters
+                .iter()
                 .fold(0, |acc, param| acc + param.len());
             return to_shrunk_bytes(len_sum as u32);
         }
@@ -108,9 +109,9 @@ pub(crate) fn eval_function(
 }
 
 fn resolve_params(params: Vec<CstAtom>, context: HashMap<String, Vec<CstAtom>>) -> Vec<CstAtom> {
-    params.iter()
+    params
+        .iter()
         .map(|param| resolve_atom(param, context.clone()))
         .flatten()
         .collect()
 }
-
