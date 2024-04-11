@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::cst::{CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstStatement, CstStatementEmit};
+use crate::cst::{CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement, CstStatementEmit};
 
 struct ResolutionContext {
     bindings: HashMap<String, CstAtomStrip>,
@@ -73,8 +73,8 @@ fn resolve_unresolved_atom(atom: &CstAtomUnresolved, context: &ResolutionContext
     return match atom {
         CstAtomUnresolved::Const { name } =>
             resolve_const(name, context),
-        CstAtomUnresolved::Fn { name, params_flatten } =>
-            resolve_function(name, params_flatten, context)
+        CstAtomUnresolved::Fn { name, params } =>
+            resolve_function(name, params, context)
     };
 }
 
@@ -82,10 +82,13 @@ fn resolve_const(name: &String, context: &ResolutionContext) -> CstAtomStrip {
     context.bindings.get(name).unwrap().clone()
 }
 
-fn resolve_function(name: &String, params: &Vec<CstAtom>, context: &ResolutionContext) -> CstAtomStrip {
+fn resolve_function(name: &String, params: &Vec<CstFunctionParameter>, context: &ResolutionContext) -> CstAtomStrip {
     match name.as_str() {
         "len" => {
-            let resolved_params = params.iter()
+            assert_eq!(params.len(), 1);
+            let param1 = params[0].clone();
+
+            let resolved_params = param1.params.iter()
                 .map(|atom| resolve_atom(context, atom))
                 .collect::<Vec<_>>();
 

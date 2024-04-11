@@ -84,13 +84,30 @@ pub(crate) enum CstStatement {
 }
 
 #[derive(Debug, Clone)]
+pub(crate) struct CstFunctionParameter {
+    pub(crate) params: Vec<CstAtom>,
+}
+
+impl CstFunctionParameter {
+    pub(crate) fn new() -> CstFunctionParameter {
+        CstFunctionParameter {
+            params: Vec::new(),
+        }
+    }
+
+    pub(crate) fn push(&mut self, atom: CstAtom) {
+        self.params.push(atom);
+    }
+}
+
+#[derive(Debug, Clone)]
 pub(crate) enum CstAtomUnresolved {
     Const {
         name: String,
     },
     Fn {
         name: String,
-        params_flatten: Vec<CstAtom>,
+        params: Vec<CstFunctionParameter>
     },
 }
 
@@ -177,23 +194,30 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
         }
         AstNodeType::AtomFn => {
             let mut name = String::new();
-            let mut params = Vec::new();
+            let mut params_flat = Vec::new();
+            let mut fn_params = Vec::new();
+
             for child in node.children {
                 match child.node_type {
                     AstNodeType::AtomFnName => {
                         name = child.value.unwrap();
                     }
                     AstNodeType::StatementConstParams => {
+                        let mut fn_param = CstFunctionParameter::new();
                         child.children.into_iter().for_each(|param| {
-                            params.push(parse_cst_atom(param));
+                            let atom = parse_cst_atom(param);
+                            params_flat.push(atom.clone());
+                            fn_param.push(atom.clone());
                         });
+
+                        fn_params.push(fn_param);
                     }
                     _ => {}
                 }
             }
             return CstAtom::Unresolved(CstAtomUnresolved::Fn {
                 name,
-                params_flatten: params,
+                params: fn_params
             });
         }
         AstNodeType::AtomBaseNumber => {
