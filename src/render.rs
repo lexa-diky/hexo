@@ -95,7 +95,7 @@ pub(crate) fn eval_function(
         "len" => {
             let len_sum = resolved_parameters.iter()
                 .fold(0, |acc, param| acc + param.len());
-            return to_shrunk_bytes(len_sum)
+            return to_shrunk_bytes(len_sum as u32)
         }
         _ => panic!("Unknown function: {}", name),
     }

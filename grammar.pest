@@ -16,8 +16,11 @@ statement = _{ const_statement | emit_statement }
 atomic_strip = _{ atom+ }
 
 atom = _{ atom_body ~ WHITESPACE? }
-	atom_body = _{ atom_const_decor | atom_hex | atom_utf8_decor | atom_fn }
+	atom_body = _{ atom_base_number | atom_const_decor | atom_hex | atom_utf8_decor | atom_fn }
 	atom_hex = @{ ASCII_HEX_DIGIT+ }
+	atom_base_number = { atom_base_number_base ~ "x" ~ atom_base_number_value }
+    	atom_base_number_base = { ('0'..'9')+ }
+        atom_base_number_value = { ASCII_ALPHANUMERIC+ }
     atom_utf8 = { ( "''" | (!"'" ~ ANY) )* }
    		atom_utf8_decor = _{ "'" ~ atom_utf8 ~ "'" }
     atom_const = @{ identifier }

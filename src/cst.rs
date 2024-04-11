@@ -1,5 +1,6 @@
 use crate::ast::{AstNode, AstNodeType};
 use crate::encoding;
+use crate::encoding::to_shrunk_bytes;
 
 #[derive(Debug)]
 pub(crate) struct CstFile {
@@ -111,17 +112,17 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
     let node_value = node.value;
 
     match node.node_type {
-        crate::ast::AstNodeType::AtomUtf8 => {
+        AstNodeType::AtomUtf8 => {
             return CstAtom::Utf8 {
                 value: node_value.unwrap(),
             };
         }
-        crate::ast::AstNodeType::AtomHex => {
+        AstNodeType::AtomHex => {
             return CstAtom::Bytes {
                 value: encoding::decode_byte(node_value.unwrap()).unwrap(),
             };
         }
-        crate::ast::AstNodeType::AtomConst => {
+        AstNodeType::AtomConst => {
             return CstAtom::Const {
                 name: node_value.unwrap(),
             };
@@ -143,6 +144,26 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                 }
             }
             return CstAtom::Fn { name, params };
+        }
+        AstNodeType::AtomBaseNumber => {
+            let mut base = 10;
+            let mut value = String::new();
+            for child in node.children {
+                match child.node_type {
+                    AstNodeType::AtomBaseNumberBase => {
+                        base = child.value.unwrap().parse().unwrap();
+                    }
+                    AstNodeType::AtomBaseNumberValue => {
+                        value = child.value.unwrap();
+                    }
+                    _ => {}
+                }
+            }
+            let value = u32::from_str_radix(value.as_str(), base).unwrap();
+
+            return CstAtom::Bytes {
+                value: to_shrunk_bytes(value),
+            };
         }
         _ => panic!("Unexpected node type: {:?}", node.node_type),
     }

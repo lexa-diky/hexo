@@ -39,6 +39,7 @@ To emit a byte use glyph '>' fallowed by byte value:
 ```hexo
 > 0a // by default numbers are interpreted as hexadecimal, will emit decimal 10
 > 'HelloWorld' // will emit utf-8 bytes of 'HelloWorld' string
+> 10x22 // you can specifiy arbitrary radix in range 2..36, will emit decimal 22
 ```
 
 ### Constants

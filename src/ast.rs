@@ -24,6 +24,9 @@ pub(crate) enum AstNodeType {
     AtomHex,
     AtomConst,
     AtomFn,
+    AtomBaseNumber,
+    AtomBaseNumberBase,
+    AtomBaseNumberValue,
 
     AtomFnName,
 
@@ -39,6 +42,8 @@ impl AstNodeType {
             | AstNodeType::AtomHex
             | AstNodeType::AtomFnName
             | AstNodeType::StatementConstName
+            | AstNodeType::AtomBaseNumberBase
+            | AstNodeType::AtomBaseNumberValue
             | AstNodeType::AtomConst => true,
             _ => false,
         }
@@ -61,6 +66,9 @@ fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
     let node_type = match p.as_rule() {
         Rule::atom_utf8 => AstNodeType::AtomUtf8,
         Rule::atom_hex => AstNodeType::AtomHex,
+        Rule::atom_base_number => AstNodeType::AtomBaseNumber,
+        Rule::atom_base_number_base => AstNodeType::AtomBaseNumberBase,
+        Rule::atom_base_number_value => AstNodeType::AtomBaseNumberValue,
         Rule::atom_const => AstNodeType::AtomConst,
         Rule::atom_fn => AstNodeType::AtomFn,
         Rule::atom_fn_name => AstNodeType::AtomFnName,
