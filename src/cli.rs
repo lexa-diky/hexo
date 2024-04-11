@@ -11,8 +11,8 @@ use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
 use crate::ast::{HexoParser, Rule};
+use crate::resolver::resolve_cst;
 use crate::{ast, cst, render};
-use crate::resovler::resolve_cst;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]

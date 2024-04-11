@@ -7,11 +7,6 @@ pub(crate) fn decode_byte(s: String) -> Result<Vec<u8>, ParseIntError> {
         .collect()
 }
 
-pub(crate) fn parse_number(value: String, radix: u32) -> u32 {
-    // implement conversion of value from string to u32 in radix
-    u32::from_str_radix(&value, radix).unwrap()
-}
-
 pub(crate) fn to_shrunk_bytes(value: u32) -> Vec<u8> {
     let mut bytes = Vec::new();
     let mut value = value;

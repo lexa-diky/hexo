@@ -18,10 +18,6 @@ impl CstAtomStrip {
         self.0.iter()
     }
 
-    pub(crate) fn to_vec(&self) -> Vec<CstAtom> {
-        self.0.clone()
-    }
-
     pub(crate) fn push(&mut self, atom: CstAtom) {
         self.0.push(atom);
     }
@@ -32,11 +28,10 @@ impl CstAtomStrip {
 }
 
 impl FromIterator<CstAtom> for CstAtomStrip {
-    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = CstAtom>>(iter: T) -> Self {
         CstAtomStrip(iter.into_iter().collect())
     }
 }
-
 
 #[derive(Debug)]
 pub(crate) struct CstFile {
@@ -90,9 +85,7 @@ pub(crate) struct CstFunctionParameter {
 
 impl CstFunctionParameter {
     pub(crate) fn new() -> CstFunctionParameter {
-        CstFunctionParameter {
-            params: Vec::new(),
-        }
+        CstFunctionParameter { params: Vec::new() }
     }
 
     pub(crate) fn push(&mut self, atom: CstAtom) {
@@ -107,7 +100,7 @@ pub(crate) enum CstAtomUnresolved {
     },
     Fn {
         name: String,
-        params: Vec<CstFunctionParameter>
+        params: Vec<CstFunctionParameter>,
     },
 }
 
@@ -159,15 +152,15 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
                     }
                 }
             }
-            return CstStatement::Const(
-                CstStatementConst {
-                    name: name,
-                    atoms: CstAtomStrip::from(atoms),
-                }
-            );
+            return CstStatement::Const(CstStatementConst {
+                name: name,
+                atoms: CstAtomStrip::from(atoms),
+            });
         }
         AstNodeType::IGNORED => {
-            return CstStatement::Emit(CstStatementEmit { atoms: CstAtomStrip::empty() });
+            return CstStatement::Emit(CstStatementEmit {
+                atoms: CstAtomStrip::empty(),
+            });
         }
         _ => panic!("Unexpected node type: {:?}", ast_node.node_type),
     }
@@ -217,7 +210,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             }
             return CstAtom::Unresolved(CstAtomUnresolved::Fn {
                 name,
-                params: fn_params
+                params: fn_params,
             });
         }
         AstNodeType::AtomBaseNumber => {
