@@ -1,9 +1,11 @@
-# Hexo
+# Hexo | 10110
+
+![Crates.io Total Downloads](https://img.shields.io/crates/v/hexo?label=version)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/hexo?logo=rust&label=crates.io%20downloads)
+![GitHub top language](https://img.shields.io/github/languages/top/lexa-diky/hexo?logo=rust)
 
 ![Crates.io License](https://img.shields.io/crates/l/hexo?logo=apache)
-![Crates.io Total Downloads](https://img.shields.io/crates/d/hexo?logo=rust&label=crates.io%20downloads)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lexa-diky/hexo/build?branch=main&logo=github)
-![GitHub top language](https://img.shields.io/github/languages/top/lexa-diky/hexo?logo=rust)
 
 Tiny binary writer utility, just enough for you
 
