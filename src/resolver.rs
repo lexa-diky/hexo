@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::io::repeat;
 
 use crate::cst::{
     CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement,

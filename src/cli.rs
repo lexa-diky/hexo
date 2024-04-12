@@ -91,7 +91,7 @@ fn run_build(source: String, output: String) {
         Err(err) => panic!("Can't parse source file\n{}", err),
     };
 
-    let ast = ast::parse_ast(String::from("java_file"), pairs);
+    let ast = ast::parse_ast(String::from("java_file"), pairs).unwrap();
 
     let cst = cst::parse_cst(ast);
     let resolved_cst = resolve_cst(cst);

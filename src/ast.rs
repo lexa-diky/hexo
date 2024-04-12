@@ -2,6 +2,8 @@ use pest::iterators::{Pair, Pairs};
 use pest_derive::Parser;
 use std::fmt::Display;
 
+type AstError = ();
+
 #[derive(Debug, Clone)]
 pub(crate) struct AstNode {
     pub(crate) node_type: AstNodeType,
@@ -37,6 +39,7 @@ pub(crate) enum AstNodeType {
 }
 
 impl AstNodeType {
+
     fn must_capture_value(&self) -> bool {
         match self {
             AstNodeType::AtomUtf8
@@ -55,15 +58,19 @@ impl AstNodeType {
 #[grammar = "grammar.pest"]
 pub(crate) struct HexoParser;
 
-pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> AstNode {
-    return AstNode {
-        node_type: AstNodeType::File,
-        value: Some(file_name),
-        children: pairs.map(parse_ast_pair).collect(),
-    };
+pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> Result<AstNode, AstError> {
+    let children: Result<Vec<AstNode>, _> = pairs.map(parse_ast_pair).collect();
+
+    return Ok(
+        AstNode {
+            node_type: AstNodeType::File,
+            value: Some(file_name),
+            children: children?,
+        }
+    );
 }
 
-fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
+fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
     let node_type = match p.as_rule() {
         Rule::atom_utf8 => AstNodeType::AtomUtf8,
         Rule::atom_hex => AstNodeType::AtomHex,
@@ -86,31 +93,19 @@ fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
             rule_name: format!("{:?}", p.as_rule()),
         },
     };
-    let option = if node_type.must_capture_value() {
-        Some(p.as_str().to_string())
-    } else {
-        None
-    };
 
-    AstNode {
-        node_type: node_type,
-        value: option,
-        children: p.into_inner().map(parse_ast_pair).collect(),
-    }
-}
+    let option = node_type.must_capture_value()
+        .then(|| p.as_str().to_string());
 
-impl Display for AstNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        // print as tree
-        fn fmt_node(node: &AstNode, f: &mut std::fmt::Formatter, level: usize) -> std::fmt::Result {
-            let indent = "  ".repeat(level);
-            write!(f, "{}{:?} => {:?}\n", indent, node.node_type, node.value)?;
-            for child in &node.children {
-                fmt_node(child, f, level + 1)?;
-            }
-            Ok(())
+    let children: Result<Vec<AstNode>, _> = p.into_inner()
+        .map(parse_ast_pair)
+        .collect();
+
+    Ok(
+        AstNode {
+            node_type: node_type,
+            value: option,
+            children: children?,
         }
-
-        fmt_node(self, f, 0)
-    }
+    )
 }
