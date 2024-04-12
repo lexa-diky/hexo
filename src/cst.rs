@@ -25,10 +25,32 @@ impl CstAtomStrip {
     pub(crate) fn extend(&mut self, atoms: CstAtomStrip) {
         self.0.extend(atoms.0);
     }
+
+    pub(crate) fn len(&self) -> usize {
+        self.0.iter().fold(0, |acc, it| acc + it.len())
+    }
+
+    pub(crate) fn as_usize(&self) -> usize {
+        let data = self.clamp_vec_u8();
+        data[0] as usize // TODO not correct behavior
+    }
+
+    pub(crate) fn clamp_vec_u8(&self) -> Vec<u8> {
+        let mut buff = Vec::new();
+        self.0.iter().for_each(|atom| {
+            if let CstAtom::Resolved { value } = atom {
+                buff.extend(value.iter().cloned());
+            } else {
+                panic!("can't get usize of unresolved atom")
+            }
+        });
+
+        buff
+    }
 }
 
 impl FromIterator<CstAtom> for CstAtomStrip {
-    fn from_iter<T: IntoIterator<Item = CstAtom>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
         CstAtomStrip(iter.into_iter().collect())
     }
 }
@@ -187,8 +209,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
         }
         AstNodeType::AtomFn => {
             let mut name = String::new();
-            let mut params_flat = Vec::new();
-            let mut fn_params = Vec::new();
+            let mut parameter_buff: Vec<CstFunctionParameter> = Vec::new();
 
             for child in node.children {
                 match child.node_type {
@@ -196,21 +217,23 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                         name = child.value.unwrap();
                     }
                     AstNodeType::StatementConstParams => {
-                        let mut fn_param = CstFunctionParameter::new();
-                        child.children.into_iter().for_each(|param| {
-                            let atom = parse_cst_atom(param);
-                            params_flat.push(atom.clone());
-                            fn_param.push(atom.clone());
-                        });
+                        child.children.iter().for_each(|param| {
+                            let mut parameter = CstFunctionParameter::new();
 
-                        fn_params.push(fn_param);
+                            param.clone().children.into_iter().for_each(|atom| {
+                                let cst_atom = parse_cst_atom(atom);
+                                parameter.push(cst_atom);
+                            });
+
+                            parameter_buff.push(parameter);
+                        })
                     }
                     _ => {}
                 }
             }
             return CstAtom::Unresolved(CstAtomUnresolved::Fn {
                 name,
-                params: fn_params,
+                params: parameter_buff,
             });
         }
         AstNodeType::AtomBaseNumber => {

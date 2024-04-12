@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::repeat;
 
 use crate::cst::{
     CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement,
@@ -95,20 +96,57 @@ fn resolve_function(
     match name.as_str() {
         "len" => {
             assert_eq!(params.len(), 1);
-            let param1 = params[0].clone();
 
-            let resolved_params = resolve_param(context, param1);
-            let arg1 = clamp_param(resolved_params);
-            let size = arg1.iter().fold(0, |acc, it| acc + it.len());
+            let size = extract_param(0, params, context).len();
 
             return CstAtomStrip::from(vec![CstAtom::Resolved {
                 value: vec![size as u8],
+            }]);
+        }
+        "pad_right" => {
+            assert_eq!(params.len(), 2);
+
+            let padding = extract_param(0, params, context).as_usize();
+
+            let data = extract_param(1, params, context);
+            let mut data_vec = data.clamp_vec_u8().clone();
+            data_vec.resize(padding, 0);
+
+            return CstAtomStrip::from(vec![CstAtom::Resolved {
+                value: data_vec,
+            }]);
+        }
+        "pad_left" => {
+            assert_eq!(params.len(), 2);
+
+            let padding = extract_param(0, params, context).as_usize();
+
+            let data = extract_param(1, params, context);
+            let data_vec = data.clamp_vec_u8().clone();
+            let mut buff = vec![];
+
+            for _ in 0..(padding - data_vec.len()) {
+                buff.push(0)
+            }
+
+            buff.extend(data_vec);
+
+            return CstAtomStrip::from(vec![CstAtom::Resolved {
+                value: buff,
             }]);
         }
         _ => {
             panic!("unknown function {}", name)
         }
     }
+}
+
+fn extract_param(idx: usize, params: &Vec<CstFunctionParameter>, context: &ResolutionContext) -> CstAtomStrip {
+    let param1 = params[idx].clone();
+
+    let resolved_params = resolve_param(context, param1);
+    let arg1 = clamp_param(resolved_params);
+    arg1
 }
 
 fn resolve_param(context: &ResolutionContext, param: CstFunctionParameter) -> Vec<CstAtomStrip> {

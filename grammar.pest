@@ -28,4 +28,5 @@ atom = _{ atom_body ~ WHITESPACE? }
 
 	atom_fn = { "#" ~ atom_fn_name ~ "(" ~ atom_fn_params ~ ")" }
     	atom_fn_name = { identifier }
-        atom_fn_params = { (atomic_strip ~ ",")* ~ atomic_strip }
+        atom_fn_params = { (atom_fn_param ~ ",")* ~ atom_fn_param }
+        atom_fn_param = { atomic_strip }

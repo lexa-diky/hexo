@@ -2,20 +2,21 @@ use pest::iterators::{Pair, Pairs};
 use pest_derive::Parser;
 use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct AstNode {
     pub(crate) node_type: AstNodeType,
     pub(crate) value: Option<String>,
     pub(crate) children: Vec<AstNode>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) enum AstNodeType {
     // Container
     File,
 
     StatementConst,
     StatementConstName,
+    StatementConstParam,
     StatementConstParams,
 
     StatementEmit,
@@ -75,6 +76,7 @@ fn parse_ast_pair(p: Pair<Rule>) -> AstNode {
 
         Rule::const_statement => AstNodeType::StatementConst,
         Rule::const_statement_name => AstNodeType::StatementConstName,
+        Rule::atom_fn_param => AstNodeType::StatementConstParam,
         Rule::atom_fn_params => AstNodeType::StatementConstParams,
 
         Rule::emit_statement => AstNodeType::StatementEmit,
