@@ -8,10 +8,13 @@ identifier = _{ (ASCII_ALPHANUMERIC | "_")+ }
 file = _{ SOI ~ body ~ EOI }
 body = _{ "\n"* ~ (statement ~ "\n"+) * ~ statement? }
 
-statement = _{ const_statement | emit_statement }
+statement = _{ const_statement | emit_statement | fn_statement }
 	emit_statement = { ">" ~ atomic_strip }
     const_statement = { "$" ~ const_statement_name ~ atomic_strip }
         const_statement_name = @{ identifier }
+    fn_statement = { "#" ~ fn_statement_name ~ fn_statement_body }
+        fn_statement_name = @{ identifier }
+        fn_statement_body = { "{" ~ body ~ "}" }
 
 atomic_strip = _{ atom+ }
 

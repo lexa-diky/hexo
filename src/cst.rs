@@ -216,7 +216,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                     AstNodeType::AtomFnName => {
                         name = child.value.unwrap();
                     }
-                    AstNodeType::StatementConstParams => {
+                    AstNodeType::AtomFnParams => {
                         child.children.iter().for_each(|param| {
                             let mut parameter = CstFunctionParameter::new();
 

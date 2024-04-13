@@ -18,15 +18,19 @@ pub(crate) enum AstNodeType {
 
     StatementConst,
     StatementConstName,
-    StatementConstParam,
-    StatementConstParams,
 
     StatementEmit,
+
+    StatementFn,
+    StatementFnName,
+    StatementFnBody,
 
     AtomUtf8,
     AtomHex,
     AtomConst,
     AtomFn,
+    AtomFnParam,
+    AtomFnParams,
     AtomBaseNumber,
     AtomBaseNumberBase,
     AtomBaseNumberValue,
@@ -78,13 +82,18 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
         Rule::atom_base_number_base => AstNodeType::AtomBaseNumberBase,
         Rule::atom_base_number_value => AstNodeType::AtomBaseNumberValue,
         Rule::atom_const => AstNodeType::AtomConst,
+
         Rule::atom_fn => AstNodeType::AtomFn,
         Rule::atom_fn_name => AstNodeType::AtomFnName,
+        Rule::atom_fn_param => AstNodeType::AtomFnParam,
+        Rule::atom_fn_params => AstNodeType::AtomFnParams,
 
         Rule::const_statement => AstNodeType::StatementConst,
         Rule::const_statement_name => AstNodeType::StatementConstName,
-        Rule::atom_fn_param => AstNodeType::StatementConstParam,
-        Rule::atom_fn_params => AstNodeType::StatementConstParams,
+
+        Rule::fn_statement => AstNodeType::StatementFn,
+        Rule::fn_statement_name => AstNodeType::StatementFnName,
+        Rule::fn_statement_body => AstNodeType::StatementFnBody,
 
         Rule::emit_statement => AstNodeType::StatementEmit,
 
