@@ -4,10 +4,9 @@ pub(crate) fn decode_byte(s: String) -> Result<Vec<u8>, ()> {
         .step_by(2)
         .map(|i| {
             if s.len() < 2 {
-                return Err(())
+                return Err(());
             }
-            u8::from_str_radix(&s[i..i + 2], 16)
-                .map_err(|_| ())
+            u8::from_str_radix(&s[i..i + 2], 16).map_err(|_| ())
         })
         .collect()
 }

@@ -1,6 +1,5 @@
 use pest::iterators::{Pair, Pairs};
 use pest_derive::Parser;
-use std::fmt::Display;
 
 type AstError = ();
 
@@ -43,7 +42,6 @@ pub(crate) enum AstNodeType {
 }
 
 impl AstNodeType {
-
     fn must_capture_value(&self) -> bool {
         match self {
             AstNodeType::AtomUtf8
@@ -66,13 +64,11 @@ pub(crate) struct HexoParser;
 pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> Result<AstNode, AstError> {
     let children: Result<Vec<AstNode>, _> = pairs.map(parse_ast_pair).collect();
 
-    return Ok(
-        AstNode {
-            node_type: AstNodeType::File,
-            value: Some(file_name),
-            children: children?,
-        }
-    );
+    return Ok(AstNode {
+        node_type: AstNodeType::File,
+        value: Some(file_name),
+        children: children?,
+    });
 }
 
 fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
@@ -104,18 +100,15 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
         },
     };
 
-    let option = node_type.must_capture_value()
+    let option = node_type
+        .must_capture_value()
         .then(|| p.as_str().to_string());
 
-    let children: Result<Vec<AstNode>, _> = p.into_inner()
-        .map(parse_ast_pair)
-        .collect();
+    let children: Result<Vec<AstNode>, _> = p.into_inner().map(parse_ast_pair).collect();
 
-    Ok(
-        AstNode {
-            node_type: node_type,
-            value: option,
-            children: children?,
-        }
-    )
+    Ok(AstNode {
+        node_type: node_type,
+        value: option,
+        children: children?,
+    })
 }

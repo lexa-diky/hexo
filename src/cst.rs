@@ -50,7 +50,7 @@ impl CstAtomStrip {
 }
 
 impl FromIterator<CstAtom> for CstAtomStrip {
-    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = CstAtom>>(iter: T) -> Self {
         CstAtomStrip(iter.into_iter().collect())
     }
 }
@@ -206,12 +206,13 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
             let body = lookup_child(AstNodeType::StatementFnBody, &ast_node).unwrap();
             return CstStatement::Fn(CstStatementFn {
                 name: name,
-                statements: body.children.into_iter().map(parse_cst_statement)
-                    .map(|statement| {
-                        match statement {
-                            CstStatement::Emit(inner) => { inner }
-                            _ => panic!("Unexpected statement type: {:?}", statement),
-                        }
+                statements: body
+                    .children
+                    .into_iter()
+                    .map(parse_cst_statement)
+                    .map(|statement| match statement {
+                        CstStatement::Emit(inner) => inner,
+                        _ => panic!("Unexpected statement type: {:?}", statement),
                     })
                     .collect(),
             });
@@ -266,18 +267,16 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
                     AstNodeType::AtomFnName => {
                         name = child.value.unwrap();
                     }
-                    AstNodeType::AtomFnParams => {
-                        child.children.iter().for_each(|param| {
-                            let mut parameter = CstFunctionParameter::new();
+                    AstNodeType::AtomFnParams => child.children.iter().for_each(|param| {
+                        let mut parameter = CstFunctionParameter::new();
 
-                            param.clone().children.into_iter().for_each(|atom| {
-                                let cst_atom = parse_cst_atom(atom);
-                                parameter.push(cst_atom);
-                            });
+                        param.clone().children.into_iter().for_each(|atom| {
+                            let cst_atom = parse_cst_atom(atom);
+                            parameter.push(cst_atom);
+                        });
 
-                            parameter_buff.push(parameter);
-                        })
-                    }
+                        parameter_buff.push(parameter);
+                    }),
                     _ => {}
                 }
             }

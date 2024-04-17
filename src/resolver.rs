@@ -1,7 +1,9 @@
 use std::collections::HashMap;
-use std::task::Context;
 
-use crate::cst::{CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement, CstStatementEmit};
+use crate::cst::{
+    CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement,
+    CstStatementEmit,
+};
 
 struct ResolutionContext {
     constant_bindings: HashMap<String, CstAtomStrip>,
@@ -9,19 +11,24 @@ struct ResolutionContext {
 }
 
 impl ResolutionContext {
-
     fn from(cst_file: &CstFile) -> ResolutionContext {
         let constant_bindings = Self::extract_constant_bindings(cst_file);
         let functions = Self::extract_functions(cst_file);
 
-        ResolutionContext { constant_bindings: constant_bindings, functions: functions }
+        ResolutionContext {
+            constant_bindings: constant_bindings,
+            functions: functions,
+        }
     }
 
     fn extract_functions(cst_file: &CstFile) -> HashMap<String, Vec<CstStatementEmit>> {
-        return cst_file.functions().iter().fold(HashMap::new(), |mut acc, function| {
-            acc.insert(function.name.clone(), function.statements.clone());
-            acc
-        });
+        return cst_file
+            .functions()
+            .iter()
+            .fold(HashMap::new(), |mut acc, function| {
+                acc.insert(function.name.clone(), function.statements.clone());
+                acc
+            });
     }
 
     fn extract_constant_bindings(cst_file: &CstFile) -> HashMap<String, CstAtomStrip> {
@@ -35,10 +42,12 @@ impl ResolutionContext {
             })
             .collect();
 
-        bindings.into_iter().fold(HashMap::new(), |mut acc, (name, value)| {
-            acc.insert(name, value.clone());
-            acc
-        })
+        bindings
+            .into_iter()
+            .fold(HashMap::new(), |mut acc, (name, value)| {
+                acc.insert(name, value.clone());
+                acc
+            })
     }
 }
 
@@ -68,7 +77,8 @@ fn resolve_emit_statement(
 ) -> CstStatementEmit {
     let mut buf = CstAtomStrip::empty();
 
-    strip.atoms
+    strip
+        .atoms
         .iter()
         .for_each(|atom| buf.extend(resolve_atom(context, atom)));
 
@@ -94,9 +104,12 @@ fn resolve_unresolved_atom(atom: &CstAtomUnresolved, context: &ResolutionContext
 }
 
 fn resolve_const(name: &String, context: &ResolutionContext) -> CstAtomStrip {
-    let a = context.constant_bindings.get(name)
-        .expect(format!("unknown constant {}", name).as_str()).clone();
-    return a
+    let a = context
+        .constant_bindings
+        .get(name)
+        .expect(format!("unknown constant {}", name).as_str())
+        .clone();
+    return a;
 }
 
 fn resolve_function(
@@ -124,9 +137,7 @@ fn resolve_function(
             let mut data_vec = data.clamp_vec_u8().clone();
             data_vec.resize(padding, 0);
 
-            return CstAtomStrip::new(vec![CstAtom::Resolved {
-                value: data_vec,
-            }]);
+            return CstAtomStrip::new(vec![CstAtom::Resolved { value: data_vec }]);
         }
         "pad_left" => {
             assert_eq!(params.len(), 2);
@@ -143,9 +154,7 @@ fn resolve_function(
 
             buff.extend(data_vec);
 
-            return CstAtomStrip::new(vec![CstAtom::Resolved {
-                value: buff,
-            }]);
+            return CstAtomStrip::new(vec![CstAtom::Resolved { value: buff }]);
         }
         _ => try_resolve_user_function(name, params, context),
     }
@@ -154,14 +163,17 @@ fn resolve_function(
 fn try_resolve_user_function(
     name: &String,
     params: &Vec<CstFunctionParameter>,
-    context: &ResolutionContext
+    context: &ResolutionContext,
 ) -> CstAtomStrip {
-    let fn_statements = context.functions.get(name)
+    let fn_statements = context
+        .functions
+        .get(name)
         .expect(format!("unknown function: {}", name).as_str());
 
     let ext_context = extend_context_for_params(context, params);
-    let resolved: Vec<CstStatementEmit> = fn_statements.iter()
-        .map(|stmt| { resolve_emit_statement(stmt, &ext_context) })
+    let resolved: Vec<CstStatementEmit> = fn_statements
+        .iter()
+        .map(|stmt| resolve_emit_statement(stmt, &ext_context))
         .collect();
 
     let mut buf = CstAtomStrip::empty();
@@ -175,7 +187,10 @@ fn try_resolve_user_function(
     buf
 }
 
-fn extend_context_for_params(context: &ResolutionContext, params: &Vec<CstFunctionParameter>) -> ResolutionContext {
+fn extend_context_for_params(
+    context: &ResolutionContext,
+    params: &Vec<CstFunctionParameter>,
+) -> ResolutionContext {
     let mut new_constant_bindings = context.constant_bindings.clone();
     let mut idx = 0;
     params.iter().for_each(|param| {
@@ -185,20 +200,21 @@ fn extend_context_for_params(context: &ResolutionContext, params: &Vec<CstFuncti
             strip_buf.extend(resolve_atom(context, atom));
         });
 
-        new_constant_bindings.insert(
-            idx.to_string(),
-            strip_buf
-        );
+        new_constant_bindings.insert(idx.to_string(), strip_buf);
         idx += 1;
     });
 
     ResolutionContext {
         constant_bindings: new_constant_bindings,
-        functions: context.functions.clone()
+        functions: context.functions.clone(),
     }
 }
 
-fn extract_param(idx: usize, params: &Vec<CstFunctionParameter>, context: &ResolutionContext) -> CstAtomStrip {
+fn extract_param(
+    idx: usize,
+    params: &Vec<CstFunctionParameter>,
+    context: &ResolutionContext,
+) -> CstAtomStrip {
     let param1 = params[idx].clone();
 
     let resolved_params = resolve_param(context, param1);
@@ -207,7 +223,8 @@ fn extract_param(idx: usize, params: &Vec<CstFunctionParameter>, context: &Resol
 }
 
 fn resolve_param(context: &ResolutionContext, param: CstFunctionParameter) -> Vec<CstAtomStrip> {
-    param.params
+    param
+        .params
         .iter()
         .map(|atom| resolve_atom(context, atom))
         .collect::<Vec<_>>()
