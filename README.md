@@ -60,6 +60,20 @@ Then you can use it as if you used hex or binary string by prefixing it with '$'
 > $class_name
 ```
 
+### Declaring Functions
+
+You can declare arbitrary functions using glyph '#' fallowed by function name and body:
+
+```hexo
+# class_declaration {
+  > 0100
+  > #len($0)
+  > $0
+}
+```
+
+Function arguments are referenced by their index: `$0`, `$1`, `$2`, ...
+
 ### Calling Functions
 
 To call a function use glyph '#' fallowed by function name and arguments:
@@ -78,15 +92,21 @@ Let's write _'HelloWorld'_ Java class bytecode:
 $ class_name 'HelloWorld'
 $ object_superclass_name 'java/lang/Object'
 
+# class_declaration {
+  > 0100
+  > #len($0)
+  > $0
+}
+
 > cafe babe // Magic number
 
 > 0000 0034 // Java Bytecode version
 > 0005 // Constant pool size
 > 0700 02 // Class at index 2
 
-> 0100 #len($class_name) $class_name
+> #class_declaration($class_name)
 > 0700 04 // Class at index 4
-> 0100 #len($object_superclass_name) $object_superclass_name
+> #class_declaration($object_superclass_name)
 
 > 0021 // Supper public
 > 0001 0003 // Class pointers

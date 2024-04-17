@@ -6,7 +6,7 @@ use crate::encoding::to_shrunk_bytes;
 pub(crate) struct CstAtomStrip(Vec<CstAtom>);
 
 impl CstAtomStrip {
-    pub(crate) fn from(atoms: Vec<CstAtom>) -> CstAtomStrip {
+    pub(crate) fn new(atoms: Vec<CstAtom>) -> CstAtomStrip {
         CstAtomStrip(atoms)
     }
 
@@ -99,7 +99,7 @@ pub(crate) struct CstStatementConst {
     pub(crate) atoms: CstAtomStrip,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct CstStatementEmit {
     pub(crate) atoms: CstAtomStrip,
 }
@@ -193,7 +193,7 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
             }
             return CstStatement::Const(CstStatementConst {
                 name: name,
-                atoms: CstAtomStrip::from(atoms),
+                atoms: CstAtomStrip::new(atoms),
             });
         }
         AstNodeType::IGNORED => {
