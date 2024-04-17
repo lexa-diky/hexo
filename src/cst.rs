@@ -81,6 +81,16 @@ impl CstFile {
             })
             .collect()
     }
+
+    pub(crate) fn functions(&self) -> Vec<&CstStatementFn> {
+        self.statements
+            .iter()
+            .filter_map(|s| match s {
+                CstStatement::Fn(it) => Some(it),
+                _ => None,
+            })
+            .collect()
+    }
 }
 
 #[derive(Debug)]
@@ -95,9 +105,16 @@ pub(crate) struct CstStatementEmit {
 }
 
 #[derive(Debug)]
+pub(crate) struct CstStatementFn {
+    pub(crate) name: String,
+    pub(crate) statements: Vec<CstStatementEmit>,
+}
+
+#[derive(Debug)]
 pub(crate) enum CstStatement {
     Emit(CstStatementEmit),
     Const(CstStatementConst),
+    Fn(CstStatementFn),
 }
 
 #[derive(Debug, Clone)]
@@ -184,8 +201,41 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
                 atoms: CstAtomStrip::empty(),
             });
         }
+        AstNodeType::StatementFn => {
+            let name = lookup_value(AstNodeType::StatementFnName, &ast_node).unwrap();
+            let body = lookup_child(AstNodeType::StatementFnBody, &ast_node).unwrap();
+            return CstStatement::Fn(CstStatementFn {
+                name: name,
+                statements: body.children.into_iter().map(parse_cst_statement)
+                    .map(|statement| {
+                        match statement {
+                            CstStatement::Emit(inner) => { inner }
+                            _ => panic!("Unexpected statement type: {:?}", statement),
+                        }
+                    })
+                    .collect(),
+            });
+        }
         _ => panic!("Unexpected node type: {:?}", ast_node.node_type),
     }
+}
+
+fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, ()> {
+    for child in &in_node.children {
+        if child.node_type == node_type {
+            return <Option<String> as Clone>::clone(&child.value).ok_or(());
+        }
+    }
+    return Err(());
+}
+
+fn lookup_child(node_type: AstNodeType, in_node: &AstNode) -> Result<AstNode, ()> {
+    for child in &in_node.children {
+        if child.node_type == node_type {
+            return Ok(child.clone());
+        }
+    }
+    return Err(());
 }
 
 fn parse_cst_atom(node: AstNode) -> CstAtom {

@@ -1,16 +1,21 @@
 use std::collections::HashMap;
 
-use crate::cst::{
-    CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement,
-    CstStatementEmit,
-};
+use crate::cst::{CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement, CstStatementEmit, CstStatementFn};
 
 struct ResolutionContext {
-    bindings: HashMap<String, CstAtomStrip>,
+    constant_bindings: HashMap<String, CstAtomStrip>,
+   // functions: HashMap<String, CstStatementFn>,
 }
 
 impl ResolutionContext {
+
     fn from(cst_file: &CstFile) -> ResolutionContext {
+        let constant_bindings = Self::extract_constant_bindings(cst_file);
+
+        ResolutionContext { constant_bindings: constant_bindings }
+    }
+
+    fn extract_constant_bindings(cst_file: &CstFile) -> HashMap<String, CstAtomStrip> {
         let bindings: Vec<_> = cst_file
             .constants()
             .iter()
@@ -26,8 +31,7 @@ impl ResolutionContext {
             acc.insert(name, value.clone());
             acc
         });
-
-        ResolutionContext { bindings: build }
+        build
     }
 }
 
@@ -84,7 +88,7 @@ fn resolve_unresolved_atom(atom: &CstAtomUnresolved, context: &ResolutionContext
 }
 
 fn resolve_const(name: &String, context: &ResolutionContext) -> CstAtomStrip {
-    context.bindings.get(name).unwrap().clone()
+    context.constant_bindings.get(name).unwrap().clone()
 }
 
 fn resolve_function(

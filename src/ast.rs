@@ -52,6 +52,7 @@ impl AstNodeType {
             | AstNodeType::StatementConstName
             | AstNodeType::AtomBaseNumberBase
             | AstNodeType::AtomBaseNumberValue
+            | AstNodeType::StatementFnName
             | AstNodeType::AtomConst => true,
             _ => false,
         }
