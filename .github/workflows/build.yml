@@ -25,12 +25,6 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test --verbose
-      - uses: Swatinem/fucov@v1
-        name: Generate coverage report
-      - uses: codecov/codecov-action@v1
-        name: Upload coverage report
-        with:
-          directory: coverage
       - name: Publish to crates.io
         uses: katyo/publish-crates@v2
         with:
