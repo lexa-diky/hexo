@@ -10,7 +10,6 @@ use console::style;
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
-use pest::error::Error;
 use pest::Parser as PestParser;
 
 use crate::ast::{HexoParser, Rule};
@@ -32,7 +31,7 @@ enum Commands {
         source: String,
 
         #[arg(short, long)]
-        output: String,
+        output: Option<String>,
     },
 
     #[command(about = "Watch source and write compiled output on change")]
@@ -41,7 +40,7 @@ enum Commands {
         source: String,
 
         #[arg(short, long)]
-        output: String,
+        output: Option<String>,
     },
 }
 
@@ -84,7 +83,7 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
     }
 }
 
-fn handle_cli_error_syntax(error: Error<Rule>) {
+fn handle_cli_error_syntax(error: pest::error::Error<Rule>) {
     print_error("invalid syntax", Box::new(error.clone()));
 }
 
@@ -93,7 +92,7 @@ fn print_error(message: &str, error: Box<dyn Display>) {
     println!("{}", style(error).red());
 }
 
-fn run_watch(source: String, output: String) -> Result<(), CliError> {
+fn run_watch(source: String, output: Option<String>) -> Result<(), CliError> {
     let source_path_clone = source.clone();
     let source_path = source_path_clone.as_ref();
 
@@ -112,7 +111,7 @@ fn run_watch(source: String, output: String) -> Result<(), CliError> {
     Ok(())
 }
 
-fn run_watch_loop(source: String, output: String, event: Result<Event, notify::Error>) {
+fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
     match event {
         Ok(e) => {
             if let Modify(ModifyKind::Data(_)) = e.kind {
@@ -127,7 +126,7 @@ fn run_watch_loop(source: String, output: String, event: Result<Event, notify::E
     }
 }
 
-fn run_build(source: String, output: String) -> Result<(), CliError> {
+fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
     let mut source_buff = String::new();
     File::open(source)
         .map_err(|err| CliError::CantReadInputFile(err))?
@@ -145,7 +144,8 @@ fn run_build(source: String, output: String) -> Result<(), CliError> {
     let cst = cst::parse_cst(ast);
     let resolved_cst = resolve_cst(cst);
 
-    File::create(output)
+    let output_file_path = output.unwrap_or(format!("{}.bin", source));
+    File::create(output_file_path)
         .map_err(|err| CliError::CantCrateOutputFile(err))?
         .write_all(&render::render_cst(resolved_cst))
         .map_err(|err| CliError::CantCrateOutputFile(err))
