@@ -16,12 +16,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        name: Checkout repository
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
           override: true
       - uses: Swatinem/rust-cache@v2
+        name: Cache dependencies
         with:
           cache-all-crates: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
