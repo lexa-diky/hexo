@@ -128,7 +128,7 @@ fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, n
 
 fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
     let mut source_buff = String::new();
-    File::open(source)
+    File::open(source.clone())
         .map_err(|err| CliError::CantReadInputFile(err))?
         .read_to_string(&mut source_buff)
         .map_err(|err| CliError::CantReadInputFile(err))?;
