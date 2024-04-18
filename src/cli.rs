@@ -42,21 +42,62 @@ enum Commands {
     },
 }
 
+#[derive(Debug)]
+pub(crate) enum CliError {
+    UnknownCommand,
+    CantCreateWatcher(notify::Error),
+    CantStartWatcher(notify::Error),
+    CantCrateOutputFile(std::io::Error),
+    CantReadInputFile(std::io::Error),
+    AstParsingFailed,
+    SyntaxError(pest::error::Error<Rule>),
+}
+
 pub(crate) fn run_cli() {
     let cli = Cli::parse();
 
-    match cli.command {
-        None => {}
+    let cli_result: Result<_, CliError> = match cli.command {
+        None => { Err(CliError::UnknownCommand) }
         Some(Commands::Watch { source, output }) => run_watch(source, output),
         Some(Commands::Build { source, output }) => run_build(source, output),
+    };
+
+    if cli_result.is_err() {
+        match cli_result.unwrap_err() {
+            CliError::UnknownCommand => println!("unknown command"),
+            CliError::CantCreateWatcher(_) => println!("can't create watcher"),
+            CliError::CantStartWatcher(_) => println!("can't start watcher"),
+            CliError::CantCrateOutputFile(_) => println!("can't create output file"),
+            CliError::CantReadInputFile(_) => println!("can't read input file"),
+            CliError::AstParsingFailed => println!("ast parsing failed"),
+            CliError::SyntaxError(_) => println!("syntax error")
+        }
     }
+
+    ()
 }
 
-fn run_watch(source: String, output: String) {
+fn run_watch(source: String, output: String) -> Result<(), CliError> {
     let source_path_clone = source.clone();
     let source_path = source_path_clone.as_ref();
 
-    let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| match event {
+    let mut watcher = notify::recommended_watcher(
+        move |event: Result<Event, _>| run_watch_loop(source.clone(), output.clone(), event)
+    ).map_err(|err| CliError::CantCreateWatcher(err))?;
+
+    watcher
+        .watch(source_path, RecursiveMode::NonRecursive)
+        .map_err(|err| CliError::CantStartWatcher(err))?;
+
+    println!("watcher started");
+
+    sleep(Duration::MAX);
+
+    Ok(())
+}
+
+fn run_watch_loop(source: String, output: String, event: Result<Event, notify::Error>) {
+    match event {
         Ok(e) => {
             if let Modify(ModifyKind::Data(_)) = e.kind {
                 print!("rebuilding...");
@@ -67,37 +108,29 @@ fn run_watch(source: String, output: String) {
         Err(e) => {
             println!("watch error: {:?}", e)
         }
-    })
-    .expect("Can't create watcher");
-
-    watcher
-        .watch(source_path, RecursiveMode::NonRecursive)
-        .expect("Can't start watcher");
-
-    println!("watcher started");
-
-    sleep(Duration::MAX);
+    }
 }
 
-fn run_build(source: String, output: String) {
+fn run_build(source: String, output: String) -> Result<(), CliError> {
     let mut source_buff = String::new();
     File::open(source)
-        .expect("Can't find source file")
+        .map_err(|err| CliError::CantReadInputFile(err))?
         .read_to_string(&mut source_buff)
-        .expect("Failed to read source file");
+        .map_err(|err| CliError::CantReadInputFile(err))?;
 
     let pairs = match HexoParser::parse(Rule::file, source_buff.as_str()) {
         Ok(pairs) => pairs,
-        Err(err) => panic!("Can't parse source file\n{}", err),
+        Err(err) => return Err(CliError::SyntaxError(err))
     };
 
-    let ast = ast::parse_ast(String::from("java_file"), pairs).unwrap();
+    let ast = ast::parse_ast(String::from("java_file"), pairs)
+        .map_err(|err| CliError::AstParsingFailed)?;
 
     let cst = cst::parse_cst(ast);
     let resolved_cst = resolve_cst(cst);
 
     File::create(output)
-        .unwrap()
+        .map_err(|err| CliError::CantCrateOutputFile(err))?
         .write_all(&render::render_cst(resolved_cst))
-        .unwrap();
+        .map_err(|err| CliError::CantCrateOutputFile(err))
 }
