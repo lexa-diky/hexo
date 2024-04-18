@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::panic::catch_unwind;
@@ -5,9 +6,11 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
+use console::style;
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
+use pest::error::Error;
 use pest::Parser as PestParser;
 
 use crate::ast::{HexoParser, Rule};
@@ -62,6 +65,12 @@ pub(crate) fn run_cli() {
         Some(Commands::Build { source, output }) => run_build(source, output),
     };
 
+    handle_cli_error(cli_result);
+
+    ()
+}
+
+fn handle_cli_error(cli_result: Result<(), CliError>) {
     if cli_result.is_err() {
         match cli_result.unwrap_err() {
             CliError::UnknownCommand => println!("unknown command"),
@@ -70,11 +79,18 @@ pub(crate) fn run_cli() {
             CliError::CantCrateOutputFile(_) => println!("can't create output file"),
             CliError::CantReadInputFile(_) => println!("can't read input file"),
             CliError::AstParsingFailed => println!("ast parsing failed"),
-            CliError::SyntaxError(_) => println!("syntax error")
+            CliError::SyntaxError(error) => handle_cli_error_syntax(error)
         }
     }
+}
 
-    ()
+fn handle_cli_error_syntax(error: Error<Rule>) {
+    print_error("invalid syntax", Box::new(error.clone()));
+}
+
+fn print_error(message: &str, error: Box<dyn Display>) {
+    println!("{} {}", style("e:").red().bold(), style(message).red());
+    println!("{}", style(error).red());
 }
 
 fn run_watch(source: String, output: String) -> Result<(), CliError> {
@@ -124,7 +140,7 @@ fn run_build(source: String, output: String) -> Result<(), CliError> {
     };
 
     let ast = ast::parse_ast(String::from("java_file"), pairs)
-        .map_err(|err| CliError::AstParsingFailed)?;
+        .map_err(|_| CliError::AstParsingFailed)?;
 
     let cst = cst::parse_cst(ast);
     let resolved_cst = resolve_cst(cst);

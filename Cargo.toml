@@ -1,6 +1,6 @@
 [package]
 name = "hexo"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/lexa-diky/hexo"
@@ -19,3 +19,4 @@ clap = { version = "4.5.4", features = ["derive"] }
 pest = "2.7.9"
 pest_derive = "2.7.9"
 notify = "6.1.1"
+console = "0.15.8"
