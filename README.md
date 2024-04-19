@@ -7,7 +7,7 @@
 ![Crates.io License](https://img.shields.io/crates/l/hexo?logo=apache)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lexa-diky/hexo/build?branch=main&logo=github)
 
-Tiny binary writer utility, just enough for you
+Tiny binary writer utility, _just enough for you_
 
 ## Installation
 

@@ -1,4 +1,5 @@
 use crate::ast::{AstNode, AstNodeType};
+use crate::cst::CstParseError::NodeValueMissing;
 use crate::encoding;
 use crate::encoding::to_shrunk_bytes;
 
@@ -158,17 +159,23 @@ impl CstAtom {
     }
 }
 
-pub(crate) fn parse_cst(ast_node: AstNode) -> CstFile {
+pub(crate) enum CstParseError {
+    NodeValueMissing(AstNodeType),
+}
+
+pub(crate) fn parse_cst(ast_node: AstNode) -> Result<CstFile, CstParseError> {
     assert_eq!(ast_node.node_type, AstNodeType::File);
 
-    return CstFile {
-        file_name: ast_node.value.unwrap(),
-        statements: ast_node
-            .children
-            .into_iter()
-            .map(parse_cst_statement)
-            .collect(),
-    };
+    return Ok(
+        CstFile {
+            file_name: ast_node.value.ok_or(NodeValueMissing(ast_node.node_type))?,
+            statements: ast_node
+                .children
+                .into_iter()
+                .map(parse_cst_statement)
+                .collect(),
+        }
+    );
 }
 
 fn parse_cst_statement(ast_node: AstNode) -> CstStatement {

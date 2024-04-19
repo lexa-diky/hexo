@@ -53,6 +53,7 @@ pub(crate) enum CliError {
     CantReadInputFile(std::io::Error),
     AstParsingFailed,
     SyntaxError(pest::error::Error<Rule>),
+    CstParsingFailed,
 }
 
 pub(crate) fn run_cli() {
@@ -78,7 +79,8 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
             CliError::CantCrateOutputFile(_) => println!("can't create output file"),
             CliError::CantReadInputFile(_) => println!("can't read input file"),
             CliError::AstParsingFailed => println!("ast parsing failed"),
-            CliError::SyntaxError(error) => handle_cli_error_syntax(error)
+            CliError::SyntaxError(error) => handle_cli_error_syntax(error),
+            CliError::CstParsingFailed => println!("cst parsing failed"),
         }
     }
 }
@@ -141,7 +143,7 @@ fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
     let ast = ast::parse_ast(String::from("java_file"), pairs)
         .map_err(|_| CliError::AstParsingFailed)?;
 
-    let cst = cst::parse_cst(ast);
+    let cst = cst::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
     let resolved_cst = resolve_cst(cst);
 
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
