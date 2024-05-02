@@ -37,7 +37,6 @@ pub(crate) enum AstNodeType {
     AtomFnName,
 
     // Fallback
-    IGNORED,
     Unknown { rule_name: String },
 }
 
@@ -62,7 +61,9 @@ impl AstNodeType {
 pub(crate) struct HexoParser;
 
 pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> Result<AstNode, AstError> {
-    let children: Result<Vec<AstNode>, _> = pairs.map(parse_ast_pair).collect();
+    let children: Result<Vec<AstNode>, _> = pairs.map(parse_ast_pair)
+        .filter_map(filter_ignored_token)
+        .collect();
 
     return Ok(AstNode {
         node_type: AstNodeType::File,
@@ -71,7 +72,21 @@ pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> Result<AstNode
     });
 }
 
-fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
+fn filter_ignored_token(result: Result<Option<AstNode>, AstError>) -> Option<Result<AstNode, AstError>> {
+    match result {
+        Ok(optional_value) => {
+            match optional_value {
+                None => None,
+                Some(value) => Some(Ok(value)),
+            }
+        }
+        Err(error) => {
+            Some(Err(error))
+        }
+    }
+}
+
+fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstError> {
     let node_type = match p.as_rule() {
         Rule::atom_utf8 => AstNodeType::AtomUtf8,
         Rule::atom_hex => AstNodeType::AtomHex,
@@ -94,7 +109,7 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
 
         Rule::emit_statement => AstNodeType::StatementEmit,
 
-        Rule::EOI => AstNodeType::IGNORED,
+        Rule::EOI => return Ok(None),
         _ => AstNodeType::Unknown {
             rule_name: format!("{:?}", p.as_rule()),
         },
@@ -104,11 +119,18 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<AstNode, AstError> {
         .must_capture_value()
         .then(|| p.as_str().to_string());
 
-    let children: Result<Vec<AstNode>, _> = p.into_inner().map(parse_ast_pair).collect();
+    let children: Result<Vec<AstNode>, _> = p.into_inner()
+        .map(parse_ast_pair)
+        .filter_map(filter_ignored_token)
+        .collect();
 
-    Ok(AstNode {
-        node_type: node_type,
-        value: option,
-        children: children?,
-    })
+    Ok(
+        Some(
+            AstNode {
+                node_type: node_type,
+                value: option,
+                children: children?,
+            }
+        )
+    )
 }

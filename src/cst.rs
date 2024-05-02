@@ -203,11 +203,6 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
                 atoms: CstAtomStrip::new(atoms),
             });
         }
-        AstNodeType::IGNORED => {
-            return CstStatement::Emit(CstStatementEmit {
-                atoms: CstAtomStrip::empty(),
-            });
-        }
         AstNodeType::StatementFn => {
             let name = lookup_value(AstNodeType::StatementFnName, &ast_node).unwrap();
             let body = lookup_child(AstNodeType::StatementFnBody, &ast_node).unwrap();
