@@ -7,6 +7,7 @@ use crate::encoding::to_shrunk_bytes;
 pub(crate) struct CstAtomStrip(Vec<CstAtom>);
 
 impl CstAtomStrip {
+
     pub(crate) fn new(atoms: Vec<CstAtom>) -> CstAtomStrip {
         CstAtomStrip(atoms)
     }
@@ -27,8 +28,16 @@ impl CstAtomStrip {
         self.0.extend(atoms.0);
     }
 
-    pub(crate) fn len(&self) -> usize {
-        self.0.iter().fold(0, |acc, it| acc + it.len())
+    pub(crate) fn len(&self) -> Result<usize, CstParseError> {
+        let mut acc = 0;
+        for atom in &self.0 {
+            acc += match atom {
+                CstAtom::Resolved { value } => value.len(),
+                CstAtom::Unresolved(_) => return Err(CstParseError::UnresolvedAtom),
+            };
+        }
+
+        return Ok(acc);
     }
 
     pub(crate) fn as_usize(&self) -> usize {
@@ -63,6 +72,7 @@ pub(crate) struct CstFile {
 }
 
 impl CstFile {
+
     pub(crate) fn constants(&self) -> Vec<&CstStatementConst> {
         self.statements
             .iter()
@@ -150,17 +160,10 @@ pub(crate) enum CstAtom {
     Unresolved(CstAtomUnresolved),
 }
 
-impl CstAtom {
-    pub(crate) fn len(&self) -> usize {
-        match self {
-            CstAtom::Resolved { value } => value.len(),
-            _ => panic!("can't get len of unresolved atom"),
-        }
-    }
-}
-
+#[derive(Debug)]
 pub(crate) enum CstParseError {
     NodeValueMissing(AstNodeType),
+    UnresolvedAtom,
 }
 
 pub(crate) fn parse_cst(ast_node: AstNode) -> Result<CstFile, CstParseError> {
@@ -226,7 +229,8 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
 fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, ()> {
     for child in &in_node.children {
         if child.node_type == node_type {
-            return <Option<String> as Clone>::clone(&child.value).ok_or(());
+            return <Option<String> as Clone>::clone(&child.value)
+                .ok_or(());
         }
     }
     return Err(());

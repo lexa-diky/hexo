@@ -125,7 +125,7 @@ fn resolve_function(
             let size = param1.len();
 
             return CstAtomStrip::new(vec![CstAtom::Resolved {
-                value: vec![size as u8],
+                value: vec![size.unwrap() as u8],
             }]);
         }
         "pad_right" => {
