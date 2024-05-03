@@ -7,7 +7,6 @@ use crate::encoding::to_shrunk_bytes;
 pub(crate) struct CstAtomStrip(Vec<CstAtom>);
 
 impl CstAtomStrip {
-
     pub(crate) fn new(atoms: Vec<CstAtom>) -> CstAtomStrip {
         CstAtomStrip(atoms)
     }
@@ -60,7 +59,7 @@ impl CstAtomStrip {
 }
 
 impl FromIterator<CstAtom> for CstAtomStrip {
-    fn from_iter<T: IntoIterator<Item = CstAtom>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
         CstAtomStrip(iter.into_iter().collect())
     }
 }
@@ -72,7 +71,6 @@ pub(crate) struct CstFile {
 }
 
 impl CstFile {
-
     pub(crate) fn constants(&self) -> Vec<&CstStatementConst> {
         self.statements
             .iter()
@@ -163,6 +161,9 @@ pub(crate) enum CstAtom {
 #[derive(Debug)]
 pub(crate) enum CstParseError {
     NodeValueMissing(AstNodeType),
+    CstValueNotFound,
+    CstChildNotFound,
+    Unexpected { message: &'static str },
     UnresolvedAtom,
 }
 
@@ -226,23 +227,23 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
     }
 }
 
-fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, ()> {
+fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, CstParseError> {
     for child in &in_node.children {
         if child.node_type == node_type {
             return <Option<String> as Clone>::clone(&child.value)
-                .ok_or(());
+                .ok_or(CstParseError::Unexpected { message: "Can't clone child value" });
         }
     }
-    return Err(());
+    return Err(CstParseError::CstValueNotFound);
 }
 
-fn lookup_child(node_type: AstNodeType, in_node: &AstNode) -> Result<AstNode, ()> {
+fn lookup_child(node_type: AstNodeType, in_node: &AstNode) -> Result<AstNode, CstParseError> {
     for child in &in_node.children {
         if child.node_type == node_type {
             return Ok(child.clone());
         }
     }
-    return Err(());
+    return Err(CstParseError::CstChildNotFound);
 }
 
 fn parse_cst_atom(node: AstNode) -> CstAtom {
