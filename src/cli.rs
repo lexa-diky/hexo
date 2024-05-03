@@ -15,6 +15,7 @@ use pest::Parser as PestParser;
 use crate::ast::{AstError, HexoParser, Rule};
 use crate::resolver::resolve_cst;
 use crate::{ast, cst, render};
+use crate::render::RenderError;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -50,6 +51,7 @@ pub(crate) enum CliError {
     CantCreateWatcher(notify::Error),
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
+    Rendering(render::RenderError),
     CantReadInputFile(std::io::Error),
     AstParsingFailed(AstError),
     SyntaxError(pest::error::Error<Rule>),
@@ -81,7 +83,15 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
             CliError::AstParsingFailed(ast_error) => handle_ast_error(&ast_error),
             CliError::SyntaxError(error) => handle_cli_error_syntax(error),
             CliError::CstParsingFailed => eprintln!("cst parsing failed"),
+            CliError::Rendering(error) => handle_render_error(error),
         }
+    }
+}
+
+fn handle_render_error(error: RenderError) {
+    match error {
+        RenderError::UnresolvedAtom { atom } =>
+            eprintln!("unresolved atom: {:?}", atom)
     }
 }
 
@@ -157,6 +167,9 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Cl
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
     File::create(output_file_path)
         .map_err(|err| CliError::CantCrateOutputFile(err))?
-        .write_all(&render::render_cst(resolved_cst))
+        .write_all(
+            &render::render_cst(resolved_cst)
+                .map_err(CliError::Rendering)?,
+        )
         .map_err(|err| CliError::CantCrateOutputFile(err))
 }
