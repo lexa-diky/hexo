@@ -112,7 +112,7 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstError> {
         }),
     };
 
-    let option = node_type
+    let node_value = node_type
         .must_capture_value()
         .then(|| p.as_str().to_string());
 
@@ -125,7 +125,7 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstError> {
         Some(
             AstNode {
                 node_type: node_type,
-                value: option,
+                value: node_value,
                 children: children?,
             }
         )
