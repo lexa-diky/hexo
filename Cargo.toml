@@ -11,7 +11,8 @@ description = "Tiny binary writer utility, just enough for you"
 keywords = ["cli-utility", "binary", "hexo", "simple"]
 categories = ["command-line-utilities"]
 exclude = [
-    "sample.hexo"
+    "sample.hexo",
+    "testcases"
 ]
 
 [dependencies]

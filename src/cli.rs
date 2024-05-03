@@ -12,7 +12,7 @@ use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
-use crate::ast::{HexoParser, Rule};
+use crate::ast::{AstError, HexoParser, Rule};
 use crate::resolver::resolve_cst;
 use crate::{ast, cst, render};
 
@@ -51,7 +51,7 @@ pub(crate) enum CliError {
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
     CantReadInputFile(std::io::Error),
-    AstParsingFailed,
+    AstParsingFailed(AstError),
     SyntaxError(pest::error::Error<Rule>),
     CstParsingFailed,
 }
@@ -73,14 +73,22 @@ pub(crate) fn run_cli() {
 fn handle_cli_error(cli_result: Result<(), CliError>) {
     if cli_result.is_err() {
         match cli_result.unwrap_err() {
-            CliError::UnknownCommand => println!("unknown command"),
-            CliError::CantCreateWatcher(_) => println!("can't create watcher"),
-            CliError::CantStartWatcher(_) => println!("can't start watcher"),
-            CliError::CantCrateOutputFile(_) => println!("can't create output file"),
-            CliError::CantReadInputFile(_) => println!("can't read input file"),
-            CliError::AstParsingFailed => println!("ast parsing failed"),
+            CliError::UnknownCommand => eprintln!("unknown command"),
+            CliError::CantCreateWatcher(_) => eprintln!("can't create watcher"),
+            CliError::CantStartWatcher(_) => eprintln!("can't start watcher"),
+            CliError::CantCrateOutputFile(_) => eprintln!("can't create output file"),
+            CliError::CantReadInputFile(_) => eprintln!("can't read input file"),
+            CliError::AstParsingFailed(ast_error) => handle_ast_error(&ast_error),
             CliError::SyntaxError(error) => handle_cli_error_syntax(error),
-            CliError::CstParsingFailed => println!("cst parsing failed"),
+            CliError::CstParsingFailed => eprintln!("cst parsing failed"),
+        }
+    }
+}
+
+fn handle_ast_error(ast_error: &AstError) {
+    match ast_error {
+        AstError::UnknownRule { rule_name } => {
+            eprintln!("unknown rule: {}", rule_name)
         }
     }
 }
@@ -128,7 +136,7 @@ fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, n
     }
 }
 
-fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
+pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
     let mut source_buff = String::new();
     File::open(source.clone())
         .map_err(|err| CliError::CantReadInputFile(err))?
@@ -141,7 +149,7 @@ fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
     };
 
     let ast = ast::parse_ast(String::from("java_file"), pairs)
-        .map_err(|_| CliError::AstParsingFailed)?;
+        .map_err(CliError::AstParsingFailed)?;
 
     let cst = cst::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
     let resolved_cst = resolve_cst(cst);

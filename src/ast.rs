@@ -1,7 +1,10 @@
 use pest::iterators::{Pair, Pairs};
 use pest_derive::Parser;
 
-type AstError = ();
+#[derive(Debug)]
+pub(crate) enum AstError {
+    UnknownRule { rule_name: String },
+}
 
 #[derive(Debug, Clone)]
 pub(crate) struct AstNode {
@@ -74,15 +77,9 @@ pub(crate) fn parse_ast(file_name: String, pairs: Pairs<Rule>) -> Result<AstNode
 
 fn filter_ignored_token(result: Result<Option<AstNode>, AstError>) -> Option<Result<AstNode, AstError>> {
     match result {
-        Ok(optional_value) => {
-            match optional_value {
-                None => None,
-                Some(value) => Some(Ok(value)),
-            }
-        }
-        Err(error) => {
-            Some(Err(error))
-        }
+        Ok(None) => None,
+        Ok(Some(value)) => Some(Ok(value)),
+        Err(error) => Some(Err(error))
     }
 }
 
@@ -110,9 +107,9 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstError> {
         Rule::emit_statement => AstNodeType::StatementEmit,
 
         Rule::EOI => return Ok(None),
-        _ => AstNodeType::Unknown {
+        _ => return Err(AstError::UnknownRule {
             rule_name: format!("{:?}", p.as_rule()),
-        },
+        }),
     };
 
     let option = node_type
