@@ -172,7 +172,7 @@ pub(crate) fn parse_cst(ast_node: AstNode) -> Result<CstFile, CstParseError> {
 
     return Ok(
         CstFile {
-            file_name: ast_node.value.ok_or(NodeValueMissing(ast_node.node_type))?,
+            file_name: "unknown".to_string(), // TODO remove unknown
             statements: ast_node
                 .children
                 .into_iter()
@@ -195,7 +195,7 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
             for child in ast_node.children {
                 match child.node_type {
                     AstNodeType::StatementConstName => {
-                        name = child.value.unwrap();
+                        name = child.content.unwrap();
                     }
                     _ => {
                         atoms.push(parse_cst_atom(child));
@@ -230,7 +230,7 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
 fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, CstParseError> {
     for child in &in_node.children {
         if child.node_type == node_type {
-            return <Option<String> as Clone>::clone(&child.value)
+            return <Option<String> as Clone>::clone(&child.content)
                 .ok_or(CstParseError::Unexpected { message: "Can't clone child value" });
         }
     }
@@ -247,7 +247,7 @@ fn lookup_child(node_type: AstNodeType, in_node: &AstNode) -> Result<AstNode, Cs
 }
 
 fn parse_cst_atom(node: AstNode) -> CstAtom {
-    let node_value = node.value;
+    let node_value = node.content;
 
     match node.node_type {
         AstNodeType::AtomUtf8 => {
@@ -272,7 +272,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             for child in node.children {
                 match child.node_type {
                     AstNodeType::AtomFnName => {
-                        name = child.value.unwrap();
+                        name = child.content.unwrap();
                     }
                     AstNodeType::AtomFnParams => child.children.iter().for_each(|param| {
                         let mut parameter = CstFunctionParameter::new();
@@ -298,10 +298,10 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
             for child in node.children {
                 match child.node_type {
                     AstNodeType::AtomBaseNumberBase => {
-                        base = child.value.unwrap().parse().unwrap();
+                        base = child.content.unwrap().parse().unwrap();
                     }
                     AstNodeType::AtomBaseNumberValue => {
-                        value = child.value.unwrap();
+                        value = child.content.unwrap();
                     }
                     _ => {}
                 }

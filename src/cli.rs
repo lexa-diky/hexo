@@ -12,9 +12,9 @@ use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
-use crate::ast::{AstError, HexoParser, Rule};
 use crate::resolver::resolve_cst;
-use crate::{ast, cst, render};
+use crate::{cst, render};
+use crate::ast::{AstParser, AstParserError};
 use crate::render::RenderError;
 
 #[derive(Parser)]
@@ -51,10 +51,9 @@ pub(crate) enum CliError {
     CantCreateWatcher(notify::Error),
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
-    Rendering(render::RenderError),
+    Rendering(RenderError),
     CantReadInputFile(std::io::Error),
-    AstParsingFailed(AstError),
-    SyntaxError(pest::error::Error<Rule>),
+    AstParsingFailed(AstParserError),
     CstParsingFailed,
 }
 
@@ -80,8 +79,7 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
             CliError::CantStartWatcher(_) => eprintln!("can't start watcher"),
             CliError::CantCrateOutputFile(_) => eprintln!("can't create output file"),
             CliError::CantReadInputFile(_) => eprintln!("can't read input file"),
-            CliError::AstParsingFailed(ast_error) => handle_ast_error(&ast_error),
-            CliError::SyntaxError(error) => handle_cli_error_syntax(error),
+            CliError::AstParsingFailed(_) => eprintln!("ast parsing error"),
             CliError::CstParsingFailed => eprintln!("cst parsing failed"),
             CliError::Rendering(error) => handle_render_error(error),
         }
@@ -93,18 +91,6 @@ fn handle_render_error(error: RenderError) {
         RenderError::UnresolvedAtom { atom } =>
             eprintln!("unresolved atom: {:?}", atom)
     }
-}
-
-fn handle_ast_error(ast_error: &AstError) {
-    match ast_error {
-        AstError::UnknownRule { rule_name } => {
-            eprintln!("unknown rule: {}", rule_name)
-        }
-    }
-}
-
-fn handle_cli_error_syntax(error: pest::error::Error<Rule>) {
-    print_error("invalid syntax", Box::new(error.clone()));
 }
 
 fn print_error(message: &str, error: Box<dyn Display>) {
@@ -153,13 +139,9 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Cl
         .read_to_string(&mut source_buff)
         .map_err(|err| CliError::CantReadInputFile(err))?;
 
-    let pairs = match HexoParser::parse(Rule::file, source_buff.as_str()) {
-        Ok(pairs) => pairs,
-        Err(err) => return Err(CliError::SyntaxError(err))
-    };
+    let ast_parser = AstParser::new();
 
-    let ast = ast::parse_ast(String::from("java_file"), pairs)
-        .map_err(CliError::AstParsingFailed)?;
+    let ast = ast_parser.parse(source_buff).unwrap();
 
     let cst = cst::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
     let resolved_cst = resolve_cst(cst);

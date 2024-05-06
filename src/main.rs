@@ -1,18 +1,21 @@
 use std::env::temp_dir;
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
-use crate::cli::{run_build, run_cli};
+use std::path::PathBuf;
 
-mod ast;
+use crate::cli::run_build;
+use crate::compiler::{HexoCompiler, HexoCompilerContext};
+
 mod cli;
 mod cst;
 mod encoding;
 mod render;
 mod resolver;
+mod compiler;
+mod ast;
 
 fn main() {
-    run_cli()
+    let compiler = HexoCompiler::new(HexoCompilerContext::new());
 }
 
 // list files in directory test cases
