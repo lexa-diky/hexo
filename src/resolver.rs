@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::cst::{
+use crate::cst_legacy::{
     CstAtom, CstAtomStrip, CstAtomUnresolved, CstFile, CstFunctionParameter, CstStatement,
     CstStatementEmit,
 };

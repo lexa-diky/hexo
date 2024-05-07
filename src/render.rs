@@ -1,4 +1,4 @@
-use crate::cst::{CstAtom, CstFile};
+use crate::cst_legacy::{CstAtom, CstFile};
 
 #[derive(Debug)]
 pub(crate) enum RenderError {

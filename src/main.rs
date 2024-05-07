@@ -7,7 +7,7 @@ use crate::cli::run_build;
 use crate::compiler::{HexoCompiler, HexoCompilerContext};
 
 mod cli;
-mod cst;
+mod cst_legacy;
 mod encoding;
 mod render;
 mod resolver;

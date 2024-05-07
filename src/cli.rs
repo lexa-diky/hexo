@@ -13,7 +13,7 @@ use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
 use crate::resolver::resolve_cst;
-use crate::{cst, render};
+use crate::{cst_legacy, render};
 use crate::ast::{AstParser, AstParserError};
 use crate::render::RenderError;
 
@@ -143,7 +143,7 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Cl
 
     let ast = ast_parser.parse(source_buff).unwrap();
 
-    let cst = cst::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
+    let cst = cst_legacy::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
     let resolved_cst = resolve_cst(cst);
 
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
