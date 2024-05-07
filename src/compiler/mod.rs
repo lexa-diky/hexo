@@ -5,7 +5,7 @@ mod compilation_result;
 
 pub(crate) use compiler_context::HexoCompilerContext;
 pub(crate) use compiler::HexoCompiler;
-pub(crate) use compiler_source::CompilerSource;
+pub(crate) use compiler_source::{CompilerSource, StringCompilerSource};
 pub(crate) use compilation_result::CompilationResult;
 
 

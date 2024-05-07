@@ -2,9 +2,10 @@ use std::env::temp_dir;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use compiler::CompilerSource;
 
 use crate::cli::run_build;
-use crate::compiler::{HexoCompiler, HexoCompilerContext};
+use crate::compiler::{HexoCompiler, HexoCompilerContext, StringCompilerSource};
 
 mod cli;
 mod cst_legacy;
@@ -16,6 +17,19 @@ mod ast;
 
 fn main() {
     let compiler = HexoCompiler::new(HexoCompilerContext::new());
+}
+
+#[test]
+fn new_compiler() {
+    let context = HexoCompilerContext::new();
+    let compiler = HexoCompiler::new(context);
+
+    let source = StringCompilerSource::new(
+        PathBuf::from(""),
+        "> 01 02 03"
+    );
+
+    let compilation_result = compiler.compile(source);
 }
 
 // list files in directory test cases
