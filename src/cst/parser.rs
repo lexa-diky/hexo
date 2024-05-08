@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use clap::builder::Str;
 
 use crate::ast::{AstNode, AstNodeType};
 use crate::cst::{CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
@@ -61,7 +60,7 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
         match child.node_type {
             AstNodeType::StatementConst => {}
             AstNodeType::StatementEmit => emits.push(parse_emit_statement(child)?),
-            AstNodeType::StatementFn => {}
+            AstNodeType::StatementFn => functions.push(parse_function(child)?),
             _ => return Err(CstParserError::UnexpectedNode {
                 actual: child.node_type,
                 expected: vec![
@@ -74,6 +73,42 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
     }
 
     Ok((emits, functions, constants))
+}
+
+fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError> {
+    let mut emits = None;
+    let mut functions = None;
+    let mut constants = None;
+
+    for child in &node.children {
+        match child.node_type {
+            AstNodeType::StatementFnName => {}
+            AstNodeType::StatementFnBody => {
+                let (emits_r, functions_r, constants_r) = parse_function_body(child)?;
+                emits = Some(emits_r);
+                functions = Some(functions_r);
+                constants = Some(constants_r);
+            }
+            _ => return Err(
+                CstParserError::UnexpectedNode {
+                    actual: child.node_type,
+                    expected: vec![
+                        AstNodeType::StatementFnName,
+                        AstNodeType::StatementFnBody,
+                    ],
+                }),
+        }
+    }
+
+    return Ok(
+        CstFunctionStatement {
+            name: parse_value_of(&node.children[0])?,
+            params: Vec::new(),
+            emits: emits.unwrap_or(Vec::new()),
+            functions: functions.unwrap_or(Vec::new()),
+            constants: constants.unwrap_or(Vec::new()),
+        }
+    );
 }
 
 fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserError> {
