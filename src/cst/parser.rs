@@ -1,7 +1,8 @@
 use std::path::PathBuf;
+use clap::builder::Str;
 
 use crate::ast::{AstNode, AstNodeType};
-use crate::cst::{CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
+use crate::cst::{CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
 use crate::cst::node::CstFile;
 use crate::encoding;
 
@@ -80,28 +81,36 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
     let mut atoms = Vec::new();
 
     for child in &node.children {
-        match child.node_type {
-            AstNodeType::AtomHex => parse_atom_hex_into(child, &mut atoms)?,
-            AstNodeType::AtomUtf8 => parse_atom_utf8_into(child, &mut atoms)?,
-            AstNodeType::AtomBaseNumber => parse_atom_base_num_into(child, &mut atoms)?,
-            AstNodeType::AtomConst => parse_atom_constant_into(child, &mut atoms)?,
-            _ => return Err(CstParserError::UnexpectedNode {
-                actual: child.node_type,
-                expected: vec![
-                    AstNodeType::AtomHex,
-                    AstNodeType::AtomUtf8,
-                    AstNodeType::AtomBaseNumber,
-                    AstNodeType::AtomConst
-                ],
-            })
-        }
+        parse_atom_into(child, &mut atoms)?
     }
 
     return Ok(
         CstEmitStatement {
-            atoms
+            atoms: atoms
         }
     );
+}
+
+fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+    match node.node_type {
+        AstNodeType::AtomHex => parse_atom_hex_into(node, buff)?,
+        AstNodeType::AtomUtf8 => parse_atom_utf8_into(node, buff)?,
+        AstNodeType::AtomBaseNumber => parse_atom_base_num_into(node, buff)?,
+        AstNodeType::AtomConst => parse_atom_constant_into(node, buff)?,
+        AstNodeType::AtomFn => parse_atom_function_into(node, buff)?,
+        _ => return Err(CstParserError::UnexpectedNode {
+            actual: node.node_type,
+            expected: vec![
+                AstNodeType::AtomHex,
+                AstNodeType::AtomUtf8,
+                AstNodeType::AtomBaseNumber,
+                AstNodeType::AtomConst,
+                AstNodeType::AtomFn,
+            ],
+        })
+    }
+
+    Ok(())
 }
 
 fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
@@ -112,6 +121,73 @@ fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     buf.push(atom);
 
     Ok(())
+}
+
+fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+    guard_node_type(node, AstNodeType::AtomFn)?;
+    let mut name = None;
+    let mut params = None;
+
+    for child in &node.children {
+        match child.node_type {
+            AstNodeType::AtomFnName => {
+                guard_empty(name)?;
+                name = Some(parse_value_of(child)?);
+            }
+            AstNodeType::AtomFnParams => {
+                params = Some(parse_atom_fn_params(child)?)
+            }
+            _ => return Err(CstParserError::UnexpectedNode {
+                actual: child.node_type,
+                expected: vec![
+                    AstNodeType::AtomFnName,
+                    AstNodeType::AtomFnParams,
+                ],
+            })
+        }
+    }
+
+
+    let name_value = name.ok_or(
+        CstParserError::MissingContent { node_type: AstNodeType::AtomFnName }
+    )?;
+
+    let params_value = params.ok_or(
+        CstParserError::MissingContent { node_type: AstNodeType::AtomFnParams }
+    )?;
+
+    buf.push(CstAtom::Function {
+        name: name_value,
+        params: params_value,
+    });
+
+    Ok(())
+}
+
+fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstParserError> {
+    guard_node_type(node, AstNodeType::AtomFnParams)?;
+
+    let mut param_counter = 0;
+    let mut buf = Vec::new();
+
+    for child in &node.children {
+        guard_node_type(child, AstNodeType::AtomFnParam)?;
+        let mut value = Vec::new();
+
+        for p_child in &child.children {
+            parse_atom_into(p_child, &mut value)?;
+        }
+
+        buf.push(
+            CstActualParameter {
+                name: param_counter.to_string(),
+                value: value,
+            }
+        );
+        param_counter += 1;
+    }
+
+    return Ok(buf);
 }
 
 fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
