@@ -10,7 +10,7 @@ pub(crate) struct CstFile {
 pub(crate) enum CstAtom {
     Hex(u8),
     String(String),
-    Number { base: u32, value: String },
+    Number { value: u32 },
     Constant { name: String },
     Function { name: String, params: Vec<CstActualParameter> },
 }

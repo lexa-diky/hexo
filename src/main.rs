@@ -26,8 +26,8 @@ fn new_compiler() {
     let compiler = HexoCompiler::new(context);
 
     let source = StringCompilerSource::new(
-        PathBuf::from(""),
-        "> 01 02 03 'lol'"
+        PathBuf::from("sample.hexo"),
+        "> 01 02 03 'lol' 2x10101"
     );
 
     let compilation_result = compiler.compile(source);
