@@ -2,6 +2,7 @@ use crate::ast::{AstParser, AstParserError};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 use crate::cst::{CstParser, CstParserError};
 
+#[derive(Debug)]
 pub(crate) enum CompilerError {
     IO(std::io::Error),
     AST(AstParserError),

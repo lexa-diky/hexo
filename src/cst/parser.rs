@@ -1,5 +1,6 @@
 use std::path::PathBuf;
-use crate::ast::{AstNode, AstNodeType, AstParserError};
+
+use crate::ast::{AstNode, AstNodeType};
 use crate::cst::{CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
 use crate::cst::node::CstFile;
 use crate::encoding;
@@ -83,12 +84,14 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
             AstNodeType::AtomHex => parse_atom_hex_into(child, &mut atoms)?,
             AstNodeType::AtomUtf8 => parse_atom_utf8_into(child, &mut atoms)?,
             AstNodeType::AtomBaseNumber => parse_atom_base_num_into(child, &mut atoms)?,
+            AstNodeType::AtomConst => parse_atom_constant_into(child, &mut atoms)?,
             _ => return Err(CstParserError::UnexpectedNode {
                 actual: child.node_type,
                 expected: vec![
                     AstNodeType::AtomHex,
                     AstNodeType::AtomUtf8,
                     AstNodeType::AtomBaseNumber,
+                    AstNodeType::AtomConst
                 ],
             })
         }
@@ -99,6 +102,16 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
             atoms
         }
     );
+}
+
+fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+    guard_node_type(node, AstNodeType::AtomConst)?;
+    let content = parse_value_of(node)?;
+    let atom = CstAtom::Constant { name: content };
+
+    buf.push(atom);
+
+    Ok(())
 }
 
 fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {

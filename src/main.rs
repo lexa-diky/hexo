@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use compiler::CompilerSource;
 
 use crate::cli::run_build;
-use crate::compiler::{HexoCompiler, HexoCompilerContext, StringCompilerSource};
+use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext, StringCompilerSource};
 
 mod cli;
 mod cst_legacy;
@@ -25,12 +25,11 @@ fn new_compiler() {
     let context = HexoCompilerContext::new();
     let compiler = HexoCompiler::new(context);
 
-    let source = StringCompilerSource::new(
+    let source = FileCompilerSource::new(
         PathBuf::from("sample.hexo"),
-        "> 01 02 03 'lol' 2x10101"
     );
 
-    let compilation_result = compiler.compile(source);
+    let compilation_result = compiler.compile(source).unwrap();
 }
 
 // list files in directory test cases
