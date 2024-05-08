@@ -14,6 +14,7 @@ mod render;
 mod resolver;
 mod compiler;
 mod ast;
+mod cst;
 
 fn main() {
     let compiler = HexoCompiler::new(HexoCompilerContext::new());
