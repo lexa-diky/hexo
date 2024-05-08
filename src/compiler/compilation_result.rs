@@ -1,11 +1,11 @@
-pub(crate) struct CompilationResult {
+pub(crate) struct Compilation {
     pub(crate) content: Vec<u8>
 }
 
-impl CompilationResult {
+impl Compilation {
 
     pub(crate) fn empty() -> Self {
-        CompilationResult {
+        Compilation {
             content: Vec::new()
         }
     }

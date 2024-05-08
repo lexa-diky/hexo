@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 pub(crate) struct HexoCompilerContext {
-    root_dir: PathBuf
+    pub(crate) root_dir : PathBuf
 }
 
 impl HexoCompilerContext {

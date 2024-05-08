@@ -6,7 +6,7 @@ pub(crate) trait SourceFinder {
     fn find(&self, path: PathBuf) -> Option<impl CompilerSource>;
 }
 
-struct FileSourceFinder {
+pub(crate) struct FileSourceFinder {
     root_dir: PathBuf
 }
 
@@ -19,5 +19,14 @@ impl SourceFinder for FileSourceFinder {
         Some(
             source
         )
+    }
+}
+
+impl FileSourceFinder {
+
+    pub(crate) fn new(root_dir: PathBuf) -> FileSourceFinder {
+        return FileSourceFinder {
+            root_dir: root_dir
+        };
     }
 }
