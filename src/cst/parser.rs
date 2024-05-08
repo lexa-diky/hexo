@@ -79,6 +79,7 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
     for child in &node.children {
         match child.node_type {
             AstNodeType::AtomHex => parse_atom_hex_into(child, &mut atoms)?,
+            AstNodeType::AtomUtf8 => parse_atom_utf8_into(child, &mut atoms)?,
             _ => panic!("Unexpected node type: {:?}", child.node_type)
         }
     }
@@ -91,6 +92,8 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
 }
 
 fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+    guard_node_type(node, AstNodeType::AtomHex)?;
+
     let content = node.clone().content
         .ok_or(CstParserError::MissingContent { node_type: AstNodeType::AtomHex })?;
 
@@ -103,6 +106,17 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cst
     for byte in bytes {
         buf.push(CstAtom::Hex(byte))
     }
+    return Ok(());
+}
+
+fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+    guard_node_type(node, AstNodeType::AtomUtf8)?;
+
+    let content = node.clone().content
+        .ok_or(CstParserError::MissingContent { node_type: AstNodeType::AtomUtf8 })?;
+
+    buf.push(CstAtom::String(content));
+
     return Ok(());
 }
 

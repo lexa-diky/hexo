@@ -27,7 +27,7 @@ fn new_compiler() {
 
     let source = StringCompilerSource::new(
         PathBuf::from(""),
-        "> 01 02 03"
+        "> 01 02 03 'lol'"
     );
 
     let compilation_result = compiler.compile(source);
