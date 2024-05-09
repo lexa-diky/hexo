@@ -58,7 +58,7 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
 
     for child in &node.children {
         match child.node_type {
-            AstNodeType::StatementConst => {}
+            AstNodeType::StatementConst => constants.push(parse_constant(child)?),
             AstNodeType::StatementEmit => emits.push(parse_emit_statement(child)?),
             AstNodeType::StatementFn => functions.push(parse_function(child)?),
             _ => return Err(CstParserError::UnexpectedNode {
@@ -73,6 +73,29 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
     }
 
     Ok((emits, functions, constants))
+}
+
+fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, CstParserError> {
+    guard_node_type(node, AstNodeType::StatementConst)?;
+    let mut atom_buff = Vec::new();
+    let mut name = None;
+
+    for child in &node.children {
+        match child.node_type {
+            AstNodeType::StatementConstName => {
+                name = Some(parse_value_of(child)?);
+            }
+            _ => parse_atom_into(child, &mut atom_buff)?,
+        }
+    }
+
+    Ok(
+        CstConstantStatement {
+            name: name.ok_or(CstParserError::MissingContent { node_type: AstNodeType::StatementConstName })?.to_string(),
+            atoms: atom_buff,
+        }
+
+    )
 }
 
 fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError> {
