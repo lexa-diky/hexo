@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::cst_legacy::CstParseError::NodeValueMissing;
 use crate::encoding_legacy;
@@ -66,7 +67,7 @@ impl FromIterator<CstAtom> for CstAtomStrip {
 
 #[derive(Debug)]
 pub(crate) struct CstFile {
-    pub(crate) file_name: String,
+    pub(crate) file_name: PathBuf,
     pub(crate) statements: Vec<CstStatement>,
 }
 
@@ -172,7 +173,7 @@ pub(crate) fn parse_cst(ast_node: AstNode) -> Result<CstFile, CstParseError> {
 
     return Ok(
         CstFile {
-            file_name: "unknown".to_string(), // TODO remove unknown
+            file_name: PathBuf::from("unknown"), // TODO remove unknown
             statements: ast_node
                 .children
                 .into_iter()

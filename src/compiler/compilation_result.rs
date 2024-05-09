@@ -4,9 +4,9 @@ pub(crate) struct Compilation {
 
 impl Compilation {
 
-    pub(crate) fn empty() -> Self {
+    pub(crate) fn from(content: Vec<u8>) -> Self {
         Compilation {
-            content: Vec::new()
+            content
         }
     }
 }

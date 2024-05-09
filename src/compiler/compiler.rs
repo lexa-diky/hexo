@@ -57,10 +57,8 @@ impl HexoCompiler {
     pub(crate) fn compile<TSource: CompilerSource>(&self, source: &TSource) -> Result<Compilation, CompilerError> {
         let cst = self.compile_cst(source)?;
         let rst_compiler = RstCompiler::new(self);
-        let rst = rst_compiler.compile(&cst);
-
-        println!("{:#?}", cst);
-
-        return Ok(Compilation::empty());
+        let rst = rst_compiler.compile(&cst)
+            .map_err(|e| CompilerError::RST(e))?;
+        return Ok(Compilation::from(rst.emits.as_vec()));
     }
 }
