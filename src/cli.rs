@@ -12,10 +12,10 @@ use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 use pest::Parser as PestParser;
 
-use crate::resolver::resolve_cst;
-use crate::{cst_legacy, render};
+use crate::resolver_legacy::resolve_cst;
+use crate::{cst_legacy, render_legacy};
 use crate::compiler::ast::{AstParser, AstParserError};
-use crate::render::RenderError;
+use crate::render_legacy::RenderError;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -150,7 +150,7 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Cl
     File::create(output_file_path)
         .map_err(|err| CliError::CantCrateOutputFile(err))?
         .write_all(
-            &render::render_cst(resolved_cst)
+            &render_legacy::render_cst(resolved_cst)
                 .map_err(CliError::Rendering)?,
         )
         .map_err(|err| CliError::CantCrateOutputFile(err))

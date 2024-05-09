@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::compiler::cst::{CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
 use crate::compiler::cst::node::CstFile;
-use crate::encoding;
+use crate::compiler::util::encoding::decode_bytes_from_string;
+use crate::encoding_legacy;
 
 #[derive(Debug)]
 pub(crate) enum CstParserError {
@@ -253,7 +254,7 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cst
     let content = node.clone().content
         .ok_or(CstParserError::MissingContent { node_type: AstNodeType::AtomHex })?;
 
-    let bytes = encoding::decode_byte_ref(&content)
+    let bytes = decode_bytes_from_string(&content)
         .map_err(|x| CstParserError::MalformedNodeValue {
             message: format!("can't parse bytes {}", content)
         })?;

@@ -11,19 +11,6 @@ pub(crate) fn decode_byte(s: String) -> Result<Vec<u8>, ()> {
         .collect()
 }
 
-pub(crate) fn decode_byte_ref(s: &String) -> Result<Vec<u8>, ()> {
-    (0..s.len())
-        .step_by(2)
-        .map(|i| {
-            if s.len() < 2 {
-                return Err(());
-            }
-            u8::from_str_radix(&s[i..i + 2], 16).map_err(|_| ())
-        })
-        .collect()
-}
-
-
 pub(crate) fn to_shrunk_bytes(value: u32) -> Vec<u8> {
     let mut bytes = Vec::new();
     let mut value = value;
@@ -36,7 +23,7 @@ pub(crate) fn to_shrunk_bytes(value: u32) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use crate::encoding::decode_byte;
+    use crate::encoding_legacy::decode_byte;
 
     #[test]
     fn given_valid_bytes_then_decode() {

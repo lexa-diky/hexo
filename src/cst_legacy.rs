@@ -1,7 +1,7 @@
 use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::cst_legacy::CstParseError::NodeValueMissing;
-use crate::encoding;
-use crate::encoding::to_shrunk_bytes;
+use crate::encoding_legacy;
+use crate::encoding_legacy::to_shrunk_bytes;
 
 #[derive(Debug, Clone)]
 pub(crate) struct CstAtomStrip(Vec<CstAtom>);
@@ -257,7 +257,7 @@ fn parse_cst_atom(node: AstNode) -> CstAtom {
         }
         AstNodeType::AtomHex => {
             return CstAtom::Resolved {
-                value: encoding::decode_byte(node_value.unwrap()).unwrap(),
+                value: encoding_legacy::decode_byte(node_value.unwrap()).unwrap(),
             };
         }
         AstNodeType::AtomConst => {

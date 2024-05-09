@@ -9,9 +9,9 @@ use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext, Str
 
 mod cli;
 mod cst_legacy;
-mod encoding;
-mod render;
-mod resolver;
+mod encoding_legacy;
+mod render_legacy;
+mod resolver_legacy;
 mod compiler;
 
 fn main() {
