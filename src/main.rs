@@ -13,10 +13,6 @@ mod encoding;
 mod render;
 mod resolver;
 mod compiler;
-mod ast;
-mod cst;
-mod rst;
-mod util;
 
 fn main() {
     let compiler = HexoCompiler::new(HexoCompilerContext::new());

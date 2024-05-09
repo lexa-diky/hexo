@@ -14,7 +14,7 @@ use pest::Parser as PestParser;
 
 use crate::resolver::resolve_cst;
 use crate::{cst_legacy, render};
-use crate::ast::{AstParser, AstParserError};
+use crate::compiler::ast::{AstParser, AstParserError};
 use crate::render::RenderError;
 
 #[derive(Parser)]

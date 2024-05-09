@@ -1,6 +1,6 @@
-use crate::ast::{AstParser, AstParserError};
+use crate::compiler::ast::{AstParser, AstParserError};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
-use crate::cst::{CstParser, CstParserError};
+use crate::compiler::cst::{CstParser, CstParserError};
 
 #[derive(Debug)]
 pub(crate) enum CompilerError {

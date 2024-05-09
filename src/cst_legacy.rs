@@ -1,4 +1,4 @@
-use crate::ast::{AstNode, AstNodeType};
+use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::cst_legacy::CstParseError::NodeValueMissing;
 use crate::encoding;
 use crate::encoding::to_shrunk_bytes;

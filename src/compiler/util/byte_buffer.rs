@@ -35,7 +35,7 @@ impl ByteBuffer {
 }
 
 mod test {
-    use crate::util::ByteBuffer;
+    use crate::compiler::util::ByteBuffer;
 
     #[test]
     fn byte_push() {

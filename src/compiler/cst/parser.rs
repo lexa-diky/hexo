@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use crate::ast::{AstNode, AstNodeType};
-use crate::cst::{CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
-use crate::cst::node::CstFile;
+use crate::compiler::ast::{AstNode, AstNodeType};
+use crate::compiler::cst::{CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement};
+use crate::compiler::cst::node::CstFile;
 use crate::encoding;
 
 #[derive(Debug)]

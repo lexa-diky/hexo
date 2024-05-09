@@ -3,7 +3,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{AstNode, AstNodeType};
+use crate::compiler::ast::{AstNode, AstNodeType};
 
 #[derive(Debug)]
 pub(crate) enum AstParserError {
