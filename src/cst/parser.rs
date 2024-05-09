@@ -94,7 +94,6 @@ fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, CstParserError
             name: name.ok_or(CstParserError::MissingContent { node_type: AstNodeType::StatementConstName })?.to_string(),
             atoms: atom_buff,
         }
-
     )
 }
 
