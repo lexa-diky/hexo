@@ -21,6 +21,10 @@ impl ByteBuffer {
         self.inner.extend_from_slice(num.to_be_bytes().as_slice());
     }
 
+    pub(crate) fn push_byte_buffer(&mut self, other: &mut ByteBuffer) {
+        self.inner.extend(other.as_vec());
+    }
+
     pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
