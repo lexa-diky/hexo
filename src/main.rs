@@ -4,7 +4,7 @@ use std::io::Read;
 use std::path::PathBuf;
 use compiler::CompilerSource;
 
-use crate::cli::run_build;
+use crate::cli::{run_build, run_cli};
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext, StringCompilerSource};
 
 mod cli;
@@ -15,7 +15,7 @@ mod resolver_legacy;
 mod compiler;
 
 fn main() {
-    let compiler = HexoCompiler::new(HexoCompilerContext::new());
+    run_cli()
 }
 
 #[test]
@@ -27,7 +27,7 @@ fn new_compiler() {
         PathBuf::from("sample.hexo"),
     );
 
-    let compilation_result = compiler.compile(source).unwrap();
+    let compilation_result = compiler.compile(&source).unwrap();
 }
 
 // list files in directory test cases

@@ -1,1 +1,3 @@
-pub(crate) struct HexoFile {}
+pub(crate) struct HexoFile {
+
+}
