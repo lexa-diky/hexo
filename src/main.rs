@@ -27,7 +27,7 @@ fn new_compiler() {
         PathBuf::from("sample.hexo"),
     );
 
-    let compilation_result = compiler.compile(&source).unwrap();
+    // let compilation_result = compiler.compile(&source).unwrap();
 }
 
 // list files in directory test cases
