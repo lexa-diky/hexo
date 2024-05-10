@@ -1,10 +1,9 @@
 use std::path::PathBuf;
-use crate::compiler::cst::{CstEmitStatement, CstFile, CstFunctionStatement};
+use crate::compiler::cst::{CstAtom, CstEmitStatement, CstFile, CstFunctionStatement};
 use crate::compiler::HexoCompiler;
 use crate::compiler::rst::compilation_context::CompilationContext;
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::util::ByteBuffer;
-use crate::cst_legacy::CstAtom;
 
 #[derive(Debug)]
 pub(crate) enum RstCompilerError {}
@@ -36,9 +35,25 @@ impl RstCompiler<'_> {
     }
 
     fn build_bytes(context: &CompilationContext, emits: &Vec<CstEmitStatement>) -> Result<ByteBuffer, RstCompilerError> {
-        let byte_buffer = ByteBuffer::new();
+        let mut byte_buffer = ByteBuffer::new();
+
+        for emit in emits {
+            Self::build_bytes_into(context, emit, &mut byte_buffer)
+        }
 
         return Ok(byte_buffer);
+    }
+
+    fn build_bytes_into(context: &CompilationContext, statement: &CstEmitStatement, buffer: &mut ByteBuffer) {
+        for atom in &statement.atoms {
+            match atom {
+                CstAtom::Hex(byte) => buffer.push_byte(*byte),
+                CstAtom::String(string) => buffer.push_string(string.clone()),
+                CstAtom::Number(number) => buffer.push_shrunk_u32(*number),
+                CstAtom::Constant { .. } => {}
+                CstAtom::Function { .. } => {}
+            }
+        }
     }
 
     fn build_context(file_path: &PathBuf, cst: &CstFunctionStatement) -> Result<CompilationContext, RstCompilerError> {

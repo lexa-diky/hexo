@@ -59,6 +59,7 @@ impl HexoCompiler {
         let rst_compiler = RstCompiler::new(self);
         let rst = rst_compiler.compile(&cst)
             .map_err(|e| CompilerError::RST(e))?;
+
         return Ok(Compilation::from(rst.emits.as_vec()));
     }
 }

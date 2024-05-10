@@ -28,6 +28,8 @@ fn new_compiler() {
     );
 
     let compilation_result = compiler.compile(&source).unwrap();
+
+    println!("{:?}", compilation_result.content);
 }
 
 // list files in directory test cases

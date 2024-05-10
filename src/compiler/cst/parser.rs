@@ -310,12 +310,12 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     let value_str = value.ok_or(CstParserError::MissingContent { node_type: AstNodeType::AtomBaseNumberValue })?;
 
     buf.push(
-        CstAtom::Number {
-            value: u32::from_str_radix(value_str.as_str(), base_value)
+        CstAtom::Number(
+            u32::from_str_radix(value_str.as_str(), base_value)
                 .map_err(|_| CstParserError::MalformedNodeValue {
                     message: format!("can't parse number {}", value_str)
                 })?
-        }
+        )
     );
 
     return Ok(());

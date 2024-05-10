@@ -9,3 +9,13 @@ pub(crate) fn decode_bytes_from_string(s: &String) -> Result<Vec<u8>, ()> {
         })
         .collect()
 }
+
+pub(crate) fn to_shrunk_bytes(value: u32) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    let mut value = value;
+    while value > 0 {
+        bytes.push((value & 0xFF) as u8);
+        value >>= 8;
+    }
+    bytes
+}

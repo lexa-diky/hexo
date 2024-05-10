@@ -1,3 +1,5 @@
+use crate::compiler::util::encoding::to_shrunk_bytes;
+
 pub(crate) struct ByteBuffer {
     inner: Vec<u8>,
 }
@@ -17,8 +19,8 @@ impl ByteBuffer {
         self.inner.extend_from_slice(string.as_bytes());
     }
 
-    pub(crate) fn push_u32(&mut self, num: u32) {
-        self.inner.extend_from_slice(num.to_be_bytes().as_slice());
+    pub(crate) fn push_shrunk_u32(&mut self, num: u32) {
+        self.inner.extend(to_shrunk_bytes(num));
     }
 
     pub(crate) fn push_byte_buffer(&mut self, other: &mut ByteBuffer) {
@@ -64,7 +66,7 @@ mod test {
     #[test]
     fn u32_push() {
         let mut buffer = ByteBuffer::new();
-        buffer.push_u32(13);
+        buffer.push_shrunk_u32(13);
 
         assert_eq!(buffer.len(), 4);
 
