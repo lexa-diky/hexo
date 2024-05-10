@@ -49,7 +49,7 @@ impl RstCompiler<'_> {
             match atom {
                 CstAtom::Hex(byte) => buffer.push_byte(*byte),
                 CstAtom::String(string) => buffer.push_string(string.clone()),
-                CstAtom::Number(number) => buffer.push_shrunk_u32(*number),
+                CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
                 CstAtom::Constant { .. } => {}
                 CstAtom::Function { .. } => {}
             }

@@ -19,7 +19,7 @@ impl ByteBuffer {
         self.inner.extend_from_slice(string.as_bytes());
     }
 
-    pub(crate) fn push_shrunk_u32(&mut self, num: u32) {
+    pub(crate) fn push_u32_shrunk(&mut self, num: u32) {
         self.inner.extend(to_shrunk_bytes(num));
     }
 
@@ -66,7 +66,7 @@ mod test {
     #[test]
     fn u32_push() {
         let mut buffer = ByteBuffer::new();
-        buffer.push_shrunk_u32(13);
+        buffer.push_u32_shrunk(13);
 
         assert_eq!(buffer.len(), 4);
 
