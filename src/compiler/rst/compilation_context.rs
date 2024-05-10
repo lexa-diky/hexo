@@ -32,4 +32,8 @@ impl CompilationContext {
     pub(crate) fn has_constant(&self, name: &String) -> bool {
         return self.constant_table.contains_key(name);
     }
+
+    pub(crate) fn get_constant(&self, name: &String) -> Option<&ConstantBinding> {
+        return self.constant_table.get(name);
+    }
 }

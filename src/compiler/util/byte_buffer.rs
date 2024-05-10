@@ -23,7 +23,7 @@ impl ByteBuffer {
         self.inner.extend(to_shrunk_bytes(num));
     }
 
-    pub(crate) fn push_byte_buffer(&mut self, other: &mut ByteBuffer) {
+    pub(crate) fn push_byte_buffer(&mut self, other: &ByteBuffer) {
         self.inner.extend(other.as_vec());
     }
 
