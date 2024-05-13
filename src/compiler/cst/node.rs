@@ -11,8 +11,13 @@ pub(crate) enum CstAtom {
     Hex(u8),
     String(String),
     Number(u32),
-    Constant { name: String },
-    Function { name: String, params: Vec<CstActualParameter> },
+    Constant {
+        name: String,
+    },
+    Function {
+        name: String,
+        params: Vec<CstActualParameter>,
+    },
 }
 
 #[derive(Debug)]

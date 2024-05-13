@@ -1,8 +1,8 @@
-use std::path::PathBuf;
 use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::cst_legacy::CstParseError::NodeValueMissing;
 use crate::encoding_legacy;
 use crate::encoding_legacy::to_shrunk_bytes;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub(crate) struct CstAtomStrip(Vec<CstAtom>);
@@ -60,7 +60,7 @@ impl CstAtomStrip {
 }
 
 impl FromIterator<CstAtom> for CstAtomStrip {
-    fn from_iter<T: IntoIterator<Item=CstAtom>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = CstAtom>>(iter: T) -> Self {
         CstAtomStrip(iter.into_iter().collect())
     }
 }
@@ -171,16 +171,14 @@ pub(crate) enum CstParseError {
 pub(crate) fn parse_cst(ast_node: AstNode) -> Result<CstFile, CstParseError> {
     assert_eq!(ast_node.node_type, AstNodeType::File);
 
-    return Ok(
-        CstFile {
-            file_name: PathBuf::from("unknown"), // TODO remove unknown
-            statements: ast_node
-                .children
-                .into_iter()
-                .map(parse_cst_statement)
-                .collect(),
-        }
-    );
+    return Ok(CstFile {
+        file_name: PathBuf::from("unknown"), // TODO remove unknown
+        statements: ast_node
+            .children
+            .into_iter()
+            .map(parse_cst_statement)
+            .collect(),
+    });
 }
 
 fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
@@ -231,8 +229,11 @@ fn parse_cst_statement(ast_node: AstNode) -> CstStatement {
 fn lookup_value(node_type: AstNodeType, in_node: &AstNode) -> Result<String, CstParseError> {
     for child in &in_node.children {
         if child.node_type == node_type {
-            return <Option<String> as Clone>::clone(&child.content)
-                .ok_or(CstParseError::Unexpected { message: "Can't clone child value" });
+            return <Option<String> as Clone>::clone(&child.content).ok_or(
+                CstParseError::Unexpected {
+                    message: "Can't clone child value",
+                },
+            );
         }
     }
     return Err(CstParseError::CstValueNotFound);

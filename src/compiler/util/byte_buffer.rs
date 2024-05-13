@@ -6,9 +6,7 @@ pub(crate) struct ByteBuffer {
 
 impl ByteBuffer {
     pub(crate) fn new() -> Self {
-        ByteBuffer {
-            inner: Vec::new()
-        }
+        ByteBuffer { inner: Vec::new() }
     }
 
     pub(crate) fn push_byte(&mut self, byte: u8) {
@@ -70,9 +68,6 @@ mod test {
 
         assert_eq!(buffer.len(), 4);
 
-        assert_eq!(
-            buffer.as_vec(),
-            vec![0, 0, 0, 13]
-        );
+        assert_eq!(buffer.as_vec(), vec![0, 0, 0, 13]);
     }
 }

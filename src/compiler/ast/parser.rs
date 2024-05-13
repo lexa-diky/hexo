@@ -26,7 +26,8 @@ impl AstParser {
         let pairs = AstPestParser::parse(Rule::file, source.as_str())
             .map_err(|error| AstParserError::PestError(error))?;
 
-        let children: Result<Vec<AstNode>, _> = pairs.map(parse_ast_pair)
+        let children: Result<Vec<AstNode>, _> = pairs
+            .map(parse_ast_pair)
             .filter_map(filter_ignored_token)
             .collect();
 
@@ -34,11 +35,13 @@ impl AstParser {
     }
 }
 
-fn filter_ignored_token(result: Result<Option<AstNode>, AstParserError>) -> Option<Result<AstNode, AstParserError>> {
+fn filter_ignored_token(
+    result: Result<Option<AstNode>, AstParserError>,
+) -> Option<Result<AstNode, AstParserError>> {
     match result {
         Ok(None) => None,
         Ok(Some(value)) => Some(Ok(value)),
-        Err(error) => Some(Err(error))
+        Err(error) => Some(Err(error)),
     }
 }
 
@@ -66,23 +69,22 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstParserError> {
         Rule::emit_statement => AstNodeType::StatementEmit,
 
         Rule::EOI => return Ok(None),
-        _ => return Err(AstParserError::UnknownRule {
-            rule_name: format!("{:?}", p.as_rule()),
-        }),
+        _ => {
+            return Err(AstParserError::UnknownRule {
+                rule_name: format!("{:?}", p.as_rule()),
+            })
+        }
     };
 
     let node_value = node_type
         .must_capture_value()
         .then(|| p.as_str().to_string());
 
-    let children: Result<Vec<AstNode>, _> = p.into_inner()
+    let children: Result<Vec<AstNode>, _> = p
+        .into_inner()
         .map(parse_ast_pair)
         .filter_map(filter_ignored_token)
         .collect();
 
-    Ok(
-        Some(
-            AstNode::new(node_type, node_value, children?)
-        )
-    )
+    Ok(Some(AstNode::new(node_type, node_value, children?)))
 }

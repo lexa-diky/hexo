@@ -1,18 +1,20 @@
+use compiler::CompilerSource;
 use std::env::temp_dir;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use compiler::CompilerSource;
 
 use crate::cli::{run_build, run_cli};
-use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext, StringCompilerSource};
+use crate::compiler::{
+    FileCompilerSource, HexoCompiler, HexoCompilerContext, StringCompilerSource,
+};
 
 mod cli;
+mod compiler;
 mod cst_legacy;
 mod encoding_legacy;
 mod render_legacy;
 mod resolver_legacy;
-mod compiler;
 
 fn main() {
     run_cli()
@@ -23,9 +25,7 @@ fn new_compiler() {
     let context = HexoCompilerContext::new();
     let compiler = HexoCompiler::new(context);
 
-    let source = FileCompilerSource::new(
-        PathBuf::from("sample.hexo"),
-    );
+    let source = FileCompilerSource::new(PathBuf::from("sample.hexo"));
 
     let compilation_result = compiler.compile(&source).unwrap();
 
@@ -59,7 +59,8 @@ fn run_test_cases() {
         run_build(
             input_file.to_str().unwrap().to_string(),
             Some(output_file.to_str().unwrap().to_string()),
-        ).unwrap();
+        )
+        .unwrap();
 
         let output_buf = read_file(&output_file);
         let expected_output_buf = read_file(&expected_output);
