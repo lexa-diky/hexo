@@ -1,5 +1,6 @@
 use crate::compiler::util::encoding::to_shrunk_bytes;
 
+#[derive(Clone)]
 pub(crate) struct ByteBuffer {
     inner: Vec<u8>,
 }

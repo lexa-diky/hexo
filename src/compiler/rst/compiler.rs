@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::compiler::cst::{CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
-use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding};
+use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding, FunctionBinding};
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::util::ByteBuffer;
 use crate::compiler::HexoCompiler;
@@ -83,12 +83,18 @@ impl RstCompiler<'_> {
     ) -> Result<CompilationContext, RstCompilerError> {
         let mut root_context = CompilationContext::new(file_path);
 
-        Self::build_context_constants(&cst, &mut root_context)?;
+        Self::build_context_into(&cst, &mut root_context)?;
 
         return Ok(root_context);
     }
 
-    fn build_context_constants(
+    fn build_context_into(cst: &&CstFunctionStatement, mut root_context: &mut CompilationContext) -> Result<(), RstCompilerError> {
+        Self::build_context_constants_into(&cst, &mut root_context)?;
+        Self::build_context_functions_into(&cst, &mut root_context)?;
+        Ok(())
+    }
+
+    fn build_context_constants_into(
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
@@ -99,6 +105,24 @@ impl RstCompiler<'_> {
                 name: constant.name.clone(),
                 byte_buffer: buff,
             })
+        }
+
+        Ok(())
+    }
+
+    fn build_context_functions_into(
+        cst: &&CstFunctionStatement,
+        root_context: &mut CompilationContext,
+    ) -> Result<(), RstCompilerError> {
+        for function in &cst.functions {
+            let mut sub_context = CompilationContext::branch(root_context.clone());
+            Self::build_context_into(&function, &mut sub_context)?;
+
+            root_context.bind_function(
+                FunctionBinding {
+                    name: function.name.clone(),
+                    context: sub_context,
+                })
         }
 
         Ok(())
