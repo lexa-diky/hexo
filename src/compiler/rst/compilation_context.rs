@@ -54,10 +54,11 @@ impl CompilationContext {
 
         local_context.bind_constant(constant);
     }
+
     pub(crate) fn get_local_constant(&self, context_id: u64, name: &String) -> Option<&ConstantBinding> {
         let local_context = self.local_contexts.get(&context_id)?;
 
-        let local_constant = local_context.get_constant(context_id, name);
+        let local_constant = local_context.get_constant(name);
 
         if local_constant.is_none() {
             for parent in  &local_context.parents {
@@ -79,12 +80,39 @@ impl CompilationContext {
         self.function_table.insert(function.name.clone(), function);
     }
 
-    pub(crate) fn get_function(&self, name: &String) -> Option<&FunctionBinding> {
-        return self.function_table.get(name);
+    pub(crate) fn bind_local_function(&mut self,  context_id: u64, function: FunctionBinding) {
+        if !self.local_contexts.contains_key(&context_id) {
+            self.local_contexts.insert(context_id, LocalCompilationContext::new());
+        }
+
+        let mut local_context: &mut LocalCompilationContext = self.local_contexts.get_mut(&context_id)
+            .expect("prechecked but value is still missing");
+
+        local_context.bind_function(function);
+    }
+
+    pub(crate) fn get_local_function(&self, context_id: u64, name: &String) -> Option<&FunctionBinding> {
+        let local_context = self.local_contexts.get(&context_id)?;
+
+        let local_function = local_context.get_function(name);
+
+        if local_function.is_none() {
+            for parent in  &local_context.parents {
+                let parent_function = self.get_local_function(*parent, name);
+                if parent_function.is_some() {
+                    return parent_function
+                }
+            }
+        } else {
+            return local_function
+        }
+
+        return None;
     }
 }
 
 impl LocalCompilationContext {
+
     fn new() -> LocalCompilationContext {
         return LocalCompilationContext {
             constant_table: HashMap::new(),
@@ -97,7 +125,7 @@ impl LocalCompilationContext {
         self.constant_table.insert(constant.name.clone(), constant);
     }
 
-    fn get_constant(&self, context_id: u64, name: &String) -> Option<&ConstantBinding> {
+    fn get_constant(&self, name: &String) -> Option<&ConstantBinding> {
         return self.constant_table.get(name);
     }
 

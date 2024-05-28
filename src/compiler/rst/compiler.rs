@@ -99,7 +99,7 @@ impl RstCompiler<'_> {
         mut root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
         Self::build_context_constants_into(context_id, &cst, &mut root_context)?;
-        Self::build_context_functions_into(&cst, &mut root_context)?;
+        Self::build_context_functions_into(context_id, &cst, &mut root_context)?;
         Ok(())
     }
 
@@ -121,11 +121,13 @@ impl RstCompiler<'_> {
     }
 
     fn build_context_functions_into(
+        context_id: u64,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
         for function in &cst.functions {
-            root_context.bind_function(
+            root_context.bind_local_function(
+                context_id,
                 FunctionBinding {
                     identifier: next_identifier(),
                     name: function.name.clone(),
