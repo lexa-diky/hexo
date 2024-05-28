@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::compiler::cst::{CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
 use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding, FunctionBinding};
 use crate::compiler::rst::node::HexoFile;
-use crate::compiler::util::ByteBuffer;
+use crate::compiler::util::{ByteBuffer, next_identifier};
 use crate::compiler::HexoCompiler;
 
 #[derive(Debug)]
@@ -21,9 +21,10 @@ impl RstCompiler<'_> {
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, RstCompilerError> {
-        let context = Self::build_context(&cst.path, &cst.main)?;
+        let context_id = next_identifier();
+        let context = Self::build_context(context_id, &cst.path, &cst.main)?;
 
-        let bb = Self::build_bytes(&context, &cst.main.emits)?;
+        let bb = Self::build_bytes(context_id, &context, &cst.main.emits)?;
 
         return Ok(HexoFile {
             path: cst.path.clone(),
@@ -33,19 +34,21 @@ impl RstCompiler<'_> {
     }
 
     fn build_bytes(
+        context_id: u64,
         context: &CompilationContext,
         emits: &Vec<CstEmitStatement>,
     ) -> Result<ByteBuffer, RstCompilerError> {
         let mut byte_buffer = ByteBuffer::new();
 
         for emit in emits {
-            Self::build_bytes_into(context, &emit.atoms, &mut byte_buffer)?
+            Self::build_bytes_into(context_id, context, &emit.atoms, &mut byte_buffer)?
         }
 
         return Ok(byte_buffer);
     }
 
     fn build_bytes_into(
+        context_id: u64,
         context: &CompilationContext,
         atoms: &CstAtomVec,
         buffer: &mut ByteBuffer,
@@ -55,7 +58,7 @@ impl RstCompiler<'_> {
                 CstAtom::Hex(byte) => buffer.push_byte(*byte),
                 CstAtom::String(string) => buffer.push_string(string.clone()),
                 CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
-                CstAtom::Constant { name } => Self::build_constant_into(context, &name, buffer)?,
+                CstAtom::Constant { name } => Self::build_constant_into(context_id, context, &name, buffer)?,
                 CstAtom::Function { .. } => {}
             }
         }
@@ -64,12 +67,13 @@ impl RstCompiler<'_> {
     }
 
     fn build_constant_into(
+        context_id: u64,
         context: &CompilationContext,
         name: &String,
         buffer: &mut ByteBuffer,
     ) -> Result<(), RstCompilerError> {
         let constant_binding = context
-            .get_constant(name)
+            .get_local_constant(context_id, name)
             .ok_or(RstCompilerError::UnresolvedConstant { name: name.clone() })?;
 
         buffer.push_byte_buffer(&constant_binding.byte_buffer);
@@ -78,30 +82,36 @@ impl RstCompiler<'_> {
     }
 
     fn build_context(
+        context_id: u64,
         file_path: &PathBuf,
         cst: &CstFunctionStatement,
     ) -> Result<CompilationContext, RstCompilerError> {
         let mut root_context = CompilationContext::new(file_path);
 
-        Self::build_context_into(&cst, &mut root_context)?;
+        Self::build_context_into(context_id, &cst, &mut root_context)?;
 
         return Ok(root_context);
     }
 
-    fn build_context_into(cst: &&CstFunctionStatement, mut root_context: &mut CompilationContext) -> Result<(), RstCompilerError> {
-        Self::build_context_constants_into(&cst, &mut root_context)?;
+    fn build_context_into(
+        context_id: u64,
+        cst: &&CstFunctionStatement,
+        mut root_context: &mut CompilationContext,
+    ) -> Result<(), RstCompilerError> {
+        Self::build_context_constants_into(context_id, &cst, &mut root_context)?;
         Self::build_context_functions_into(&cst, &mut root_context)?;
         Ok(())
     }
 
     fn build_context_constants_into(
+        context_id: u64,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
         for constant in &cst.constants {
             let mut buff = ByteBuffer::new();
-            Self::build_bytes_into(&root_context, &constant.atoms, &mut buff)?;
-            root_context.bind_constant(ConstantBinding {
+            Self::build_bytes_into(context_id, &root_context, &constant.atoms, &mut buff)?;
+            root_context.bind_local_constant(context_id, ConstantBinding {
                 name: constant.name.clone(),
                 byte_buffer: buff,
             })
@@ -115,13 +125,10 @@ impl RstCompiler<'_> {
         root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
         for function in &cst.functions {
-            let mut sub_context = CompilationContext::branch(root_context.clone());
-            Self::build_context_into(&function, &mut sub_context)?;
-
             root_context.bind_function(
                 FunctionBinding {
+                    identifier: next_identifier(),
                     name: function.name.clone(),
-                    context: sub_context,
                 })
         }
 
