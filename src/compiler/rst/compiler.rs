@@ -126,12 +126,15 @@ impl RstCompiler<'_> {
         root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
         for function in &cst.functions {
+            let inner_function_context_id = next_identifier();
             root_context.bind_local_function(
                 context_id,
                 FunctionBinding {
-                    identifier: next_identifier(),
+                    identifier: inner_function_context_id,
                     name: function.name.clone(),
-                })
+                });
+
+            Self::build_context_into(inner_function_context_id, &function, root_context)?;
         }
 
         Ok(())

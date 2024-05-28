@@ -4,31 +4,29 @@ use std::path::PathBuf;
 
 use crate::compiler::util::ByteBuffer;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct ConstantBinding {
     pub(crate) name: String,
     pub(crate) byte_buffer: ByteBuffer,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct FunctionBinding {
     pub(crate) identifier: u64,
     pub(crate) name: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct LocalCompilationContext {
     constant_table: HashMap<String, ConstantBinding>,
     function_table: HashMap<String, FunctionBinding>,
     parents: Vec<u64>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct CompilationContext {
     self_path: PathBuf,
     parent: Option<Box<CompilationContext>>,
-    constant_table: HashMap<String, ConstantBinding>,
-    function_table: HashMap<String, FunctionBinding>,
     local_contexts: HashMap<u64, LocalCompilationContext>,
 }
 
@@ -37,8 +35,6 @@ impl CompilationContext {
         return CompilationContext {
             self_path: path.clone(),
             parent: None,
-            constant_table: HashMap::new(),
-            function_table: HashMap::new(),
             local_contexts: HashMap::new(),
         };
     }
@@ -75,10 +71,6 @@ impl CompilationContext {
     }
 
     // endregion
-
-    pub(crate) fn bind_function(&mut self, function: FunctionBinding) {
-        self.function_table.insert(function.name.clone(), function);
-    }
 
     pub(crate) fn bind_local_function(&mut self,  context_id: u64, function: FunctionBinding) {
         if !self.local_contexts.contains_key(&context_id) {

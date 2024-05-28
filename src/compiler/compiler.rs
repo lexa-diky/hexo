@@ -62,9 +62,9 @@ impl HexoCompiler {
     ) -> Result<Compilation, CompilerError> {
         let cst = self.compile_cst(source)?;
         let rst_compiler = RstCompiler::new(self);
-        let rst = rst_compiler
-            .compile(&cst)
-            .map_err(|e| CompilerError::RST(e))?;
+        let rst = self.compile_rst(source)?;
+
+        print!("{:#?}", rst);
 
         return Ok(Compilation::from(rst.emits.as_vec()));
     }

@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use crate::compiler::util::encoding::to_shrunk_bytes;
 
 #[derive(Clone)]
@@ -70,5 +71,12 @@ mod test {
         assert_eq!(buffer.len(), 4);
 
         assert_eq!(buffer.as_vec(), vec![0, 0, 0, 13]);
+    }
+}
+
+impl Debug for ByteBuffer {
+
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{:?}", self.inner))
     }
 }
