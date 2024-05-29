@@ -1,7 +1,8 @@
-# hello {
-    # goodbye {
+$ ant FF
 
-    }
+# hello {
+    $ terminator 00
+    > 04 05 06 $terminator $ant
 }
 
-> 01 02 03
+> 01 02 03 #hello() $ant

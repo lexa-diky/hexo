@@ -219,9 +219,7 @@ fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
         node_type: AstNodeType::AtomFnName,
     })?;
 
-    let params_value = params.ok_or(CstParserError::MissingContent {
-        node_type: AstNodeType::AtomFnParams,
-    })?;
+    let params_value = params.unwrap_or(Vec::new());
 
     buf.push(CstAtom::Function {
         name: name_value,

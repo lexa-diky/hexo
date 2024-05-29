@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::compiler::cst::{CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
+use crate::compiler::cst::{CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
 use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding, FunctionBinding};
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::util::{ByteBuffer, next_identifier};
@@ -9,6 +9,7 @@ use crate::compiler::HexoCompiler;
 #[derive(Debug)]
 pub(crate) enum RstCompilerError {
     UnresolvedConstant { name: String },
+    UnresolvedFunction { name: String },
 }
 
 pub(crate) struct RstCompiler<'a> {
@@ -59,9 +60,28 @@ impl RstCompiler<'_> {
                 CstAtom::String(string) => buffer.push_string(string.clone()),
                 CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
                 CstAtom::Constant { name } => Self::build_constant_into(context_id, context, &name, buffer)?,
-                CstAtom::Function { .. } => {}
+                CstAtom::Function { name, params } => {
+                    Self::build_function_into(context_id, context, name.clone(), params, buffer)?
+                }
             }
         }
+
+        Ok(())
+    }
+
+    fn build_function_into(
+        context_id: u64,
+        context: &CompilationContext,
+        function_name: String,
+        params: &Vec<CstActualParameter>,
+        buffer: &mut ByteBuffer
+    ) -> Result<(), RstCompilerError>{
+        let function_binding = context.get_local_function(context_id, &function_name)
+            .ok_or(RstCompilerError::UnresolvedFunction { name: function_name.clone() })?;
+
+        function_binding.emits.iter().for_each(|emit| {
+            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms, buffer).unwrap();
+        });
 
         Ok(())
     }
@@ -136,6 +156,8 @@ impl RstCompiler<'_> {
                 });
 
             Self::build_context_into(inner_function_context_id, &function, root_context)?;
+
+            root_context.bind_parents(inner_function_context_id, vec![context_id]);
         }
 
         Ok(())

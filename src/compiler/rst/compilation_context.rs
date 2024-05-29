@@ -1,6 +1,7 @@
 use crate::compiler::cst::{CstConstantStatement, CstEmitStatement, CstFile, CstFunctionStatement};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use pest::pratt_parser::Op;
 
 use crate::compiler::util::ByteBuffer;
 
@@ -56,14 +57,14 @@ impl CompilationContext {
         let local_constant = local_context.get_constant(name);
 
         if local_constant.is_none() {
-            for parent in  &local_context.parents {
+            for parent in &local_context.parents {
                 let parent_constant = self.get_local_constant(*parent, name);
                 if parent_constant.is_some() {
-                    return parent_constant
+                    return parent_constant;
                 }
             }
         } else {
-            return local_constant
+            return local_constant;
         }
 
         return None;
@@ -71,7 +72,7 @@ impl CompilationContext {
 
     // endregion
 
-    pub(crate) fn bind_local_function(&mut self,  context_id: u64, function: FunctionBinding) {
+    pub(crate) fn bind_local_function(&mut self, context_id: u64, function: FunctionBinding) {
         if !self.local_contexts.contains_key(&context_id) {
             self.local_contexts.insert(context_id, LocalCompilationContext::new());
         }
@@ -88,22 +89,39 @@ impl CompilationContext {
         let local_function = local_context.get_function(name);
 
         if local_function.is_none() {
-            for parent in  &local_context.parents {
+            for parent in &local_context.parents {
                 let parent_function = self.get_local_function(*parent, name);
                 if parent_function.is_some() {
-                    return parent_function
+                    return parent_function;
                 }
             }
         } else {
-            return local_function
+            return local_function;
         }
 
         return None;
     }
+
+    pub(crate) fn get_parents(&self, context_id: u64) -> Option<Vec<u64>> {
+        return self.local_contexts.get(&context_id)
+            .map(|it| it.parents.clone());
+    }
+
+    pub(crate) fn bind_parents(&mut self, context_id: u64, parents: Vec<u64>) {
+        if !self.local_contexts.contains_key(&context_id) {
+            self.local_contexts.insert(context_id, LocalCompilationContext::new());
+        }
+
+        let mut local_context: &mut LocalCompilationContext = self.local_contexts.get_mut(&context_id)
+            .expect("prechecked but value is still missing");
+
+        for parent in parents {
+            local_context.attach_parent(parent);
+        }
+    }
 }
 
 impl LocalCompilationContext {
-
     fn new() -> LocalCompilationContext {
         return LocalCompilationContext {
             constant_table: HashMap::new(),
