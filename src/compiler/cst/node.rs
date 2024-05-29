@@ -1,12 +1,12 @@
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstFile {
     pub(crate) path: PathBuf,
     pub(crate) main: CstFunctionStatement,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) enum CstAtom {
     Hex(u8),
     String(String),
@@ -20,12 +20,12 @@ pub(crate) enum CstAtom {
     },
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstFunctionParameter {
     pub(crate) name: String,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstActualParameter {
     pub(crate) name: String,
     pub(crate) value: CstAtomVec,
@@ -33,18 +33,18 @@ pub(crate) struct CstActualParameter {
 
 pub(crate) type CstAtomVec = Vec<CstAtom>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstEmitStatement {
     pub(crate) atoms: CstAtomVec,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstConstantStatement {
     pub(crate) name: String,
     pub(crate) atoms: CstAtomVec,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct CstFunctionStatement {
     pub(crate) name: String,
     pub(crate) params: Vec<CstFunctionParameter>,

@@ -132,6 +132,7 @@ impl RstCompiler<'_> {
                 FunctionBinding {
                     identifier: inner_function_context_id,
                     name: function.name.clone(),
+                    emits: function.emits.clone(),
                 });
 
             Self::build_context_into(inner_function_context_id, &function, root_context)?;

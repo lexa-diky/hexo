@@ -14,6 +14,7 @@ pub(crate) struct ConstantBinding {
 pub(crate) struct FunctionBinding {
     pub(crate) identifier: u64,
     pub(crate) name: String,
+    pub(crate) emits: Vec<CstEmitStatement>,
 }
 
 #[derive(Clone, Debug)]
