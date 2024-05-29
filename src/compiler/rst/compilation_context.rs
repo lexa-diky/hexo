@@ -26,7 +26,6 @@ pub(crate) struct LocalCompilationContext {
 #[derive(Clone, Debug)]
 pub(crate) struct CompilationContext {
     self_path: PathBuf,
-    parent: Option<Box<CompilationContext>>,
     local_contexts: HashMap<u64, LocalCompilationContext>,
 }
 
@@ -34,7 +33,6 @@ impl CompilationContext {
     pub(crate) fn new(path: &PathBuf) -> CompilationContext {
         return CompilationContext {
             self_path: path.clone(),
-            parent: None,
             local_contexts: HashMap::new(),
         };
     }
