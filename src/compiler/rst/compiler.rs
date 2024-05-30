@@ -79,9 +79,18 @@ impl RstCompiler<'_> {
         let function_binding = context.get_local_function(context_id, &function_name)
             .ok_or(RstCompilerError::UnresolvedFunction { name: function_name.clone() })?;
 
-        function_binding.emits.iter().for_each(|emit| {
-            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms, buffer).unwrap();
-        });
+        for emit in &function_binding.emits {
+            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms, buffer)
+                .unwrap();
+        }
+
+        for param in params {
+            let mut param_buffer = ByteBuffer::new();
+            Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer)
+                .unwrap();
+
+            // TODO bind param into function context
+        }
 
         Ok(())
     }
