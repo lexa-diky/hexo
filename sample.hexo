@@ -2,7 +2,7 @@ $ ant FF
 
 # hello {
     $ terminator 00
-    > 04 05 06 $terminator $ant
+    > $0 $terminator $ant
 }
 
-> 01 02 03 #hello() $ant
+> 01 02 03 #hello(04)
