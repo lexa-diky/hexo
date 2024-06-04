@@ -7,6 +7,7 @@ mod cst;
 mod rst;
 mod source_finder;
 mod util;
+mod native_fn;
 
 pub(crate) use compilation_result::Compilation;
 pub(crate) use compiler::{CompilerError, HexoCompiler};

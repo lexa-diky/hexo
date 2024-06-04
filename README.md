@@ -80,8 +80,6 @@ To call a function use glyph '#' fallowed by function name and arguments:
 
 ```hexo
 > #len('HelloWorld') // will emit length of 'HelloWorld' in bytes (0a)
-> #pad_left(0x2, 0a) // will emit '00 0a'
-> #pad_right(0x2, 0a) // will emit '0a 00'
 ```
 
 ### Example

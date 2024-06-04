@@ -1,7 +1,9 @@
 use crate::compiler::cst::{CstConstantStatement, CstEmitStatement, CstFile, CstFunctionStatement};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use clap::builder::Str;
 use pest::pratt_parser::Op;
+use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 
 use crate::compiler::util::ByteBuffer;
 
@@ -29,6 +31,7 @@ pub(crate) struct LocalCompilationContext {
 pub(crate) struct CompilationContext {
     self_path: PathBuf,
     local_contexts: HashMap<u64, LocalCompilationContext>,
+    native_function_index: NativeFunctionIndex,
 }
 
 impl CompilationContext {
@@ -36,6 +39,7 @@ impl CompilationContext {
         return CompilationContext {
             self_path: path.clone(),
             local_contexts: HashMap::new(),
+            native_function_index: NativeFunctionIndex::new(),
         };
     }
 
@@ -102,6 +106,10 @@ impl CompilationContext {
         return None;
     }
 
+    pub(crate) fn get_native_function(&self, name: String) -> Option<&NativeFunction> {
+        return self.native_function_index.find(name);
+    }
+
     pub(crate) fn get_parents(&self, context_id: u64) -> Option<Vec<u64>> {
         return self.local_contexts.get(&context_id)
             .map(|it| it.parents.clone());
@@ -122,6 +130,7 @@ impl CompilationContext {
 }
 
 impl LocalCompilationContext {
+
     fn new() -> LocalCompilationContext {
         return LocalCompilationContext {
             constant_table: HashMap::new(),

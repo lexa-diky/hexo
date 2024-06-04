@@ -1,15 +1,18 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use crate::compiler::cst::{CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
+use crate::compiler::HexoCompiler;
+use crate::compiler::native_fn::NativeFunctionError;
 use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding, FunctionBinding};
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::util::{ByteBuffer, next_identifier};
-use crate::compiler::HexoCompiler;
 
 #[derive(Debug)]
 pub(crate) enum RstCompilerError {
     UnresolvedConstant { name: String },
     UnresolvedFunction { name: String },
+    NativeFunctionExecution(NativeFunctionError),
 }
 
 pub(crate) struct RstCompiler<'a> {
@@ -18,7 +21,9 @@ pub(crate) struct RstCompiler<'a> {
 
 impl RstCompiler<'_> {
     pub(crate) fn new(parent: &HexoCompiler) -> RstCompiler {
-        RstCompiler { parent: parent }
+        RstCompiler {
+            parent: parent,
+        }
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, RstCompilerError> {
@@ -74,8 +79,26 @@ impl RstCompiler<'_> {
         context: &mut CompilationContext,
         function_name: String,
         params: &Vec<CstActualParameter>,
-        buffer: &mut ByteBuffer
-    ) -> Result<(), RstCompilerError>{
+        buffer: &mut ByteBuffer,
+    ) -> Result<(), RstCompilerError> {
+        let native_function = context.get_native_function(function_name.clone());
+        if native_function.is_some() {
+            let executor = native_function.unwrap().executor;
+            let mut params_buffer = HashMap::new();
+
+            for param in params {
+                let mut param_buffer = ByteBuffer::new();
+                Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer)
+                    .unwrap();
+
+                params_buffer.insert(param.name.clone(), param_buffer);
+                executor(params_buffer.clone())
+                    .map(|bb| buffer.push_byte_buffer(&bb))
+                    .map_err(|e| RstCompilerError::NativeFunctionExecution(e))?;
+            }
+            return Ok(());
+        }
+
         let binding = context.clone();
         let function_binding = binding.get_local_function(context_id, &function_name)
             .ok_or(RstCompilerError::UnresolvedFunction { name: function_name.clone() })?;
