@@ -68,9 +68,9 @@ mod test {
         let mut buffer = ByteBuffer::new();
         buffer.push_u32_shrunk(13);
 
-        assert_eq!(buffer.len(), 4);
+        assert_eq!(buffer.len(), 1);
 
-        assert_eq!(buffer.as_vec(), vec![0, 0, 0, 13]);
+        assert_eq!(buffer.as_vec(), vec![13]);
     }
 }
 
