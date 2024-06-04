@@ -3,14 +3,13 @@ use crate::compiler::native_fn::signature::NativeFunction;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunctionIndex {
-    functions: Vec<NativeFunction>
+    functions: Vec<NativeFunction>,
 }
 
 impl NativeFunctionIndex {
-
     pub(crate) fn new() -> NativeFunctionIndex {
         return NativeFunctionIndex {
-            functions: Self::create_native_functions()
+            functions: Self::create_native_functions(),
         };
     }
 
@@ -19,8 +18,6 @@ impl NativeFunctionIndex {
     }
 
     fn create_native_functions() -> Vec<NativeFunction> {
-        return vec![
-            create_len_native_function()
-        ]
+        return vec![create_len_native_function()];
     }
 }

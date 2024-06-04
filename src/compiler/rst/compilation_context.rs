@@ -1,9 +1,9 @@
 use crate::compiler::cst::{CstConstantStatement, CstEmitStatement, CstFile, CstFunctionStatement};
-use std::collections::HashMap;
-use std::path::PathBuf;
+use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 use clap::builder::Str;
 use pest::pratt_parser::Op;
-use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
+use std::collections::HashMap;
+use std::path::PathBuf;
 
 use crate::compiler::util::ByteBuffer;
 
@@ -46,16 +46,23 @@ impl CompilationContext {
     // region constant
     pub(crate) fn bind_local_constant(&mut self, context_id: u64, constant: ConstantBinding) {
         if !self.local_contexts.contains_key(&context_id) {
-            self.local_contexts.insert(context_id, LocalCompilationContext::new());
+            self.local_contexts
+                .insert(context_id, LocalCompilationContext::new());
         }
 
-        let mut local_context: &mut LocalCompilationContext = self.local_contexts.get_mut(&context_id)
+        let mut local_context: &mut LocalCompilationContext = self
+            .local_contexts
+            .get_mut(&context_id)
             .expect("prechecked but value is still missing");
 
         local_context.bind_constant(constant);
     }
 
-    pub(crate) fn get_local_constant(&self, context_id: u64, name: &String) -> Option<&ConstantBinding> {
+    pub(crate) fn get_local_constant(
+        &self,
+        context_id: u64,
+        name: &String,
+    ) -> Option<&ConstantBinding> {
         let local_context = self.local_contexts.get(&context_id)?;
 
         let local_constant = local_context.get_constant(name);
@@ -78,16 +85,23 @@ impl CompilationContext {
 
     pub(crate) fn bind_local_function(&mut self, context_id: u64, function: FunctionBinding) {
         if !self.local_contexts.contains_key(&context_id) {
-            self.local_contexts.insert(context_id, LocalCompilationContext::new());
+            self.local_contexts
+                .insert(context_id, LocalCompilationContext::new());
         }
 
-        let mut local_context: &mut LocalCompilationContext = self.local_contexts.get_mut(&context_id)
+        let mut local_context: &mut LocalCompilationContext = self
+            .local_contexts
+            .get_mut(&context_id)
             .expect("prechecked but value is still missing");
 
         local_context.bind_function(function);
     }
 
-    pub(crate) fn get_local_function(&self, context_id: u64, name: &String) -> Option<&FunctionBinding> {
+    pub(crate) fn get_local_function(
+        &self,
+        context_id: u64,
+        name: &String,
+    ) -> Option<&FunctionBinding> {
         let local_context = self.local_contexts.get(&context_id)?;
 
         let local_function = local_context.get_function(name);
@@ -111,16 +125,21 @@ impl CompilationContext {
     }
 
     pub(crate) fn get_parents(&self, context_id: u64) -> Option<Vec<u64>> {
-        return self.local_contexts.get(&context_id)
+        return self
+            .local_contexts
+            .get(&context_id)
             .map(|it| it.parents.clone());
     }
 
     pub(crate) fn bind_parents(&mut self, context_id: u64, parents: Vec<u64>) {
         if !self.local_contexts.contains_key(&context_id) {
-            self.local_contexts.insert(context_id, LocalCompilationContext::new());
+            self.local_contexts
+                .insert(context_id, LocalCompilationContext::new());
         }
 
-        let mut local_context: &mut LocalCompilationContext = self.local_contexts.get_mut(&context_id)
+        let mut local_context: &mut LocalCompilationContext = self
+            .local_contexts
+            .get_mut(&context_id)
             .expect("prechecked but value is still missing");
 
         for parent in parents {
@@ -130,7 +149,6 @@ impl CompilationContext {
 }
 
 impl LocalCompilationContext {
-
     fn new() -> LocalCompilationContext {
         return LocalCompilationContext {
             constant_table: HashMap::new(),

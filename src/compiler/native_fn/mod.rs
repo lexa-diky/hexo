@@ -1,8 +1,7 @@
-mod signature;
-mod index;
 mod implementations;
+mod index;
+mod signature;
 
-pub(crate) use signature::*;
-pub(crate) use index::*;
 pub(crate) use implementations::*;
-
+pub(crate) use index::*;
+pub(crate) use signature::*;

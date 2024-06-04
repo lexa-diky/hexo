@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Formatter};
 use crate::compiler::util::encoding::to_shrunk_bytes;
+use std::fmt::{Debug, Formatter};
 
 #[derive(Clone)]
 pub(crate) struct ByteBuffer {
@@ -75,7 +75,6 @@ mod test {
 }
 
 impl Debug for ByteBuffer {
-
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(&format!("{:?}", self.inner))
     }

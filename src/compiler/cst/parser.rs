@@ -6,7 +6,6 @@ use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
 use crate::compiler::util::encoding::decode_bytes_from_string;
-use crate::encoding_legacy;
 
 #[derive(Debug)]
 pub(crate) enum CstParserError {

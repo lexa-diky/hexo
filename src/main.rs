@@ -11,25 +11,9 @@ use crate::compiler::{
 
 mod cli;
 mod compiler;
-mod cst_legacy;
-mod encoding_legacy;
-mod render_legacy;
-mod resolver_legacy;
 
 fn main() {
     run_cli()
-}
-
-#[test]
-fn new_compiler() {
-    let context = HexoCompilerContext::new();
-    let compiler = HexoCompiler::new(context);
-
-    let source = FileCompilerSource::new(PathBuf::from("sample.hexo"));
-
-    let compilation_result = compiler.compile(&source).unwrap();
-
-    println!("{:?}", compilation_result.content);
 }
 
 // list files in directory test cases

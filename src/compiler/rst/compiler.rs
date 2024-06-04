@@ -1,12 +1,16 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::compiler::cst::{CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement};
-use crate::compiler::HexoCompiler;
+use crate::compiler::cst::{
+    CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
+};
 use crate::compiler::native_fn::NativeFunctionError;
-use crate::compiler::rst::compilation_context::{CompilationContext, ConstantBinding, FunctionBinding};
+use crate::compiler::rst::compilation_context::{
+    CompilationContext, ConstantBinding, FunctionBinding,
+};
 use crate::compiler::rst::node::HexoFile;
-use crate::compiler::util::{ByteBuffer, next_identifier};
+use crate::compiler::util::{next_identifier, ByteBuffer};
+use crate::compiler::HexoCompiler;
 
 #[derive(Debug)]
 pub(crate) enum RstCompilerError {
@@ -21,9 +25,7 @@ pub(crate) struct RstCompiler<'a> {
 
 impl RstCompiler<'_> {
     pub(crate) fn new(parent: &HexoCompiler) -> RstCompiler {
-        RstCompiler {
-            parent: parent,
-        }
+        RstCompiler { parent: parent }
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, RstCompilerError> {
@@ -64,7 +66,9 @@ impl RstCompiler<'_> {
                 CstAtom::Hex(byte) => buffer.push_byte(*byte),
                 CstAtom::String(string) => buffer.push_string(string.clone()),
                 CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
-                CstAtom::Constant { name } => Self::build_constant_into(context_id, context, &name, buffer)?,
+                CstAtom::Constant { name } => {
+                    Self::build_constant_into(context_id, context, &name, buffer)?
+                }
                 CstAtom::Function { name, params } => {
                     Self::build_function_into(context_id, context, name.clone(), params, buffer)?
                 }
@@ -100,18 +104,23 @@ impl RstCompiler<'_> {
         }
 
         let binding = context.clone();
-        let function_binding = binding.get_local_function(context_id, &function_name)
-            .ok_or(RstCompilerError::UnresolvedFunction { name: function_name.clone() })?;
+        let function_binding = binding
+            .get_local_function(context_id, &function_name)
+            .ok_or(RstCompilerError::UnresolvedFunction {
+                name: function_name.clone(),
+            })?;
 
         for param in params {
             let mut param_buffer = ByteBuffer::new();
-            Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer)
-                .unwrap();
+            Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer).unwrap();
 
-            context.bind_local_constant(function_binding.identifier, ConstantBinding {
-                name: param.name.clone(),
-                byte_buffer: param_buffer,
-            });
+            context.bind_local_constant(
+                function_binding.identifier,
+                ConstantBinding {
+                    name: param.name.clone(),
+                    byte_buffer: param_buffer,
+                },
+            );
         }
 
         for emit in &function_binding.emits {
@@ -167,10 +176,13 @@ impl RstCompiler<'_> {
         for constant in &cst.constants {
             let mut buff = ByteBuffer::new();
             Self::build_bytes_into(context_id, context, &constant.atoms, &mut buff)?;
-            context.bind_local_constant(context_id, ConstantBinding {
-                name: constant.name.clone(),
-                byte_buffer: buff,
-            })
+            context.bind_local_constant(
+                context_id,
+                ConstantBinding {
+                    name: constant.name.clone(),
+                    byte_buffer: buff,
+                },
+            )
         }
 
         Ok(())
@@ -189,7 +201,8 @@ impl RstCompiler<'_> {
                     identifier: inner_function_context_id,
                     name: function.name.clone(),
                     emits: function.emits.clone(),
-                });
+                },
+            );
 
             Self::build_context_into(inner_function_context_id, &function, root_context)?;
 

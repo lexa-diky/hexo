@@ -1,7 +1,8 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Write;
 use std::panic::catch_unwind;
+use std::path::PathBuf;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -10,12 +11,9 @@ use console::style;
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
-use pest::Parser as PestParser;
 
-use crate::compiler::ast::{AstParser, AstParserError};
-use crate::render_legacy::RenderError;
-use crate::resolver_legacy::resolve_cst;
-use crate::{cst_legacy, render_legacy};
+use crate::compiler::ast::AstParserError;
+use crate::compiler::{CompilerSource, FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -51,10 +49,9 @@ pub(crate) enum CliError {
     CantCreateWatcher(notify::Error),
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
-    Rendering(RenderError),
     CantReadInputFile(std::io::Error),
     AstParsingFailed(AstParserError),
-    CstParsingFailed,
+    CompilationError(crate::compiler::CompilerError),
 }
 
 pub(crate) fn run_cli() {
@@ -80,21 +77,20 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
             CliError::CantCrateOutputFile(_) => eprintln!("can't create output file"),
             CliError::CantReadInputFile(_) => eprintln!("can't read input file"),
             CliError::AstParsingFailed(_) => eprintln!("ast parsing error"),
-            CliError::CstParsingFailed => eprintln!("cst parsing failed"),
-            CliError::Rendering(error) => handle_render_error(error),
+            CliError::CompilationError(compilation_error) => {
+                handle_compilation_error(compilation_error)
+            }
         }
     }
 }
 
-fn handle_render_error(error: RenderError) {
-    match error {
-        RenderError::UnresolvedAtom { atom } => eprintln!("unresolved atom: {:?}", atom),
-    }
+fn handle_compilation_error(err: crate::compiler::CompilerError) {
+    print_error("compilation error", Box::new(err));
 }
 
-fn print_error(message: &str, error: Box<dyn Display>) {
+fn print_error(message: &str, error: Box<dyn Debug>) {
     println!("{} {}", style("e:").red().bold(), style(message).red());
-    println!("{}", style(error).red());
+    println!("{:?}", style(error).red());
 }
 
 fn run_watch(source: String, output: Option<String>) -> Result<(), CliError> {
@@ -133,22 +129,19 @@ fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, n
 }
 
 pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
-    let mut source_buff = String::new();
-    File::open(source.clone())
-        .map_err(|err| CliError::CantReadInputFile(err))?
-        .read_to_string(&mut source_buff)
-        .map_err(|err| CliError::CantReadInputFile(err))?;
+    let context = HexoCompilerContext::new();
+    let compiler = HexoCompiler::new(context);
 
-    let ast_parser = AstParser::new();
+    let compiler_source = FileCompilerSource::new(PathBuf::from(source.clone()));
 
-    let ast = ast_parser.parse(source_buff).unwrap();
-
-    let cst = cst_legacy::parse_cst(ast).map_err(|_| CliError::CstParsingFailed)?;
-    let resolved_cst = resolve_cst(cst);
+    let compilation_result = compiler
+        .compile(&compiler_source)
+        .map_err(|err| CliError::CompilationError(err))?;
 
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
+
     File::create(output_file_path)
         .map_err(|err| CliError::CantCrateOutputFile(err))?
-        .write_all(&render_legacy::render_cst(resolved_cst).map_err(CliError::Rendering)?)
+        .write_all(compilation_result.content.iter().as_slice())
         .map_err(|err| CliError::CantCrateOutputFile(err))
 }
