@@ -1,13 +1,5 @@
-use compiler::CompilerSource;
-use std::env::temp_dir;
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
 
-use crate::cli::{run_build, run_cli};
-use crate::compiler::{
-    FileCompilerSource, HexoCompiler, HexoCompilerContext, StringCompilerSource,
-};
+use crate::cli::{run_cli};
 
 mod cli;
 mod compiler;
@@ -21,8 +13,8 @@ fn main() {
 #[test]
 fn run_test_cases() {
     fn read_file(filename: &PathBuf) -> Vec<u8> {
-        let mut f = File::open(&filename).expect("no file found");
-        let metadata = std::fs::metadata(&filename).expect("unable to read metadata");
+        let mut f = File::open(filename).expect("no file found");
+        let metadata = std::fs::metadata(filename).expect("unable to read metadata");
         let mut buffer = vec![0; metadata.len() as usize];
         f.read(&mut buffer).expect("buffer overflow");
 

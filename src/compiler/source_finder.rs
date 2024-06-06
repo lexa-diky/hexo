@@ -1,4 +1,4 @@
-use crate::compiler::{CompilerSource, FileCompilerSource, StringCompilerSource};
+use crate::compiler::{CompilerSource, FileCompilerSource};
 use std::path::PathBuf;
 
 pub(crate) trait SourceFinder {
@@ -20,6 +20,6 @@ impl SourceFinder for FileSourceFinder {
 
 impl FileSourceFinder {
     pub(crate) fn new(root_dir: PathBuf) -> FileSourceFinder {
-        return FileSourceFinder { root_dir: root_dir };
+        FileSourceFinder { root_dir }
     }
 }

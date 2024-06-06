@@ -25,7 +25,7 @@ pub(crate) struct RstCompiler<'a> {
 
 impl RstCompiler<'_> {
     pub(crate) fn new(parent: &HexoCompiler) -> RstCompiler {
-        RstCompiler { parent: parent }
+        RstCompiler { parent }
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, RstCompilerError> {
@@ -34,11 +34,11 @@ impl RstCompiler<'_> {
 
         let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
 
-        return Ok(HexoFile {
+        Ok(HexoFile {
             path: cst.path.clone(),
-            context: context,
+            context,
             emits: bb,
-        });
+        })
     }
 
     fn build_bytes(
@@ -52,7 +52,7 @@ impl RstCompiler<'_> {
             Self::build_bytes_into(context_id, context, &emit.atoms, &mut byte_buffer)?
         }
 
-        return Ok(byte_buffer);
+        Ok(byte_buffer)
     }
 
     fn build_bytes_into(
@@ -67,7 +67,7 @@ impl RstCompiler<'_> {
                 CstAtom::String(string) => buffer.push_string(string.clone()),
                 CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
                 CstAtom::Constant { name } => {
-                    Self::build_constant_into(context_id, context, &name, buffer)?
+                    Self::build_constant_into(context_id, context, name, buffer)?
                 }
                 CstAtom::Function { name, params } => {
                     Self::build_function_into(context_id, context, name.clone(), params, buffer)?
@@ -100,7 +100,7 @@ impl RstCompiler<'_> {
 
             executor(params_buffer.clone())
                 .map(|bb| buffer.push_byte_buffer(&bb))
-                .map_err(|e| RstCompilerError::NativeFunctionExecution(e))?;
+                .map_err(RstCompilerError::NativeFunctionExecution)?;
 
             return Ok(());
         }
@@ -157,16 +157,16 @@ impl RstCompiler<'_> {
 
         Self::build_context_into(context_id, &cst, &mut root_context)?;
 
-        return Ok(root_context);
+        Ok(root_context)
     }
 
     fn build_context_into(
         context_id: u64,
         cst: &&CstFunctionStatement,
-        mut root_context: &mut CompilationContext,
+        root_context: &mut CompilationContext,
     ) -> Result<(), RstCompilerError> {
-        Self::build_context_constants_into(context_id, &cst, &mut root_context)?;
-        Self::build_context_functions_into(context_id, &cst, &mut root_context)?;
+        Self::build_context_constants_into(context_id, cst, root_context)?;
+        Self::build_context_functions_into(context_id, cst, root_context)?;
         Ok(())
     }
 

@@ -1,7 +1,6 @@
-use clap::builder::Str;
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 
 pub(crate) trait CompilerSource {
     fn read(&self) -> Result<String, std::io::Error>;
@@ -16,20 +15,20 @@ pub(crate) struct StringCompilerSource {
 
 impl StringCompilerSource {
     pub(crate) fn new(path: PathBuf, text: &str) -> StringCompilerSource {
-        return StringCompilerSource {
+        StringCompilerSource {
             content: text.to_string(),
-            path: path,
-        };
+            path,
+        }
     }
 }
 
 impl CompilerSource for StringCompilerSource {
     fn read(&self) -> Result<String, std::io::Error> {
-        return Ok(self.content.clone());
+        Ok(self.content.clone())
     }
 
     fn path(&self) -> PathBuf {
-        return self.path.clone();
+        self.path.clone()
     }
 }
 
@@ -39,7 +38,7 @@ pub(crate) struct FileCompilerSource {
 
 impl FileCompilerSource {
     pub(crate) fn new(path: PathBuf) -> FileCompilerSource {
-        return FileCompilerSource { path: path };
+        FileCompilerSource { path }
     }
 }
 
@@ -49,10 +48,10 @@ impl CompilerSource for FileCompilerSource {
         let mut buff = String::new();
         p.read_to_string(&mut buff)?;
 
-        return Ok(buff);
+        Ok(buff)
     }
 
     fn path(&self) -> PathBuf {
-        return self.path.clone();
+        self.path.clone()
     }
 }

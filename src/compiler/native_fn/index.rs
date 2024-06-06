@@ -9,9 +9,9 @@ pub(crate) struct NativeFunctionIndex {
 impl NativeFunctionIndex {
 
     pub(crate) fn new() -> NativeFunctionIndex {
-        return NativeFunctionIndex {
+        NativeFunctionIndex {
             functions: Self::create_native_functions(),
-        };
+        }
     }
 
     pub(crate) fn find(&self, name: String) -> Option<&NativeFunction> {
@@ -19,12 +19,12 @@ impl NativeFunctionIndex {
     }
 
     fn create_native_functions() -> Vec<NativeFunction> {
-        return vec![
+        vec![
             create_len_native_function(),
             create_pad_left_native_function(),
             create_pad_right_native_function(),
             create_cmd_native_function(),
             create_read_file_native_function()
-        ];
+        ]
     }
 }

@@ -61,10 +61,10 @@ impl ByteBuffer {
     pub(crate) fn as_usize(&self) -> usize {
         let mut padded = self.clone();
         padded.pad_left(4);
-        return ((padded.inner[0] as usize) << 24) +
+        ((padded.inner[0] as usize) << 24) +
             ((padded.inner[1] as usize) << 16) +
             ((padded.inner[2] as usize) <<  8) +
-            ((padded.inner[3] as usize) <<  0);
+            (padded.inner[3] as usize)
     }
 
     pub(crate) fn as_string(&self) -> String {
@@ -73,7 +73,7 @@ impl ByteBuffer {
 }
 
 mod test {
-    use crate::compiler::util::ByteBuffer;
+    
 
     #[test]
     fn byte_push() {

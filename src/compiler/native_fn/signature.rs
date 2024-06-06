@@ -1,6 +1,5 @@
 use crate::compiler::util::ByteBuffer;
 use std::collections::HashMap;
-use std::iter::Map;
 
 #[derive(Clone, Debug)]
 pub(crate) enum NativeFunctionError {

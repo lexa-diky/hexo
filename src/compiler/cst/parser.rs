@@ -38,7 +38,7 @@ impl CstParser {
         path: PathBuf,
         ast_root: AstNode,
     ) -> Result<CstFile, CstParserError> {
-        return parse_file(path, &ast_root);
+        parse_file(path, &ast_root)
     }
 }
 
@@ -48,8 +48,8 @@ fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, CstParserError> 
     guard_node_type(node, AstNodeType::File)?;
     let (emits, functions, constants) = parse_function_body(node)?;
 
-    return Ok(CstFile {
-        path: path,
+    Ok(CstFile {
+        path,
         main: CstFunctionStatement {
             name: MAIN_FUNCTION_NAME.to_string(),
             params: Vec::new(),
@@ -57,7 +57,7 @@ fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, CstParserError> 
             functions,
             constants,
         },
-    });
+    })
 }
 
 type BodyParsingResult = (
@@ -139,13 +139,13 @@ fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError
         }
     }
 
-    return Ok(CstFunctionStatement {
+    Ok(CstFunctionStatement {
         name: parse_value_of(&node.children[0])?,
         params: Vec::new(),
         emits: emits.unwrap_or(Vec::new()),
         functions: functions.unwrap_or(Vec::new()),
         constants: constants.unwrap_or(Vec::new()),
-    });
+    })
 }
 
 fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserError> {
@@ -156,7 +156,7 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
         parse_atom_into(child, &mut atoms)?
     }
 
-    return Ok(CstEmitStatement { atoms: atoms });
+    Ok(CstEmitStatement { atoms })
 }
 
 fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
@@ -244,12 +244,12 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstPa
 
         buf.push(CstActualParameter {
             name: param_counter.to_string(),
-            value: value,
+            value,
         });
         param_counter += 1;
     }
 
-    return Ok(buf);
+    Ok(buf)
 }
 
 fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
@@ -267,7 +267,7 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cst
     for byte in bytes {
         buf.push(CstAtom::Hex(byte))
     }
-    return Ok(());
+    Ok(())
 }
 
 fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
@@ -279,7 +279,7 @@ fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cs
 
     buf.push(CstAtom::String(content));
 
-    return Ok(());
+    Ok(())
 }
 
 fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
@@ -330,7 +330,7 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
         })?,
     ));
 
-    return Ok(());
+    Ok(())
 }
 
 fn parse_value_of(node: &AstNode) -> Result<String, CstParserError> {
@@ -341,9 +341,9 @@ fn parse_value_of(node: &AstNode) -> Result<String, CstParserError> {
         });
     }
 
-    return node.clone().content.ok_or(CstParserError::MissingContent {
+    node.clone().content.ok_or(CstParserError::MissingContent {
         node_type: node.node_type,
-    });
+    })
 }
 
 fn guard_node_type(node: &AstNode, expected_type: AstNodeType) -> Result<(), CstParserError> {
@@ -354,7 +354,7 @@ fn guard_node_type(node: &AstNode, expected_type: AstNodeType) -> Result<(), Cst
         });
     }
 
-    return Ok(());
+    Ok(())
 }
 
 fn guard_empty<T>(option: Option<T>) -> Result<(), CstParserError> {
@@ -362,5 +362,5 @@ fn guard_empty<T>(option: Option<T>) -> Result<(), CstParserError> {
         return Err(CstParserError::DuplicateNode);
     }
 
-    return Ok(());
+    Ok(())
 }

@@ -24,14 +24,14 @@ impl AstParser {
 
     pub(crate) fn parse(&self, source: String) -> Result<AstNode, AstParserError> {
         let pairs = AstPestParser::parse(Rule::file, source.as_str())
-            .map_err(|error| AstParserError::PestError(error))?;
+            .map_err(AstParserError::PestError)?;
 
         let children: Result<Vec<AstNode>, _> = pairs
             .map(parse_ast_pair)
             .filter_map(filter_ignored_token)
             .collect();
 
-        return Ok(AstNode::new(AstNodeType::File, None, children?));
+        Ok(AstNode::new(AstNodeType::File, None, children?))
     }
 }
 
