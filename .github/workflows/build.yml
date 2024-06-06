@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Environment
-        uses: ./.github/workflows/setup.yml
+        uses: ./.github/actions/prepare-environment
       - name: Run tests
         run: cargo test --verbose
 
@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Setup Environment
-        uses: ./.github/workflows/setup.yml
+        uses: ./.github/actions/prepare-environment
       - name: Publish to crates.io
         uses: katyo/publish-crates@v2
         with:
