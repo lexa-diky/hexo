@@ -1,1 +1,1 @@
-> #pad_left(04, 01)
+> #read_file('grammar.pest')

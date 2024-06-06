@@ -83,6 +83,7 @@ To call a function use glyph '#' fallowed by function name and arguments:
 > #pad_left(AA, 4) // will emit '00 00 00 AA'
 > #pad_right(AA, 4) // will emit 'AA 00 00 00'
 > #cmd(`ls`) // will emit result of command line 'ls' command
+> #read_file('file.txt') // will emit content of 'file.txt'
 ```
 
 ### Example
