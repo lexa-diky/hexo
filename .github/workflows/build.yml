@@ -10,8 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  prepare-environment:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +26,22 @@ jobs:
         with:
           cache-all-crates: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
-      - name: Build
-        run: cargo build --verbose
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - prepare-environment
+
+    steps:
       - name: Run tests
         run: cargo test --verbose
+
+  publish:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+
+    steps:
       - name: Publish to crates.io
         uses: katyo/publish-crates@v2
         with:
