@@ -1,5 +1,9 @@
 on:
   workflow_call:
+    inputs:
+      branch-ref:
+        required: true
+        type: string
 
 jobs:
   prepare-environment:
@@ -17,4 +21,4 @@ jobs:
         name: Cache dependencies
         with:
           cache-all-crates: true
-          save-if: ${{ github.ref == 'refs/heads/master' }}
+          save-if: ${{ inputs.branch-ref == 'refs/heads/master' }}
