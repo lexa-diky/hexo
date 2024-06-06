@@ -5,7 +5,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/lexa-diky/hexo?logo=rust)
 
 ![Crates.io License](https://img.shields.io/crates/l/hexo?logo=apache)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lexa-diky/hexo/build?branch=main&logo=github)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/lexa-diky/hexo?logo=github)
 
 Tiny binary writer utility, _just enough for you_
 
