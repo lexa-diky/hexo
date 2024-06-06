@@ -15,10 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: Checkout repository
-      - name: Setup Environment
-        uses: ./.github/actions/prepare-environment
+      - uses: Swatinem/rust-cache@v2
+        name: Cache dependencies
         with:
-          branch-ref: ${{ github.ref }}
+          cache-all-crates: true
+          save-if: ${{ github.ref == 'refs/heads/master' }}
       - name: Run tests
         run: cargo test --verbose
 
@@ -30,10 +31,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: Checkout repository
-      - name: Setup Environment
-        uses: ./.github/actions/prepare-environment
+      - uses: Swatinem/rust-cache@v2
+        name: Cache dependencies
         with:
-          branch-ref: ${{ github.ref }}
+          cache-all-crates: true
+          save-if: ${{ github.ref == 'refs/heads/master' }}
       - name: Publish to crates.io
         uses: katyo/publish-crates@v2
         with:
