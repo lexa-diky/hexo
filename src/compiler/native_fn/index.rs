@@ -1,4 +1,4 @@
-use crate::compiler::native_fn::{create_len_native_function, create_pad_left_native_function, create_pad_right_native_function};
+use crate::compiler::native_fn::{create_cmd_native_function, create_len_native_function, create_pad_left_native_function, create_pad_right_native_function};
 use crate::compiler::native_fn::signature::NativeFunction;
 
 #[derive(Clone, Debug)]
@@ -22,7 +22,8 @@ impl NativeFunctionIndex {
         return vec![
             create_len_native_function(),
             create_pad_left_native_function(),
-            create_pad_right_native_function()
+            create_pad_right_native_function(),
+            create_cmd_native_function()
         ];
     }
 }

@@ -11,6 +11,10 @@ impl ByteBuffer {
         ByteBuffer { inner: Vec::new() }
     }
 
+    pub(crate) fn from(vec: Vec<u8>) -> Self {
+        ByteBuffer { inner: vec }
+    }
+
     pub(crate) fn push_byte(&mut self, byte: u8) {
         self.inner.push(byte);
     }
@@ -61,6 +65,10 @@ impl ByteBuffer {
             ((padded.inner[1] as usize) << 16) +
             ((padded.inner[2] as usize) <<  8) +
             ((padded.inner[3] as usize) <<  0);
+    }
+
+    pub(crate) fn as_string(&self) -> String {
+        String::from_utf8(self.inner.clone()).unwrap()
     }
 }
 

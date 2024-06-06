@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::format;
 
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
 use crate::compiler::native_fn::NativeFunctionError;
@@ -63,6 +64,34 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
             arg0.pad_right(arg1.as_usize());
 
             return Ok(arg0);
+        },
+    };
+}
+
+pub(crate) fn create_cmd_native_function() -> NativeFunction {
+    return NativeFunction {
+        signature: NativeFunctionSignature {
+            name: String::from("cmd"),
+        },
+        executor: |arguments: HashMap<String, ByteBuffer>| {
+            let mut arg0 = arguments
+                .get("0")
+                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
+                .clone();
+
+
+            let command = arg0.as_string();
+            let output = std::process::Command::new(command)
+                .output()
+                .map_err(|e|
+                    NativeFunctionError::Unknown(
+                        format!("Error executing command: {}", e.to_string())
+                    )
+                )?;
+
+            let buffer = ByteBuffer::from(output.stdout);
+
+            return Ok(buffer);
         },
     };
 }
