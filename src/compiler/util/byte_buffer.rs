@@ -37,6 +37,15 @@ impl ByteBuffer {
         }
     }
 
+    pub(crate) fn pad_right(&mut self, size: usize) {
+        let padding = size - self.inner.len();
+
+        if padding > 0 {
+            let mut padding_vec = vec![0; padding];
+            self.inner.append(padding_vec.as_mut());
+        }
+    }
+
     pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
