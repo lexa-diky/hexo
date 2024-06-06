@@ -20,3 +20,26 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
         },
     };
 }
+
+pub(crate) fn create_pad_left_native_function() -> NativeFunction {
+    return NativeFunction {
+        signature: NativeFunctionSignature {
+            name: String::from("pad_left"),
+        },
+        executor: |arguments: HashMap<String, ByteBuffer>| {
+            let mut arg0 = arguments
+                .get("0")
+                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
+                .clone();
+
+            let mut arg1 = arguments
+                .get("1")
+                .ok_or(NativeFunctionError::Unknown("1".to_string()))?
+                .clone();
+
+            arg0.pad_left(arg1.as_usize());
+
+            return Ok(arg0);
+        },
+    };
+}

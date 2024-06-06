@@ -96,10 +96,12 @@ impl RstCompiler<'_> {
                     .unwrap();
 
                 params_buffer.insert(param.name.clone(), param_buffer);
-                executor(params_buffer.clone())
-                    .map(|bb| buffer.push_byte_buffer(&bb))
-                    .map_err(|e| RstCompilerError::NativeFunctionExecution(e))?;
             }
+
+            executor(params_buffer.clone())
+                .map(|bb| buffer.push_byte_buffer(&bb))
+                .map_err(|e| RstCompilerError::NativeFunctionExecution(e))?;
+
             return Ok(());
         }
 

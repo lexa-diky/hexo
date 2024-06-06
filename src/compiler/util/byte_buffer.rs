@@ -27,12 +27,31 @@ impl ByteBuffer {
         self.inner.extend(other.as_vec());
     }
 
+    pub(crate) fn pad_left(&mut self, size: usize) {
+        let padding = size - self.inner.len();
+
+        if padding > 0 {
+            let mut padding_vec = vec![0; padding];
+            padding_vec.append(&mut self.inner);
+            self.inner = padding_vec;
+        }
+    }
+
     pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
 
     pub(crate) fn as_vec(&self) -> Vec<u8> {
         self.inner.clone()
+    }
+
+    pub(crate) fn as_usize(&self) -> usize {
+        let mut padded = self.clone();
+        padded.pad_left(4);
+        return ((padded.inner[0] as usize) << 24) +
+            ((padded.inner[1] as usize) << 16) +
+            ((padded.inner[2] as usize) <<  8) +
+            ((padded.inner[3] as usize) <<  0);
     }
 }
 
