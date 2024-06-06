@@ -13,6 +13,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        name: Checkout repository
       - name: Setup Environment
         uses: ./.github/actions/prepare-environment
       - name: Run tests
@@ -24,6 +26,8 @@ jobs:
       - test
 
     steps:
+      - uses: actions/checkout@v3
+        name: Checkout repository
       - name: Setup Environment
         uses: ./.github/actions/prepare-environment
       - name: Publish to crates.io
