@@ -114,3 +114,19 @@ $ object_superclass_name 'java/lang/Object'
 > 0001 0003 // Class pointers
 > 0000 0000 0000 0000 // No interfaces, fields, methods, attributes
 ```
+
+## Q/A
+
+### Does Hexo support small endian?
+
+No, Hexo only supports big endian currently. But we are currently investigating ability to support
+both big and small endian.
+
+### Can I use Hexo as a library?
+
+Not currently, but this is planned for future releases.
+
+### Isn't `cmd` function highly unsafe?
+
+Yes, safety is no goal of Hexo, please don't run untrusted code with it.
+Safe mode might be implemented in the future is there is enough demand for it.
