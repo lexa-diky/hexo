@@ -10,29 +10,11 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  prepare-environment:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-        name: Checkout repository
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-      - uses: Swatinem/rust-cache@v2
-        name: Cache dependencies
-        with:
-          cache-all-crates: true
-          save-if: ${{ github.ref == 'refs/heads/master' }}
-
   test:
     runs-on: ubuntu-latest
-    needs:
-      - prepare-environment
-
     steps:
+      - name: Setup Environment
+        uses: ./.github/workflows/setup.yml
       - name: Run tests
         run: cargo test --verbose
 
@@ -42,6 +24,8 @@ jobs:
       - test
 
     steps:
+      - name: Setup Environment
+        uses: ./.github/workflows/setup.yml
       - name: Publish to crates.io
         uses: katyo/publish-crates@v2
         with:
