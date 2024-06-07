@@ -231,10 +231,9 @@ fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
 fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstParserError> {
     guard_node_type(node, AstNodeType::AtomFnParams)?;
 
-    let mut param_counter = 0;
     let mut buf = Vec::new();
 
-    for child in &node.children {
+    for (param_counter, child) in node.children.iter().enumerate() {
         guard_node_type(child, AstNodeType::AtomFnParam)?;
         let mut value = Vec::new();
 
@@ -246,7 +245,6 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstPa
             name: param_counter.to_string(),
             value,
         });
-        param_counter += 1;
     }
 
     Ok(buf)
