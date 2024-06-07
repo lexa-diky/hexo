@@ -13,9 +13,8 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let mut result = ByteBuffer::new();
-            let arg0 = arguments
-                .get("0")
-                .ok_or(NativeFunctionError::Unknown("0".to_string()))?;
+            let arg0 = get_argument_at(&arguments, 0)?;
+
             let len = arg0.len() as u32;
             result.push_u32_shrunk(len);
             Ok(result)
@@ -29,15 +28,8 @@ pub(crate) fn create_pad_left_native_function() -> NativeFunction {
             name: String::from("pad_left"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let mut arg0 = arguments
-                .get("0")
-                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
-                .clone();
-
-            let arg1 = arguments
-                .get("1")
-                .ok_or(NativeFunctionError::Unknown("1".to_string()))?
-                .clone();
+            let mut arg0 = get_argument_at(&arguments, 0)?;
+            let arg1 = get_argument_at(&arguments, 1)?;
 
             arg0.pad_left(arg1.as_usize());
 
@@ -52,15 +44,8 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
             name: String::from("pad_right"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let mut arg0 = arguments
-                .get("0")
-                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
-                .clone();
-
-            let arg1 = arguments
-                .get("1")
-                .ok_or(NativeFunctionError::Unknown("1".to_string()))?
-                .clone();
+            let mut arg0 = get_argument_at(&arguments, 0)?;
+            let arg1 = get_argument_at(&arguments, 1)?;
 
             arg0.pad_right(arg1.as_usize());
 
@@ -75,11 +60,7 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
             name: String::from("cmd"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let arg0 = arguments
-                .get("0")
-                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
-                .clone();
-
+            let arg0 = get_argument_at(&arguments, 0)?;
 
             let command = arg0.as_string();
             let output = std::process::Command::new(command)
@@ -103,11 +84,7 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
             name: String::from("read_file"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let arg0 = arguments
-                .get("0")
-                .ok_or(NativeFunctionError::Unknown("0".to_string()))?
-                .clone();
-
+            let arg0 = get_argument_at(&arguments, 0)?;
 
             let file_path = arg0.as_string();
 
@@ -131,4 +108,13 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
             Ok(buffer)
         },
     };
+}
+
+fn get_argument_at(arguments: &HashMap<String, ByteBuffer>, pos: usize) -> Result<ByteBuffer, NativeFunctionError> {
+    Ok(
+        arguments
+            .get(&pos.to_string())
+            .ok_or(NativeFunctionError::MissingArgument { name: pos.to_string() })?
+            .clone()
+    )
 }

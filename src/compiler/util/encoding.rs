@@ -1,4 +1,4 @@
-pub(crate) fn decode_bytes_from_string(s: &String) -> Result<Vec<u8>, ()> {
+pub(crate) fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, ()> {
     (0..s.len())
         .step_by(2)
         .map(|i| {

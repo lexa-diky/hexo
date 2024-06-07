@@ -260,7 +260,7 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cst
     })?;
 
     let bytes =
-        decode_bytes_from_string(&content).map_err(|x| CstParserError::MalformedNodeValue {
+        decode_bytes_from_string(content.as_str()).map_err(|x| CstParserError::MalformedNodeValue {
             message: format!("can't parse bytes {}", content),
         })?;
 

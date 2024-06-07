@@ -4,6 +4,7 @@ use std::collections::HashMap;
 #[derive(Clone, Debug)]
 pub(crate) enum NativeFunctionError {
     Unknown(String),
+    MissingArgument { name: String }
 }
 
 #[derive(Clone, Debug)]
