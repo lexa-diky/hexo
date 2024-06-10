@@ -1,1 +1,1 @@
-> #read_file('grammar.pest')
+> #read_file(path: 'grammar.pest')

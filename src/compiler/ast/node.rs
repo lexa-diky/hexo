@@ -16,6 +16,8 @@ pub(crate) enum AstNodeType {
     AtomConst,
     AtomFn,
     AtomFnParam,
+    AtomFnParamValue,
+    AtomFnParamIdentifier,
     AtomFnParams,
     AtomBaseNumber,
     AtomBaseNumberBase,
@@ -34,6 +36,7 @@ impl AstNodeType {
             | AstNodeType::AtomBaseNumberBase
             | AstNodeType::AtomBaseNumberValue
             | AstNodeType::StatementFnName
+            | AstNodeType::AtomFnParamIdentifier
             | AstNodeType::AtomConst => true,
             _ => false,
         }

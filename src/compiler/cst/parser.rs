@@ -236,13 +236,29 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstPa
     for (param_counter, child) in node.children.iter().enumerate() {
         guard_node_type(child, AstNodeType::AtomFnParam)?;
         let mut value = Vec::new();
+        let mut name = None;
 
         for p_child in &child.children {
-            parse_atom_into(p_child, &mut value)?;
+            match p_child.node_type {
+                AstNodeType::AtomFnParamValue => {
+                    for value_node in &p_child.children {
+                        parse_atom_into(value_node, &mut value)?;
+                    }
+                }
+                AstNodeType::AtomFnParamIdentifier => {
+                    name = Some(parse_value_of(p_child)?);
+                }
+                _ => {
+                    return Err(CstParserError::UnexpectedNode {
+                        actual: p_child.node_type,
+                        expected: vec![AstNodeType::AtomFnParamValue],
+                    })
+                }
+            }
         }
 
         buf.push(CstActualParameter {
-            name: param_counter.to_string(),
+            name: name.unwrap_or(param_counter.to_string()),
             value,
         });
     }

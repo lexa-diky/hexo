@@ -65,6 +65,8 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstParserError> {
         Rule::fn_statement => AstNodeType::StatementFn,
         Rule::fn_statement_name => AstNodeType::StatementFnName,
         Rule::fn_statement_body => AstNodeType::StatementFnBody,
+        Rule::atom_fn_param_value => AstNodeType::AtomFnParamValue,
+        Rule::atom_fn_param_identifier => AstNodeType::AtomFnParamIdentifier,
 
         Rule::emit_statement => AstNodeType::StatementEmit,
 
