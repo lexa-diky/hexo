@@ -60,9 +60,10 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
             name: String::from("cmd"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let arg0 = get_argument_at(&arguments, 0)?;
+            let command = get_argument_at(&arguments, 0)?
+                .as_string()
+                .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
 
-            let command = arg0.as_string();
             let output = std::process::Command::new(command)
                 .output()
                 .map_err(|e|
@@ -86,7 +87,8 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let arg0 = get_argument_at(&arguments, 0)?;
 
-            let file_path = arg0.as_string();
+            let file_path = arg0.as_string()
+                .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
 
             let mut file = File::open(file_path)
                 .map_err(|e|

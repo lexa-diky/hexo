@@ -1,5 +1,6 @@
 use crate::compiler::util::encoding::to_shrunk_bytes;
 use std::fmt::{Debug, Formatter};
+use std::string::FromUtf8Error;
 
 #[derive(Clone)]
 pub(crate) struct ByteBuffer {
@@ -67,8 +68,8 @@ impl ByteBuffer {
             (padded.inner[3] as usize)
     }
 
-    pub(crate) fn as_string(&self) -> String {
-        String::from_utf8(self.inner.clone()).unwrap()
+    pub(crate) fn as_string(&self) -> Result<String, FromUtf8Error> {
+        return String::from_utf8(self.inner.clone())
     }
 }
 

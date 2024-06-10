@@ -64,8 +64,6 @@ pub(crate) fn run_cli() {
     };
 
     handle_cli_error(cli_result);
-
-    
 }
 
 fn handle_cli_error(cli_result: Result<(), CliError>) {
