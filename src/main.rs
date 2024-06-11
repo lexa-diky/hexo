@@ -11,6 +11,11 @@ fn main() {
     run_cli()
 }
 
+#[test]
+fn run_sample() {
+    run_build("sample.hexo".to_string(), None).unwrap();
+}
+
 // list files in directory test cases
 // for each file, run the test
 #[test]
@@ -39,7 +44,7 @@ fn run_test_cases() {
             input_file.to_str().unwrap().to_string(),
             Some(output_file.to_str().unwrap().to_string()),
         )
-        .unwrap();
+            .unwrap();
 
         let output_buf = read_file(&output_file);
         let expected_output_buf = read_file(&expected_output);

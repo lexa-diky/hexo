@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
+use clap::arg;
 
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
 use crate::compiler::native_fn::NativeFunctionError;
@@ -13,7 +14,8 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let mut result = ByteBuffer::new();
-            let arg0 = get_argument_at(&arguments, 0)?;
+            let arg0 = get_named_argument(&arguments, "utf8")
+                .unwrap_or_else(|| get_argument_at(&arguments, 0, "len").unwrap());
 
             let len = arg0.len() as u32;
             result.push_u32_shrunk(len);
@@ -28,12 +30,12 @@ pub(crate) fn create_pad_left_native_function() -> NativeFunction {
             name: String::from("pad_left"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let mut arg0 = get_argument_at(&arguments, 0)?;
-            let arg1 = get_argument_at(&arguments, 1)?;
+            let mut arg0 = get_argument_at(&arguments, 0, "pad_left")?.clone();
+            let arg1 = get_argument_at(&arguments, 1, "pad_left")?;
 
             arg0.pad_left(arg1.as_usize());
 
-            Ok(arg0)
+            Ok(arg0.clone())
         },
     }
 }
@@ -44,12 +46,12 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
             name: String::from("pad_right"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let mut arg0 = get_argument_at(&arguments, 0)?;
-            let arg1 = get_argument_at(&arguments, 1)?;
+            let mut arg0: ByteBuffer = get_argument_at(&arguments, 0, "pad_right")?.clone();
+            let arg1 = get_argument_at(&arguments, 1, "pad_right")?;
 
             arg0.pad_right(arg1.as_usize());
 
-            Ok(arg0)
+            Ok(arg0.clone())
         },
     }
 }
@@ -60,7 +62,7 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
             name: String::from("cmd"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let command = get_argument_at(&arguments, 0)?
+            let command = get_argument_at(&arguments, 0, "cmd")?
                 .as_string()
                 .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
 
@@ -85,7 +87,7 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
             name: String::from("read_file"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let arg0 = get_argument_at(&arguments, 0)?;
+            let arg0 = get_argument_at(&arguments, 0, "read_file")?;
 
             let file_path = arg0.as_string()
                 .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
@@ -112,11 +114,20 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
     };
 }
 
-fn get_argument_at(arguments: &HashMap<String, ByteBuffer>, pos: usize) -> Result<ByteBuffer, NativeFunctionError> {
+fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, NativeFunctionError> {
     Ok(
         arguments
             .get(&pos.to_string())
-            .ok_or(NativeFunctionError::MissingArgument { name: pos.to_string() })?
-            .clone()
+            .ok_or_else(|| NativeFunctionError::MissingArgument {
+                name: pos.to_string(),
+                available_arguments: arguments.keys().cloned().collect(),
+                function_name: fn_name.to_string(),
+            })?
     )
+}
+
+fn get_named_argument<'a>(arguments: &'a HashMap<String, ByteBuffer>, name: &str) -> Option<&'a ByteBuffer> {
+    let argument_named = arguments.get(name);
+
+    return argument_named
 }
