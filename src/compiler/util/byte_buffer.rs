@@ -33,21 +33,24 @@ impl ByteBuffer {
     }
 
     pub(crate) fn pad_left(&mut self, size: usize) {
-        let padding = size - self.inner.len();
-
-        if padding > 0 {
-            let mut padding_vec = vec![0; padding];
-            padding_vec.append(&mut self.inner);
-            self.inner = padding_vec;
+        let padding = size.checked_sub(self.inner.len());
+        if let Some(padding) = padding {
+            if padding > 0 {
+                let mut padding_vec = vec![0; padding];
+                padding_vec.append(&mut self.inner);
+                self.inner = padding_vec;
+            }
         }
     }
 
     pub(crate) fn pad_right(&mut self, size: usize) {
-        let padding = size - self.inner.len();
+        let padding = size.checked_sub(self.inner.len());
 
-        if padding > 0 {
-            let mut padding_vec = vec![0; padding];
-            self.inner.append(padding_vec.as_mut());
+        if let Some(padding) = padding {
+            if padding > 0 {
+                let mut padding_vec = vec![0; padding];
+                self.inner.append(padding_vec.as_mut());
+            }
         }
     }
 

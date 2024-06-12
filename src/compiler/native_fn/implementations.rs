@@ -114,6 +114,31 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
     };
 }
 
+pub(crate) fn create_pad_native_function() -> NativeFunction {
+    return NativeFunction {
+        signature: NativeFunctionSignature {
+            name: String::from("pad"),
+        },
+        executor: |arguments: HashMap<String, ByteBuffer>| {
+            let mut buffer = get_argument_at(&arguments, 0, "pad")?.clone();
+
+            let left_padding = get_named_argument(&arguments, "left")
+                .map(|b| b.as_usize());
+            let right_padding = get_named_argument(&arguments, "right")
+                .map(|b| b.as_usize());
+
+            if let Some(size) = left_padding {
+                buffer.pad_left(size);
+            }
+            if let Some(size) = right_padding {
+                buffer.pad_right(size);
+            }
+
+            Ok(buffer)
+        },
+    };
+}
+
 fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, NativeFunctionError> {
     Ok(
         arguments
