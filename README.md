@@ -79,11 +79,17 @@ Function arguments are referenced by their index: `$0`, `$1`, `$2`, ...
 To call a function use glyph '#' fallowed by function name and arguments:
 
 ```hexo
+// String functions
 > #len('HelloWorld') // will emit length of 'HelloWorld' in bytes (0a)
-> #pad_left(AA, 4) // will emit '00 00 00 AA'
-> #pad_right(AA, 4) // will emit 'AA 00 00 00'
+
+// OS functions
 > #cmd(`ls`) // will emit result of command line 'ls' command
 > #read_file('file.txt') // will emit content of 'file.txt'
+
+// Padding functions
+> #pad_left(AA, 4) // will emit '00 00 00 AA'
+> #pad_right(AA, 4) // will emit 'AA 00 00 00'
+> #pad('AA', left: 10x4, right: 10x8) // wil pad left by 4 bytes and right by 8 bytes
 ```
 
 ### Example
