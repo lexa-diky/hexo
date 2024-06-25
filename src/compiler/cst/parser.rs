@@ -5,26 +5,8 @@ use crate::compiler::cst::node::CstFile;
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
+use crate::compiler::cst::error::Error;
 use crate::compiler::util::encoding::decode_bytes_from_string;
-
-#[derive(Debug)]
-pub(crate) enum CstParserError {
-    UnexpectedNode {
-        expected: Vec<AstNodeType>,
-        actual: AstNodeType,
-    },
-    MalformedNodeValue {
-        message: String,
-    },
-    MissingContent {
-        node_type: AstNodeType,
-    },
-    UnexpectedChildren {
-        node_type: AstNodeType,
-        children: Vec<AstNodeType>,
-    },
-    DuplicateNode,
-}
 
 pub(crate) struct CstParser {}
 
@@ -37,14 +19,14 @@ impl CstParser {
         &self,
         path: PathBuf,
         ast_root: AstNode,
-    ) -> Result<CstFile, CstParserError> {
+    ) -> Result<CstFile, Error> {
         parse_file(path, &ast_root)
     }
 }
 
 const MAIN_FUNCTION_NAME: &str = "main";
 
-fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, CstParserError> {
+fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, Error> {
     guard_node_type(node, AstNodeType::File)?;
     let (emits, functions, constants) = parse_function_body(node)?;
 
@@ -66,7 +48,7 @@ type BodyParsingResult = (
     Vec<CstConstantStatement>,
 );
 
-fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserError> {
+fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, Error> {
     let mut emits = Vec::new();
     let mut functions = Vec::new();
     let mut constants = Vec::new();
@@ -77,7 +59,7 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
             AstNodeType::StatementEmit => emits.push(parse_emit_statement(child)?),
             AstNodeType::StatementFn => functions.push(parse_function(child)?),
             _ => {
-                return Err(CstParserError::UnexpectedNode {
+                return Err(Error::UnexpectedNode {
                     actual: child.node_type,
                     expected: vec![
                         AstNodeType::StatementConst,
@@ -92,7 +74,7 @@ fn parse_function_body(node: &AstNode) -> Result<BodyParsingResult, CstParserErr
     Ok((emits, functions, constants))
 }
 
-fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, CstParserError> {
+fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, Error> {
     guard_node_type(node, AstNodeType::StatementConst)?;
     let mut atom_buff = Vec::new();
     let mut name = None;
@@ -108,7 +90,7 @@ fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, CstParserError
 
     Ok(CstConstantStatement {
         name: name
-            .ok_or(CstParserError::MissingContent {
+            .ok_or(Error::MissingContent {
                 node_type: AstNodeType::StatementConstName,
             })?
             .to_string(),
@@ -116,7 +98,7 @@ fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, CstParserError
     })
 }
 
-fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError> {
+fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, Error> {
     let mut emits = None;
     let mut functions = None;
     let mut constants = None;
@@ -131,7 +113,7 @@ fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError
                 constants = Some(constants_r);
             }
             _ => {
-                return Err(CstParserError::UnexpectedNode {
+                return Err(Error::UnexpectedNode {
                     actual: child.node_type,
                     expected: vec![AstNodeType::StatementFnName, AstNodeType::StatementFnBody],
                 })
@@ -148,7 +130,7 @@ fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, CstParserError
     })
 }
 
-fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserError> {
+fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, Error> {
     guard_node_type(node, AstNodeType::StatementEmit)?;
     let mut atoms = Vec::new();
 
@@ -159,7 +141,7 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, CstParserErr
     Ok(CstEmitStatement { atoms })
 }
 
-fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), Error> {
     match node.node_type {
         AstNodeType::AtomHex => parse_atom_hex_into(node, buff)?,
         AstNodeType::AtomUtf8 => parse_atom_utf8_into(node, buff)?,
@@ -167,7 +149,7 @@ fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), CstPar
         AstNodeType::AtomConst => parse_atom_constant_into(node, buff)?,
         AstNodeType::AtomFn => parse_atom_function_into(node, buff)?,
         _ => {
-            return Err(CstParserError::UnexpectedNode {
+            return Err(Error::UnexpectedNode {
                 actual: node.node_type,
                 expected: vec![
                     AstNodeType::AtomHex,
@@ -183,7 +165,7 @@ fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), CstPar
     Ok(())
 }
 
-fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomConst)?;
     let content = parse_value_of(node)?;
     let atom = CstAtom::Constant { name: content };
@@ -193,7 +175,7 @@ fn parse_atom_constant_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     Ok(())
 }
 
-fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomFn)?;
     let mut name = None;
     let mut params = None;
@@ -206,7 +188,7 @@ fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
             }
             AstNodeType::AtomFnParams => params = Some(parse_atom_fn_params(child)?),
             _ => {
-                return Err(CstParserError::UnexpectedNode {
+                return Err(Error::UnexpectedNode {
                     actual: child.node_type,
                     expected: vec![AstNodeType::AtomFnName, AstNodeType::AtomFnParams],
                 })
@@ -214,7 +196,7 @@ fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
         }
     }
 
-    let name_value = name.ok_or(CstParserError::MissingContent {
+    let name_value = name.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomFnName,
     })?;
 
@@ -228,7 +210,7 @@ fn parse_atom_function_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     Ok(())
 }
 
-fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstParserError> {
+fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, Error> {
     guard_node_type(node, AstNodeType::AtomFnParams)?;
 
     let mut buf = Vec::new();
@@ -249,7 +231,7 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstPa
                     name = Some(parse_value_of(p_child)?);
                 }
                 _ => {
-                    return Err(CstParserError::UnexpectedNode {
+                    return Err(Error::UnexpectedNode {
                         actual: p_child.node_type,
                         expected: vec![AstNodeType::AtomFnParamValue],
                     })
@@ -266,15 +248,15 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, CstPa
     Ok(buf)
 }
 
-fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomHex)?;
 
-    let content = node.clone().content.ok_or(CstParserError::MissingContent {
+    let content = node.clone().content.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomHex,
     })?;
 
     let bytes =
-        decode_bytes_from_string(content.as_str()).map_err(|x| CstParserError::MalformedNodeValue {
+        decode_bytes_from_string(content.as_str()).map_err(|x| Error::MalformedNodeValue {
             message: format!("can't parse bytes {}", content),
         })?;
 
@@ -284,10 +266,10 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cst
     Ok(())
 }
 
-fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomUtf8)?;
 
-    let content = node.clone().content.ok_or(CstParserError::MissingContent {
+    let content = node.clone().content.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomUtf8,
     })?;
 
@@ -296,7 +278,7 @@ fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Cs
     Ok(())
 }
 
-fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), CstParserError> {
+fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomBaseNumber)?;
     let mut base = None;
     let mut value = None;
@@ -312,7 +294,7 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
                 value = Some(parse_value_of(child)?)
             }
             _ => {
-                return Err(CstParserError::UnexpectedNode {
+                return Err(Error::UnexpectedNode {
                     actual: child.node_type,
                     expected: vec![
                         AstNodeType::AtomBaseNumberBase,
@@ -323,22 +305,22 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
         }
     }
 
-    let base_value_str = base.ok_or(CstParserError::MissingContent {
+    let base_value_str = base.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomBaseNumberBase,
     })?;
     let base_value = u32::from_str_radix(base_value_str.as_str(), 10).map_err(|_| {
-        CstParserError::MalformedNodeValue {
+        Error::MalformedNodeValue {
             message: format!("can't parse base {}", base_value_str),
         }
     })?;
 
-    let value_str = value.ok_or(CstParserError::MissingContent {
+    let value_str = value.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomBaseNumberValue,
     })?;
 
     buf.push(CstAtom::Number(
         u32::from_str_radix(value_str.as_str(), base_value).map_err(|_| {
-            CstParserError::MalformedNodeValue {
+            Error::MalformedNodeValue {
                 message: format!("can't parse number {}", value_str),
             }
         })?,
@@ -347,22 +329,22 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     Ok(())
 }
 
-fn parse_value_of(node: &AstNode) -> Result<String, CstParserError> {
+fn parse_value_of(node: &AstNode) -> Result<String, Error> {
     if !node.children.is_empty() {
-        return Err(CstParserError::UnexpectedChildren {
+        return Err(Error::UnexpectedChildren {
             node_type: node.node_type,
             children: node.children.iter().map(|x| x.node_type).collect(),
         });
     }
 
-    node.clone().content.ok_or(CstParserError::MissingContent {
+    node.clone().content.ok_or(Error::MissingContent {
         node_type: node.node_type,
     })
 }
 
-fn guard_node_type(node: &AstNode, expected_type: AstNodeType) -> Result<(), CstParserError> {
+fn guard_node_type(node: &AstNode, expected_type: AstNodeType) -> Result<(), Error> {
     if node.node_type != expected_type {
-        return Err(CstParserError::UnexpectedNode {
+        return Err(Error::UnexpectedNode {
             actual: node.node_type,
             expected: vec![expected_type],
         });
@@ -371,9 +353,9 @@ fn guard_node_type(node: &AstNode, expected_type: AstNodeType) -> Result<(), Cst
     Ok(())
 }
 
-fn guard_empty<T>(option: Option<T>) -> Result<(), CstParserError> {
+fn guard_empty<T>(option: Option<T>) -> Result<(), Error> {
     if option.is_some() {
-        return Err(CstParserError::DuplicateNode);
+        return Err(Error::DuplicateNode);
     }
 
     Ok(())

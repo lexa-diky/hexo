@@ -1,5 +1,5 @@
 use crate::compiler::ast::{AstNode, AstParser};
-use crate::compiler::cst::{CstFile, CstParser, CstParserError};
+use crate::compiler::cst::{CstFile, CstParser};
 use crate::compiler::rst::{HexoFile, RstCompiler, RstCompilerError};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 
@@ -7,7 +7,7 @@ use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 pub(crate) enum CompilerError {
     IO(std::io::Error),
     AST(crate::compiler::ast::Error),
-    CST(CstParserError),
+    CST(crate::compiler::cst::Error),
     RST(RstCompilerError),
 }
 
