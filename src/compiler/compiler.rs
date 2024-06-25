@@ -1,27 +1,8 @@
 use crate::compiler::ast::{AstNode, AstParser};
 use crate::compiler::cst::{CstFile, CstParser};
-use crate::compiler::rst::{HexoFile, RstCompiler, RstCompilerError};
+use crate::compiler::rst::{HexoFile, RstCompiler};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
-
-#[derive(Debug)]
-pub(crate) enum CompilerError {
-    IO(std::io::Error),
-    AST(crate::compiler::ast::Error),
-    CST(crate::compiler::cst::Error),
-    RST(RstCompilerError),
-}
-
-impl std::fmt::Display for CompilerError {
-    
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CompilerError::IO(e) => write!(f, "IO error: {}", e),
-            CompilerError::AST(e) => write!(f, "AST error: {}", e),
-            CompilerError::CST(e) => write!(f, "CST error: {}", e),
-            CompilerError::RST(e) => write!(f, "RST error: {}", e),
-        }
-    }
-}
+use crate::compiler::error::Error;
 
 pub(crate) struct HexoCompiler {
     context: HexoCompilerContext,
@@ -35,43 +16,43 @@ impl HexoCompiler {
     pub(crate) fn compile_ast<TSource: CompilerSource>(
         &self,
         source: &TSource,
-    ) -> Result<AstNode, CompilerError> {
+    ) -> Result<AstNode, Error> {
         let ast_parser = AstParser::new();
-        let source_text = source.read().map_err(CompilerError::IO)?;
+        let source_text = source.read().map_err(Error::IO)?;
 
         ast_parser
             .parse(source_text)
-            .map_err(CompilerError::AST)
+            .map_err(Error::AST)
     }
 
     pub(crate) fn compile_cst<TSource: CompilerSource>(
         &self,
         source: &TSource,
-    ) -> Result<CstFile, CompilerError> {
+    ) -> Result<CstFile, Error> {
         let ast = self.compile_ast(source)?;
         let cst_parser = CstParser::new();
 
         cst_parser
             .parse(source.path(), ast)
-            .map_err(CompilerError::CST)
+            .map_err(Error::CST)
     }
 
     pub(crate) fn compile_rst<TSource: CompilerSource>(
         &self,
         source: &TSource,
-    ) -> Result<HexoFile, CompilerError> {
+    ) -> Result<HexoFile, Error> {
         let cst = self.compile_cst(source)?;
         let rst_compiler = RstCompiler::new(self);
 
         rst_compiler
             .compile(&cst)
-            .map_err(CompilerError::RST)
+            .map_err(Error::RST)
     }
 
     pub(crate) fn compile<TSource: CompilerSource>(
         &self,
         source: &TSource,
-    ) -> Result<Compilation, CompilerError> {
+    ) -> Result<Compilation, Error> {
         let rst = self.compile_rst(source)?;
 
         Ok(Compilation::from(rst.emits.as_vec()))

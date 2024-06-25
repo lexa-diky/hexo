@@ -9,7 +9,7 @@ pub(crate) enum CliError {
     CantCrateOutputFile(std::io::Error),
     CantReadInputFile(std::io::Error),
     AstParsingFailed(Error),
-    CompilationError(crate::compiler::CompilerError),
+    CompilationError(crate::compiler::Error),
 }
 
 impl Display for CliError {

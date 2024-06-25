@@ -73,7 +73,7 @@ fn handle_cli_error(cli_result: Result<(), CliError>) {
     }
 }
 
-fn handle_compilation_error(err: crate::compiler::CompilerError) {
+fn handle_compilation_error(err: crate::compiler::Error) {
     print_error("compilation error", Box::new(err));
 }
 
