@@ -11,6 +11,18 @@ pub(crate) enum CompilerError {
     RST(RstCompilerError),
 }
 
+impl std::fmt::Display for CompilerError {
+    
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CompilerError::IO(e) => write!(f, "IO error: {}", e),
+            CompilerError::AST(e) => write!(f, "AST error: {}", e),
+            CompilerError::CST(e) => write!(f, "CST error: {}", e),
+            CompilerError::RST(e) => write!(f, "RST error: {}", e),
+        }
+    }
+}
+
 pub(crate) struct HexoCompiler {
     context: HexoCompilerContext,
 }

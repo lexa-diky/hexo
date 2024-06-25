@@ -1,4 +1,4 @@
-use std::fmt::{Debug};
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::Write;
 use std::panic::catch_unwind;
@@ -13,7 +13,9 @@ use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
-use crate::compiler::ast::Error;
+pub(crate) use error::CliError;
+
+mod error;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -41,17 +43,6 @@ enum Commands {
         #[arg(short, long)]
         output: Option<String>,
     },
-}
-
-#[derive(Debug)]
-pub(crate) enum CliError {
-    UnknownCommand,
-    CantCreateWatcher(notify::Error),
-    CantStartWatcher(notify::Error),
-    CantCrateOutputFile(std::io::Error),
-    CantReadInputFile(std::io::Error),
-    AstParsingFailed(Error),
-    CompilationError(crate::compiler::CompilerError),
 }
 
 pub(crate) fn run_cli() {
@@ -98,7 +89,7 @@ fn run_watch(source: String, output: Option<String>) -> Result<(), CliError> {
     let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
         run_watch_loop(source.clone(), output.clone(), event)
     })
-    .map_err(CliError::CantCreateWatcher)?;
+        .map_err(CliError::CantCreateWatcher)?;
 
     watcher
         .watch(source_path, RecursiveMode::NonRecursive)

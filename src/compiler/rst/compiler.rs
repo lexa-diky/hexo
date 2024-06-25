@@ -19,6 +19,22 @@ pub(crate) enum RstCompilerError {
     NativeFunctionExecution(NativeFunctionError),
 }
 
+impl std::fmt::Display for RstCompilerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RstCompilerError::UnresolvedConstant { name } => {
+                write!(f, "Unresolved constant: {}", name)
+            }
+            RstCompilerError::UnresolvedFunction { name } => {
+                write!(f, "Unresolved function: {}", name)
+            }
+            RstCompilerError::NativeFunctionExecution(e) => {
+                write!(f, "Native function execution error: {}", e)
+            }
+        }
+    }
+}
+
 pub(crate) struct RstCompiler<'a> {
     parent: &'a HexoCompiler,
 }
