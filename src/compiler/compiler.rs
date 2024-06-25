@@ -1,4 +1,4 @@
-use crate::compiler::ast::{AstNode, AstParser, AstParserError};
+use crate::compiler::ast::{AstNode, AstParser};
 use crate::compiler::cst::{CstFile, CstParser, CstParserError};
 use crate::compiler::rst::{HexoFile, RstCompiler, RstCompilerError};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
@@ -6,7 +6,7 @@ use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 #[derive(Debug)]
 pub(crate) enum CompilerError {
     IO(std::io::Error),
-    AST(AstParserError),
+    AST(crate::compiler::ast::Error),
     CST(CstParserError),
     RST(RstCompilerError),
 }

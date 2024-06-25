@@ -1,15 +1,10 @@
-use pest::error::Error;
+use std::fmt::Display;
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
 use crate::compiler::ast::{AstNode, AstNodeType};
-
-#[derive(Debug)]
-pub(crate) enum AstParserError {
-    PestError(Error<Rule>),
-    UnknownRule { rule_name: String },
-}
+use crate::compiler::ast::error::Error;
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
@@ -22,9 +17,9 @@ impl AstParser {
         AstParser {}
     }
 
-    pub(crate) fn parse(&self, source: String) -> Result<AstNode, AstParserError> {
+    pub(crate) fn parse(&self, source: String) -> Result<AstNode, Error> {
         let pairs = AstPestParser::parse(Rule::file, source.as_str())
-            .map_err(AstParserError::PestError)?;
+            .map_err(Error::PestError)?;
 
         let children: Result<Vec<AstNode>, _> = pairs
             .map(parse_ast_pair)
@@ -36,8 +31,8 @@ impl AstParser {
 }
 
 fn filter_ignored_token(
-    result: Result<Option<AstNode>, AstParserError>,
-) -> Option<Result<AstNode, AstParserError>> {
+    result: Result<Option<AstNode>, Error>,
+) -> Option<Result<AstNode, Error>> {
     match result {
         Ok(None) => None,
         Ok(Some(value)) => Some(Ok(value)),
@@ -45,7 +40,7 @@ fn filter_ignored_token(
     }
 }
 
-fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstParserError> {
+fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, Error> {
     let node_type = match p.as_rule() {
         Rule::atom_utf8 => AstNodeType::AtomUtf8,
         Rule::atom_hex => AstNodeType::AtomHex,
@@ -72,7 +67,7 @@ fn parse_ast_pair(p: Pair<Rule>) -> Result<Option<AstNode>, AstParserError> {
 
         Rule::EOI => return Ok(None),
         _ => {
-            return Err(AstParserError::UnknownRule {
+            return Err(Error::UnknownRule {
                 rule_name: format!("{:?}", p.as_rule()),
             })
         }

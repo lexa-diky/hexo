@@ -12,8 +12,8 @@ use notify::event::ModifyKind;
 use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 
-use crate::compiler::ast::AstParserError;
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
+use crate::compiler::ast::Error;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -50,7 +50,7 @@ pub(crate) enum CliError {
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
     CantReadInputFile(std::io::Error),
-    AstParsingFailed(AstParserError),
+    AstParsingFailed(Error),
     CompilationError(crate::compiler::CompilerError),
 }
 
