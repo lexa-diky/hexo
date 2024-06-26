@@ -4,36 +4,13 @@ use std::path::PathBuf;
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
 };
-use crate::compiler::native_fn::NativeFunctionError;
 use crate::compiler::rst::compilation_context::{
     CompilationContext, ConstantBinding, FunctionBinding,
 };
 use crate::compiler::rst::node::HexoFile;
-use crate::compiler::util::{next_identifier, ByteBuffer};
+use crate::compiler::util::{ByteBuffer, next_identifier};
 use crate::compiler::HexoCompiler;
-
-#[derive(Debug)]
-pub(crate) enum RstCompilerError {
-    UnresolvedConstant { name: String },
-    UnresolvedFunction { name: String },
-    NativeFunctionExecution(NativeFunctionError),
-}
-
-impl std::fmt::Display for RstCompilerError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            RstCompilerError::UnresolvedConstant { name } => {
-                write!(f, "Unresolved constant: {}", name)
-            }
-            RstCompilerError::UnresolvedFunction { name } => {
-                write!(f, "Unresolved function: {}", name)
-            }
-            RstCompilerError::NativeFunctionExecution(e) => {
-                write!(f, "Native function execution error: {}", e)
-            }
-        }
-    }
-}
+use crate::compiler::rst::error::Error;
 
 pub(crate) struct RstCompiler<'a> {
     parent: &'a HexoCompiler,
@@ -44,7 +21,7 @@ impl RstCompiler<'_> {
         RstCompiler { parent }
     }
 
-    pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, RstCompilerError> {
+    pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
         let context_id = next_identifier();
         let mut context = Self::build_context(context_id, &cst.path, &cst.main)?;
 
@@ -61,7 +38,7 @@ impl RstCompiler<'_> {
         context_id: u64,
         context: &mut CompilationContext,
         emits: &Vec<CstEmitStatement>,
-    ) -> Result<ByteBuffer, RstCompilerError> {
+    ) -> Result<ByteBuffer, Error> {
         let mut byte_buffer = ByteBuffer::new();
 
         for emit in emits {
@@ -76,7 +53,7 @@ impl RstCompiler<'_> {
         context: &mut CompilationContext,
         atoms: &CstAtomVec,
         buffer: &mut ByteBuffer,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         for atom in atoms {
             match atom {
                 CstAtom::Hex(byte) => buffer.push_byte(*byte),
@@ -100,7 +77,7 @@ impl RstCompiler<'_> {
         function_name: String,
         params: &Vec<CstActualParameter>,
         buffer: &mut ByteBuffer,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         let native_function = context.get_native_function(function_name.clone());
         if native_function.is_some() {
             let executor = native_function.unwrap().executor;
@@ -116,7 +93,7 @@ impl RstCompiler<'_> {
 
             executor(params_buffer.clone())
                 .map(|bb| buffer.push_byte_buffer(&bb))
-                .map_err(RstCompilerError::NativeFunctionExecution)?;
+                .map_err(Error::NativeFunctionExecution)?;
 
             return Ok(());
         }
@@ -124,7 +101,7 @@ impl RstCompiler<'_> {
         let binding = context.clone();
         let function_binding = binding
             .get_local_function(context_id, &function_name)
-            .ok_or(RstCompilerError::UnresolvedFunction {
+            .ok_or(Error::UnresolvedFunction {
                 name: function_name.clone(),
             })?;
 
@@ -154,10 +131,10 @@ impl RstCompiler<'_> {
         context: &CompilationContext,
         name: &String,
         buffer: &mut ByteBuffer,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         let constant_binding = context
             .get_local_constant(context_id, name)
-            .ok_or(RstCompilerError::UnresolvedConstant { name: name.clone() })?;
+            .ok_or(Error::UnresolvedConstant { name: name.clone() })?;
 
         buffer.push_byte_buffer(&constant_binding.byte_buffer);
 
@@ -168,7 +145,7 @@ impl RstCompiler<'_> {
         context_id: u64,
         file_path: &PathBuf,
         cst: &CstFunctionStatement,
-    ) -> Result<CompilationContext, RstCompilerError> {
+    ) -> Result<CompilationContext, Error> {
         let mut root_context = CompilationContext::new(file_path);
 
         Self::build_context_into(context_id, &cst, &mut root_context)?;
@@ -180,7 +157,7 @@ impl RstCompiler<'_> {
         context_id: u64,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         Self::build_context_constants_into(context_id, cst, root_context)?;
         Self::build_context_functions_into(context_id, cst, root_context)?;
         Ok(())
@@ -190,7 +167,7 @@ impl RstCompiler<'_> {
         context_id: u64,
         cst: &&CstFunctionStatement,
         context: &mut CompilationContext,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         for constant in &cst.constants {
             let mut buff = ByteBuffer::new();
             Self::build_bytes_into(context_id, context, &constant.atoms, &mut buff)?;
@@ -210,7 +187,7 @@ impl RstCompiler<'_> {
         context_id: u64,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
-    ) -> Result<(), RstCompilerError> {
+    ) -> Result<(), Error> {
         for function in &cst.functions {
             let inner_function_context_id = next_identifier();
             root_context.bind_local_function(

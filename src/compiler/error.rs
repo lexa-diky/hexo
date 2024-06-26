@@ -1,11 +1,9 @@
-use crate::compiler::rst::RstCompilerError;
-
 #[derive(Debug)]
 pub(crate) enum Error {
     IO(std::io::Error),
     AST(crate::compiler::ast::Error),
     CST(crate::compiler::cst::Error),
-    RST(RstCompilerError),
+    RST(crate::compiler::rst::Error),
 }
 
 impl std::fmt::Display for Error {
