@@ -18,11 +18,11 @@ impl HexoCompiler {
         source: &TSource,
     ) -> Result<AstNode, Error> {
         let ast_parser = AstParser::new();
-        let source_text = source.read().map_err(Error::IO)?;
+        let source_text = source.read().map_err(Error::Io)?;
 
         ast_parser
             .parse(source_text)
-            .map_err(Error::AST)
+            .map_err(Error::Ast)
     }
 
     pub(crate) fn compile_cst<TSource: CompilerSource>(
@@ -34,7 +34,7 @@ impl HexoCompiler {
 
         cst_parser
             .parse(source.path(), ast)
-            .map_err(Error::CST)
+            .map_err(Error::Cst)
     }
 
     pub(crate) fn compile_rst<TSource: CompilerSource>(
@@ -46,7 +46,7 @@ impl HexoCompiler {
 
         rst_compiler
             .compile(&cst)
-            .map_err(Error::RST)
+            .map_err(Error::Rst)
     }
 
     pub(crate) fn compile<TSource: CompilerSource>(

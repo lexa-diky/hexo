@@ -61,12 +61,11 @@ fn handle_cli_error(cli_result: Result<(), Error>) {
     if cli_result.is_err() {
         match cli_result.unwrap_err() {
             Error::UnknownCommand => eprintln!("unknown command"),
-            Error::CantCreateWatcher(_) => eprintln!("can't create watcher"),
-            Error::CantStartWatcher(_) => eprintln!("can't start watcher"),
+            Error::FileWatcher(_) => eprintln!("can't create watcher"),
             Error::CantCrateOutputFile(_) => eprintln!("can't create output file"),
             Error::CantReadInputFile(_) => eprintln!("can't read input file"),
             Error::AstParsingFailed(_) => eprintln!("ast parsing error"),
-            Error::CompilationError(compilation_error) => {
+            Error::Compilation(compilation_error) => {
                 handle_compilation_error(compilation_error)
             }
         }
@@ -89,11 +88,11 @@ fn run_watch(source: String, output: Option<String>) -> Result<(), Error> {
     let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
         run_watch_loop(source.clone(), output.clone(), event)
     })
-        .map_err(Error::CantCreateWatcher)?;
+        .map_err(Error::FileWatcher)?;
 
     watcher
         .watch(source_path, RecursiveMode::NonRecursive)
-        .map_err(Error::CantStartWatcher)?;
+        .map_err(Error::FileWatcher)?;
 
     println!("watcher started");
 
@@ -125,7 +124,7 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Er
 
     let compilation_result = compiler
         .compile(&compiler_source)
-        .map_err(Error::CompilationError)?;
+        .map_err(Error::Compilation)?;
 
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
 

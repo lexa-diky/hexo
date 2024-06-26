@@ -1,7 +1,7 @@
 use crate::compiler::cst::{CstEmitStatement};
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::compiler::util::ByteBuffer;
 
@@ -33,9 +33,9 @@ pub(crate) struct CompilationContext {
 }
 
 impl CompilationContext {
-    pub(crate) fn new(path: &PathBuf) -> CompilationContext {
+    pub(crate) fn new(path: &Path) -> CompilationContext {
         CompilationContext {
-            self_path: path.clone(),
+            self_path: path.to_path_buf(),
             local_contexts: HashMap::new(),
             native_function_index: NativeFunctionIndex::new(),
         }

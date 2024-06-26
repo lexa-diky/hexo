@@ -1,19 +1,19 @@
 #[derive(Debug)]
 pub(crate) enum Error {
-    IO(std::io::Error),
-    AST(crate::compiler::ast::Error),
-    CST(crate::compiler::cst::Error),
-    RST(crate::compiler::rst::Error),
+    Io(std::io::Error),
+    Ast(crate::compiler::ast::Error),
+    Cst(crate::compiler::cst::Error),
+    Rst(crate::compiler::rst::Error),
 }
 
 impl std::fmt::Display for Error {
 
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::IO(e) => write!(f, "IO error: {}", e),
-            Error::AST(e) => write!(f, "AST error: {}", e),
-            Error::CST(e) => write!(f, "CST error: {}", e),
-            Error::RST(e) => write!(f, "RST error: {}", e),
+            Error::Io(e) => write!(f, "IO error: {}", e),
+            Error::Ast(e) => write!(f, "AST error: {}", e),
+            Error::Cst(e) => write!(f, "CST error: {}", e),
+            Error::Rst(e) => write!(f, "RST error: {}", e),
         }
     }
 }

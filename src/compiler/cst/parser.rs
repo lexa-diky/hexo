@@ -308,7 +308,9 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
     let base_value_str = base.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomBaseNumberBase,
     })?;
-    let base_value = u32::from_str_radix(base_value_str.as_str(), 10).map_err(|_| {
+
+
+    let base_value = base_value_str.parse().map_err(|_| {
         Error::MalformedNodeValue {
             message: format!("can't parse base {}", base_value_str),
         }

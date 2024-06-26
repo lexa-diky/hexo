@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
@@ -27,11 +27,13 @@ impl RstCompiler<'_> {
 
         let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
 
-        Ok(HexoFile {
-            path: cst.path.clone(),
-            context,
-            emits: bb,
-        })
+        Ok(
+            HexoFile {
+                path: cst.path.clone(),
+                context,
+                emits: bb,
+            }
+        )
     }
 
     fn build_bytes(
@@ -143,7 +145,7 @@ impl RstCompiler<'_> {
 
     fn build_context(
         context_id: u64,
-        file_path: &PathBuf,
+        file_path: &Path,
         cst: &CstFunctionStatement,
     ) -> Result<CompilationContext, Error> {
         let mut root_context = CompilationContext::new(file_path);

@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use clap::arg;
 
-use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
 use crate::compiler::native_fn::error::Error;
+use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
 use crate::compiler::util::ByteBuffer;
 
 pub(crate) fn create_len_native_function() -> NativeFunction {
@@ -69,9 +68,9 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
             let output = std::process::Command::new(command)
                 .output()
                 .map_err(|e|
-                    Error::Unknown(
-                        format!("Error executing command: {}", e)
-                    )
+                Error::Unknown(
+                    format!("Error executing command: {}", e)
+                )
                 )?;
 
             let buffer = ByteBuffer::from(output.stdout);
@@ -94,17 +93,17 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
 
             let mut file = File::open(file_path)
                 .map_err(|e|
-                    Error::Unknown(
-                        format!("Error executing command: {}", e)
-                    )
+                Error::Unknown(
+                    format!("Error executing command: {}", e)
+                )
                 )?;
 
             let mut buf_string = String::new();
             file.read_to_string(&mut buf_string)
                 .map_err(|e|
-                    Error::Unknown(
-                        format!("Error executing command: {}", e)
-                    )
+                Error::Unknown(
+                    format!("Error executing command: {}", e)
+                )
                 )?;
 
             let buffer = ByteBuffer::from(buf_string.as_bytes().to_vec());
@@ -140,19 +139,15 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
 }
 
 fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, Error> {
-    Ok(
-        arguments
-            .get(&pos.to_string())
-            .ok_or_else(|| Error::MissingArgument {
-                name: pos.to_string(),
-                available_arguments: arguments.keys().cloned().collect(),
-                function_name: fn_name.to_string(),
-            })?
-    )
+    arguments
+        .get(&pos.to_string())
+        .ok_or_else(|| Error::MissingArgument {
+            name: pos.to_string(),
+            available_arguments: arguments.keys().cloned().collect(),
+            function_name: fn_name.to_string(),
+        })
 }
 
 fn get_named_argument<'a>(arguments: &'a HashMap<String, ByteBuffer>, name: &str) -> Option<&'a ByteBuffer> {
-    let argument_named = arguments.get(name);
-
-    return argument_named
+    arguments.get(name)
 }

@@ -72,7 +72,7 @@ impl ByteBuffer {
     }
 
     pub(crate) fn as_string(&self) -> Result<String, FromUtf8Error> {
-        return String::from_utf8(self.inner.clone())
+        String::from_utf8(self.inner.clone())
     }
 }
 
