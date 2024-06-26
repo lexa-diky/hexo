@@ -59,16 +59,7 @@ pub(crate) fn run_cli() {
 
 fn handle_cli_error(cli_result: Result<(), Error>) {
     if cli_result.is_err() {
-        match cli_result.unwrap_err() {
-            Error::UnknownCommand => eprintln!("unknown command"),
-            Error::FileWatcher(_) => eprintln!("can't create watcher"),
-            Error::CantCrateOutputFile(_) => eprintln!("can't create output file"),
-            Error::CantReadInputFile(_) => eprintln!("can't read input file"),
-            Error::AstParsingFailed(_) => eprintln!("ast parsing error"),
-            Error::Compilation(compilation_error) => {
-                handle_compilation_error(compilation_error)
-            }
-        }
+        eprintln!("{}", cli_result.unwrap_err());
     }
 }
 

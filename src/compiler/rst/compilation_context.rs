@@ -116,13 +116,6 @@ impl CompilationContext {
         return self.native_function_index.find(name);
     }
 
-    pub(crate) fn get_parents(&self, context_id: u64) -> Option<Vec<u64>> {
-        return self
-            .local_contexts
-            .get(&context_id)
-            .map(|it| it.parents.clone());
-    }
-
     pub(crate) fn bind_parents(&mut self, context_id: u64, parents: Vec<u64>) {
         self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
 
