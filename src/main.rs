@@ -2,7 +2,7 @@ use std::env::temp_dir;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use crate::cli::{run_build, run_cli};
+use crate::cli::{Error, run_build, run_cli};
 
 mod cli;
 mod compiler;
@@ -12,8 +12,8 @@ fn main() {
 }
 
 #[test]
-fn run_sample() {
-    run_build("sample.hexo".to_string(), None).unwrap();
+fn run_sample() -> Result<(), Error> {
+    run_build("sample.hexo".to_string(), None)
 }
 
 // list files in directory test cases
