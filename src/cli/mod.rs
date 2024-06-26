@@ -7,22 +7,15 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use console::style;
+use notify::{Event, RecursiveMode, Watcher};
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
-use notify::{Event, RecursiveMode, Watcher};
 
-use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 pub(crate) use error::Error;
 
-mod error;
+use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
-#[derive(Parser)]
-#[command(version, about, long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
+mod error;
 
 #[derive(Subcommand)]
 enum Commands {
@@ -45,82 +38,85 @@ enum Commands {
     },
 }
 
-pub(crate) fn run_cli() {
-    let cli = Cli::parse();
-
-    let cli_result: Result<_, Error> = match cli.command {
-        None => Err(Error::UnknownCommand),
-        Some(Commands::Watch { source, output }) => run_watch(source, output),
-        Some(Commands::Build { source, output }) => run_build(source, output),
-    };
-
-    handle_cli_error(cli_result);
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+pub(crate) struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
 }
 
-fn handle_cli_error(cli_result: Result<(), Error>) {
-    if cli_result.is_err() {
-        eprintln!("{}", cli_result.unwrap_err());
+impl Cli {
+
+    pub(crate) fn run() {
+        let cli = Cli::parse();
+
+        let cli_result: Result<_, Error> = match cli.command {
+            None => Err(Error::UnknownCommand),
+            Some(Commands::Watch { source, output }) =>
+                Self::watch(source, output),
+            Some(Commands::Build { source, output }) =>
+                Self::build(source, output),
+        };
+
+        Self::handle_cli_error_if_required(cli_result);
     }
-}
 
-fn handle_compilation_error(err: crate::compiler::Error) {
-    print_error("compilation error", Box::new(err));
-}
+    fn handle_cli_error_if_required(cli_result: Result<(), Error>) {
+        if cli_result.is_err() {
+            eprintln!("{}", cli_result.unwrap_err());
+        }
+    }
 
-fn print_error(message: &str, error: Box<dyn Debug>) {
-    println!("{} {}", style("e:").red().bold(), style(message).red());
-    println!("{:?}", style(error).red());
-}
+    fn watch(source: String, output: Option<String>) -> Result<(), Error> {
+        let source_path_clone = source.clone();
+        let source_path = source_path_clone.as_ref();
 
-fn run_watch(source: String, output: Option<String>) -> Result<(), Error> {
-    let source_path_clone = source.clone();
-    let source_path = source_path_clone.as_ref();
+        let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
+            Self::watch_loop(source.clone(), output.clone(), event)
+        })
+            .map_err(Error::FileWatcher)?;
 
-    let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
-        run_watch_loop(source.clone(), output.clone(), event)
-    })
-        .map_err(Error::FileWatcher)?;
+        watcher
+            .watch(source_path, RecursiveMode::NonRecursive)
+            .map_err(Error::FileWatcher)?;
 
-    watcher
-        .watch(source_path, RecursiveMode::NonRecursive)
-        .map_err(Error::FileWatcher)?;
+        println!("watcher started");
 
-    println!("watcher started");
+        sleep(Duration::MAX);
 
-    sleep(Duration::MAX);
+        Ok(())
+    }
 
-    Ok(())
-}
-
-fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
-    match event {
-        Ok(e) => {
-            if let Modify(ModifyKind::Data(_)) = e.kind {
-                print!("rebuilding...");
-                let _ = catch_unwind(|| run_build(source.clone(), output.clone()));
-                println!(" done!");
+    fn watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
+        match event {
+            Ok(e) => {
+                if let Modify(ModifyKind::Data(_)) = e.kind {
+                    print!("rebuilding...");
+                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
+                    println!(" done!");
+                }
+            }
+            Err(e) => {
+                println!("watch error: {:?}", e)
             }
         }
-        Err(e) => {
-            println!("watch error: {:?}", e)
-        }
     }
-}
 
-pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Error> {
-    let context = HexoCompilerContext::new();
-    let compiler = HexoCompiler::new(context);
+    pub(crate) fn build(source: String, output: Option<String>) -> Result<(), Error> {
+        let context = HexoCompilerContext::new();
+        let compiler = HexoCompiler::new(context);
 
-    let compiler_source = FileCompilerSource::new(PathBuf::from(source.clone()));
+        let compiler_source = FileCompilerSource::new(PathBuf::from(source.clone()));
 
-    let compilation_result = compiler
-        .compile(&compiler_source)
-        .map_err(Error::Compilation)?;
+        let compilation_result = compiler
+            .compile(&compiler_source)
+            .map_err(Error::Compilation)?;
 
-    let output_file_path = output.unwrap_or(format!("{}.bin", source));
+        let output_file_path = output.unwrap_or(format!("{}.bin", source));
 
-    File::create(output_file_path)
-        .map_err(Error::CantCrateOutputFile)?
-        .write_all(compilation_result.content.iter().as_slice())
-        .map_err(Error::CantCrateOutputFile)
+        File::create(output_file_path)
+            .map_err(Error::CantCrateOutputFile)?
+            .write_all(compilation_result.content.iter().as_slice())
+            .map_err(Error::CantCrateOutputFile)
+    }
 }
