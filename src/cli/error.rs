@@ -1,29 +1,28 @@
 use std::fmt::{Display, Formatter};
-use crate::compiler::ast::Error;
 
 #[derive(Debug)]
-pub(crate) enum CliError {
+pub(crate) enum Error {
     UnknownCommand,
     CantCreateWatcher(notify::Error),
     CantStartWatcher(notify::Error),
     CantCrateOutputFile(std::io::Error),
     CantReadInputFile(std::io::Error),
-    AstParsingFailed(Error),
+    AstParsingFailed(crate::compiler::ast::Error),
     CompilationError(crate::compiler::Error),
 }
 
-impl Display for CliError {
+impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CliError::UnknownCommand => write!(f, "Unknown command"),
-            CliError::CantCreateWatcher(e) => write!(f, "Can't create watcher: {}", e),
-            CliError::CantStartWatcher(e) => write!(f, "Can't start watcher: {}", e),
-            CliError::CantCrateOutputFile(e) => write!(f, "Can't create output file: {}", e),
-            CliError::CantReadInputFile(e) => write!(f, "Can't read input file: {}", e),
-            CliError::AstParsingFailed(e) => write!(f, "Ast parsing error: {}", e),
-            CliError::CompilationError(e) => write!(f, "Compilation error: {}", e),
+            Error::UnknownCommand => write!(f, "Unknown command"),
+            Error::CantCreateWatcher(e) => write!(f, "Can't create watcher: {}", e),
+            Error::CantStartWatcher(e) => write!(f, "Can't start watcher: {}", e),
+            Error::CantCrateOutputFile(e) => write!(f, "Can't create output file: {}", e),
+            Error::CantReadInputFile(e) => write!(f, "Can't read input file: {}", e),
+            Error::AstParsingFailed(e) => write!(f, "Ast parsing error: {}", e),
+            Error::CompilationError(e) => write!(f, "Compilation error: {}", e),
         }
     }
 }
 
-impl std::error::Error for CliError {}
+impl std::error::Error for Error {}

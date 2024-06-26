@@ -13,7 +13,7 @@ use notify::EventKind::Modify;
 use notify::{Event, RecursiveMode, Watcher};
 
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
-pub(crate) use error::CliError;
+pub(crate) use error::Error;
 
 mod error;
 
@@ -48,8 +48,8 @@ enum Commands {
 pub(crate) fn run_cli() {
     let cli = Cli::parse();
 
-    let cli_result: Result<_, CliError> = match cli.command {
-        None => Err(CliError::UnknownCommand),
+    let cli_result: Result<_, Error> = match cli.command {
+        None => Err(Error::UnknownCommand),
         Some(Commands::Watch { source, output }) => run_watch(source, output),
         Some(Commands::Build { source, output }) => run_build(source, output),
     };
@@ -57,16 +57,16 @@ pub(crate) fn run_cli() {
     handle_cli_error(cli_result);
 }
 
-fn handle_cli_error(cli_result: Result<(), CliError>) {
+fn handle_cli_error(cli_result: Result<(), Error>) {
     if cli_result.is_err() {
         match cli_result.unwrap_err() {
-            CliError::UnknownCommand => eprintln!("unknown command"),
-            CliError::CantCreateWatcher(_) => eprintln!("can't create watcher"),
-            CliError::CantStartWatcher(_) => eprintln!("can't start watcher"),
-            CliError::CantCrateOutputFile(_) => eprintln!("can't create output file"),
-            CliError::CantReadInputFile(_) => eprintln!("can't read input file"),
-            CliError::AstParsingFailed(_) => eprintln!("ast parsing error"),
-            CliError::CompilationError(compilation_error) => {
+            Error::UnknownCommand => eprintln!("unknown command"),
+            Error::CantCreateWatcher(_) => eprintln!("can't create watcher"),
+            Error::CantStartWatcher(_) => eprintln!("can't start watcher"),
+            Error::CantCrateOutputFile(_) => eprintln!("can't create output file"),
+            Error::CantReadInputFile(_) => eprintln!("can't read input file"),
+            Error::AstParsingFailed(_) => eprintln!("ast parsing error"),
+            Error::CompilationError(compilation_error) => {
                 handle_compilation_error(compilation_error)
             }
         }
@@ -82,18 +82,18 @@ fn print_error(message: &str, error: Box<dyn Debug>) {
     println!("{:?}", style(error).red());
 }
 
-fn run_watch(source: String, output: Option<String>) -> Result<(), CliError> {
+fn run_watch(source: String, output: Option<String>) -> Result<(), Error> {
     let source_path_clone = source.clone();
     let source_path = source_path_clone.as_ref();
 
     let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
         run_watch_loop(source.clone(), output.clone(), event)
     })
-        .map_err(CliError::CantCreateWatcher)?;
+        .map_err(Error::CantCreateWatcher)?;
 
     watcher
         .watch(source_path, RecursiveMode::NonRecursive)
-        .map_err(CliError::CantStartWatcher)?;
+        .map_err(Error::CantStartWatcher)?;
 
     println!("watcher started");
 
@@ -117,7 +117,7 @@ fn run_watch_loop(source: String, output: Option<String>, event: Result<Event, n
     }
 }
 
-pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), CliError> {
+pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Error> {
     let context = HexoCompilerContext::new();
     let compiler = HexoCompiler::new(context);
 
@@ -125,12 +125,12 @@ pub(crate) fn run_build(source: String, output: Option<String>) -> Result<(), Cl
 
     let compilation_result = compiler
         .compile(&compiler_source)
-        .map_err(CliError::CompilationError)?;
+        .map_err(Error::CompilationError)?;
 
     let output_file_path = output.unwrap_or(format!("{}.bin", source));
 
     File::create(output_file_path)
-        .map_err(CliError::CantCrateOutputFile)?
+        .map_err(Error::CantCrateOutputFile)?
         .write_all(compilation_result.content.iter().as_slice())
-        .map_err(CliError::CantCrateOutputFile)
+        .map_err(Error::CantCrateOutputFile)
 }
