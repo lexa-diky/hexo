@@ -7,6 +7,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
+use console::style;
 use notify::{Event, RecursiveMode, Watcher};
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
@@ -63,7 +64,7 @@ impl Cli {
 
     fn handle_cli_error_if_required(cli_result: Result<(), Error>) {
         if cli_result.is_err() {
-            eprintln!("{}", cli_result.unwrap_err());
+            eprintln!("{}", style(cli_result.unwrap_err()).red());
         }
     }
 
