@@ -4,7 +4,7 @@ use std::io::Read;
 use clap::arg;
 
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
-use crate::compiler::native_fn::NativeFunctionError;
+use crate::compiler::native_fn::error::Error;
 use crate::compiler::util::ByteBuffer;
 
 pub(crate) fn create_len_native_function() -> NativeFunction {
@@ -64,12 +64,12 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let command = get_argument_at(&arguments, 0, "cmd")?
                 .as_string()
-                .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
+                .map_err(|e| Error::Unknown(e.to_string()))?;
 
             let output = std::process::Command::new(command)
                 .output()
                 .map_err(|e|
-                    NativeFunctionError::Unknown(
+                    Error::Unknown(
                         format!("Error executing command: {}", e)
                     )
                 )?;
@@ -90,11 +90,11 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
             let arg0 = get_argument_at(&arguments, 0, "read_file")?;
 
             let file_path = arg0.as_string()
-                .map_err(|e| NativeFunctionError::Unknown(e.to_string()))?;
+                .map_err(|e| Error::Unknown(e.to_string()))?;
 
             let mut file = File::open(file_path)
                 .map_err(|e|
-                    NativeFunctionError::Unknown(
+                    Error::Unknown(
                         format!("Error executing command: {}", e)
                     )
                 )?;
@@ -102,7 +102,7 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
             let mut buf_string = String::new();
             file.read_to_string(&mut buf_string)
                 .map_err(|e|
-                    NativeFunctionError::Unknown(
+                    Error::Unknown(
                         format!("Error executing command: {}", e)
                     )
                 )?;
@@ -139,11 +139,11 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
     };
 }
 
-fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, NativeFunctionError> {
+fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, Error> {
     Ok(
         arguments
             .get(&pos.to_string())
-            .ok_or_else(|| NativeFunctionError::MissingArgument {
+            .ok_or_else(|| Error::MissingArgument {
                 name: pos.to_string(),
                 available_arguments: arguments.keys().cloned().collect(),
                 function_name: fn_name.to_string(),

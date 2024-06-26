@@ -1,10 +1,8 @@
-use crate::compiler::native_fn::NativeFunctionError;
-
 #[derive(Debug)]
 pub(crate) enum Error {
     UnresolvedConstant { name: String },
     UnresolvedFunction { name: String },
-    NativeFunctionExecution(NativeFunctionError),
+    NativeFunctionExecution(crate::compiler::native_fn::Error),
 }
 
 impl std::fmt::Display for Error {
