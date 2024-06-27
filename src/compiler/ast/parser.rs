@@ -18,7 +18,7 @@ impl AstParser {
 
     pub(crate) fn parse(&self, source: String) -> Result<AstNode, Error> {
         let pairs = AstPestParser::parse(Rule::file, source.as_str())
-            .map_err(Error::Pest)?;
+            .map_err(|e| Error::Pest(Box::new(e)))?;
 
         let children: Result<Vec<AstNode>, _> = pairs
             .map(parse_ast_pair)

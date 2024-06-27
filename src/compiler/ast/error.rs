@@ -3,7 +3,7 @@ use crate::compiler::ast::parser::Rule;
 
 #[derive(Debug)]
 pub(crate) enum Error {
-    Pest(pest::error::Error<Rule>),
+    Pest(Box<pest::error::Error<Rule>>),
     UnknownRule { rule_name: String },
 }
 

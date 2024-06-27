@@ -63,9 +63,13 @@ impl Cli {
     }
 
     fn handle_cli_error_if_required(cli_result: Result<(), Error>) {
-        if cli_result.is_err() {
-            eprintln!("{}", style(cli_result.unwrap_err()).red());
+        if let Err(e) = cli_result {
+            Self::print_error(e.into());
         }
+    }
+
+    fn print_error(error: Box<dyn std::error::Error>) {
+        eprintln!("{}", style(error).red());
     }
 
     fn watch(source: String, output: Option<String>) -> Result<(), Error> {
@@ -89,17 +93,14 @@ impl Cli {
     }
 
     fn watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
-        match event {
-            Ok(e) => {
-                if let Modify(ModifyKind::Data(_)) = e.kind {
-                    print!("rebuilding...");
-                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
-                    println!(" done!");
-                }
+        if let Ok(e) = event {
+            if let Modify(ModifyKind::Data(_)) = e.kind {
+                println!("rebuilding...");
+                let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
+                println!(" done!");
             }
-            Err(e) => {
-                println!("watch error: {:?}", e)
-            }
+        } else {
+            Self::print_error(event.unwrap_err().into());
         }
     }
 
