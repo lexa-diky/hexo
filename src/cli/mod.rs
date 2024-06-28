@@ -4,7 +4,7 @@ use std::io::Write;
 use std::panic::catch_unwind;
 use std::path::PathBuf;
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use clap::{Parser, Subcommand};
 use console::style;
@@ -48,6 +48,8 @@ pub(crate) struct Cli {
 
 impl Cli {
     pub(crate) fn run() {
+        let build_started = Instant::now();
+
         let cli = Cli::parse();
 
         let cli_result: Result<_, Error> = match cli.command {
@@ -56,12 +58,23 @@ impl Cli {
             Some(Commands::Build { source, output }) => Self::build(source, output),
         };
 
-        Self::handle_cli_error_if_required(cli_result);
+        Self::handle_cli_error_if_required(cli_result, build_started);
     }
 
-    fn handle_cli_error_if_required(cli_result: Result<(), Error>) {
+    fn handle_cli_error_if_required(
+        cli_result: Result<(), Error>,
+        build_started: Instant,
+    ) {
         if let Err(e) = cli_result {
             Self::print_error(e.into());
+        } else {
+            let build_duration = Instant::now() - build_started;
+
+            println!(
+                "{} {:?}",
+                style("hexo compilation finished in:").green(),
+                style(build_duration)
+            );
         }
     }
 
