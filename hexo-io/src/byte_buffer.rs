@@ -1,38 +1,40 @@
-use crate::compiler::util::encoding::to_shrunk_bytes;
 use std::fmt::{Debug, Formatter};
 use std::string::FromUtf8Error;
 
 #[derive(Clone)]
-pub(crate) struct ByteBuffer {
+pub struct ByteBuffer {
     inner: Vec<u8>,
 }
 
+impl Debug for ByteBuffer {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{:?}", self.inner))
+    }
+}
+
 impl ByteBuffer {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         ByteBuffer { inner: Vec::new() }
     }
 
-    pub(crate) fn from(vec: Vec<u8>) -> Self {
-        ByteBuffer { inner: vec }
-    }
-
-    pub(crate) fn push_byte(&mut self, byte: u8) {
+    pub fn push_byte(&mut self, byte: u8) {
         self.inner.push(byte);
     }
 
-    pub(crate) fn push_string(&mut self, string: String) {
+    pub fn push_string(&mut self, string: String) {
         self.inner.extend_from_slice(string.as_bytes());
     }
 
-    pub(crate) fn push_u32_shrunk(&mut self, num: u32) {
-        self.inner.extend(to_shrunk_bytes(num));
+    pub fn push_u32_shrunk(&mut self, num: u32) {
+        self.inner.extend(Self::_to_shrunk_bytes(num));
     }
 
-    pub(crate) fn push_byte_buffer(&mut self, other: &ByteBuffer) {
-        self.inner.extend(other.as_vec());
+    pub fn push_byte_buffer(&mut self, other: &ByteBuffer) {
+        self.inner.extend(other.to_vec());
     }
 
-    pub(crate) fn pad_left(&mut self, size: usize) {
+    /// Moves the byte buffer to the left by the specified [size]
+    pub fn pad_left(&mut self, size: usize) {
         let padding = size.checked_sub(self.inner.len());
         if let Some(padding) = padding {
             if padding > 0 {
@@ -43,7 +45,8 @@ impl ByteBuffer {
         }
     }
 
-    pub(crate) fn pad_right(&mut self, size: usize) {
+    /// Moves the byte buffer to the right by the specified [size]
+    pub fn pad_right(&mut self, size: usize) {
         let padding = size.checked_sub(self.inner.len());
 
         if let Some(padding) = padding {
@@ -54,15 +57,12 @@ impl ByteBuffer {
         }
     }
 
-    pub(crate) fn len(&self) -> usize {
+    /// Returns the length of the byte buffer
+    pub fn len(&self) -> usize {
         self.inner.len()
     }
 
-    pub(crate) fn as_vec(&self) -> Vec<u8> {
-        self.inner.clone()
-    }
-
-    pub(crate) fn as_usize(&self) -> usize {
+    pub fn as_usize_unsafe(&self) -> usize {
         let mut padded = self.clone();
         padded.pad_left(4);
         ((padded.inner[0] as usize) << 24) +
@@ -71,13 +71,35 @@ impl ByteBuffer {
             (padded.inner[3] as usize)
     }
 
-    pub(crate) fn as_string(&self) -> Result<String, FromUtf8Error> {
+    /// Clones inner representation of the byte buffer and returns Vec<u8> of it
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.inner.clone()
+    }
+
+    pub fn to_string(&self) -> Result<String, FromUtf8Error> {
         String::from_utf8(self.inner.clone())
+    }
+
+    fn _to_shrunk_bytes(value: u32) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        let mut value = value;
+        while value > 0 {
+            bytes.push((value & 0xFF) as u8);
+            value >>= 8;
+        }
+        bytes
+    }
+
+}
+
+impl From<Vec<u8>> for ByteBuffer {
+    fn from(value: Vec<u8>) -> Self {
+        ByteBuffer { inner: value }
     }
 }
 
 mod test {
-    use crate::compiler::util::ByteBuffer;
+    use crate::byte_buffer::ByteBuffer;
 
     #[test]
     fn byte_push() {
@@ -87,7 +109,7 @@ mod test {
 
         assert_eq!(buffer.len(), 2);
 
-        assert_eq!(buffer.as_vec(), vec![0x01, 0x02]);
+        assert_eq!(buffer.to_vec(), vec![0x01, 0x02]);
     }
 
     #[test]
@@ -98,7 +120,7 @@ mod test {
         assert_eq!(buffer.len(), 11);
 
         assert_eq!(
-            buffer.as_vec(),
+            buffer.to_vec(),
             vec![104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]
         );
     }
@@ -110,12 +132,7 @@ mod test {
 
         assert_eq!(buffer.len(), 1);
 
-        assert_eq!(buffer.as_vec(), vec![13]);
+        assert_eq!(buffer.to_vec(), vec![13]);
     }
 }
 
-impl Debug for ByteBuffer {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{:?}", self.inner))
-    }
-}

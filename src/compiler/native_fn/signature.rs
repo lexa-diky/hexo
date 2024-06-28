@@ -1,5 +1,5 @@
-use crate::compiler::util::ByteBuffer;
 use std::collections::HashMap;
+use hexo_io::byte_buffer::ByteBuffer;
 use crate::compiler::native_fn::error::Error;
 
 #[derive(Clone, Debug)]

@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
+use hexo_io::byte_buffer::ByteBuffer;
 
 use crate::compiler::native_fn::error::Error;
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
-use crate::compiler::util::ByteBuffer;
 
 pub(crate) fn create_len_native_function() -> NativeFunction {
     NativeFunction {
@@ -32,7 +32,7 @@ pub(crate) fn create_pad_left_native_function() -> NativeFunction {
             let mut arg0 = get_argument_at(&arguments, 0, "pad_left")?.clone();
             let arg1 = get_argument_at(&arguments, 1, "pad_left")?;
 
-            arg0.pad_left(arg1.as_usize());
+            arg0.pad_left(arg1.as_usize_unsafe());
 
             Ok(arg0.clone())
         },
@@ -48,7 +48,7 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
             let mut arg0: ByteBuffer = get_argument_at(&arguments, 0, "pad_right")?.clone();
             let arg1 = get_argument_at(&arguments, 1, "pad_right")?;
 
-            arg0.pad_right(arg1.as_usize());
+            arg0.pad_right(arg1.as_usize_unsafe());
 
             Ok(arg0.clone())
         },
@@ -62,7 +62,7 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let command = get_argument_at(&arguments, 0, "cmd")?
-                .as_string()
+                .to_string()
                 .map_err(|e| Error::Unknown(e.to_string()))?;
 
             let output = std::process::Command::new(command)
@@ -88,7 +88,7 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let arg0 = get_argument_at(&arguments, 0, "read_file")?;
 
-            let file_path = arg0.as_string()
+            let file_path = arg0.to_string()
                 .map_err(|e| Error::Unknown(e.to_string()))?;
 
             let mut file = File::open(file_path)
@@ -122,9 +122,9 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
             let mut buffer = get_argument_at(&arguments, 0, "pad")?.clone();
 
             let left_padding = get_named_argument(&arguments, "left")
-                .map(|b| b.as_usize());
+                .map(|b| b.as_usize_unsafe());
             let right_padding = get_named_argument(&arguments, "right")
-                .map(|b| b.as_usize());
+                .map(|b| b.as_usize_unsafe());
 
             if let Some(size) = left_padding {
                 buffer.pad_left(size);

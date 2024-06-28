@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::path::Path;
+use hexo_io::byte_buffer::ByteBuffer;
 
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
@@ -8,7 +9,7 @@ use crate::compiler::rst::compilation_context::{
     CompilationContext, ConstantBinding, FunctionBinding,
 };
 use crate::compiler::rst::node::HexoFile;
-use crate::compiler::util::{ByteBuffer, next_identifier};
+use crate::compiler::util::{next_identifier};
 use crate::compiler::HexoCompiler;
 use crate::compiler::rst::error::Error;
 

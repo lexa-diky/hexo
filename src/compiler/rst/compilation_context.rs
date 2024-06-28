@@ -2,8 +2,7 @@ use crate::compiler::cst::{CstEmitStatement};
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-
-use crate::compiler::util::ByteBuffer;
+use hexo_io::byte_buffer::ByteBuffer;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConstantBinding {

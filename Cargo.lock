@@ -229,10 +229,15 @@ version = "0.7.5"
 dependencies = [
  "clap",
  "console",
+ "hexo-io",
  "notify",
  "pest",
  "pest_derive",
 ]
+
+[[package]]
+name = "hexo-io"
+version = "0.1.0"
 
 [[package]]
 name = "inotify"
