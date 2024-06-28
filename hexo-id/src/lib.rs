@@ -24,11 +24,15 @@ lazy_static! {
     static ref COUNTER: Mutex<u64> = Mutex::new(0);
 }
 
-pub fn next() -> HexoId {
-    let mut counter = COUNTER.lock().unwrap();
-    *counter += 1;
-    HexoId {
-        sequence_id: *counter,
-        batch_id: 0,
+impl HexoId {
+
+    pub fn next() -> HexoId {
+        let mut counter = COUNTER.lock().unwrap();
+        *counter += 1;
+        HexoId {
+            sequence_id: *counter,
+            batch_id: 0,
+        }
     }
+
 }

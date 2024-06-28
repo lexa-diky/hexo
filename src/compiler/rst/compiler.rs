@@ -23,7 +23,7 @@ impl RstCompiler<'_> {
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
-        let context_id = hexo_id::next();
+        let context_id = HexoId::next();
         let mut context = Self::build_context(context_id, &cst.path, &cst.main)?;
 
         let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
@@ -192,7 +192,7 @@ impl RstCompiler<'_> {
         root_context: &mut CompilationContext,
     ) -> Result<(), Error> {
         for function in &cst.functions {
-            let inner_function_context_id = hexo_id::next();
+            let inner_function_context_id = HexoId::next();
             root_context.bind_local_function(
                 context_id,
                 FunctionBinding {
