@@ -239,14 +239,14 @@ dependencies = [
 
 [[package]]
 name = "hexo-id"
-version = "0.1.0"
+version = "0.7.6"
 dependencies = [
  "lazy_static",
 ]
 
 [[package]]
 name = "hexo-io"
-version = "0.1.0"
+version = "0.7.6"
 
 [[package]]
 name = "inotify"
