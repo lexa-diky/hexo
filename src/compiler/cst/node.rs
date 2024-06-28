@@ -6,6 +6,12 @@ pub(crate) struct CstFile {
     pub(crate) main: CstFunctionStatement,
 }
 
+impl CstFile {
+    pub(super) fn new(path: PathBuf, main: CstFunctionStatement) -> Self {
+        CstFile { path, main }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(crate) enum CstAtom {
     Hex(u8),

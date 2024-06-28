@@ -25,16 +25,18 @@ fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, Error> {
     guard_node_type(node, AstNodeType::File)?;
     let (emits, functions, constants) = parse_function_body(node)?;
 
-    Ok(CstFile {
-        path,
-        main: CstFunctionStatement {
-            name: MAIN_FUNCTION_NAME.to_string(),
-            params: Vec::new(),
-            emits,
-            functions,
-            constants,
-        },
-    })
+    Ok(
+        CstFile::new(
+            path,
+            CstFunctionStatement {
+                name: MAIN_FUNCTION_NAME.to_string(),
+                params: Vec::new(),
+                emits,
+                functions,
+                constants,
+            },
+        )
+    )
 }
 
 type BodyParsingResult = (
