@@ -6,7 +6,7 @@ use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
 use crate::compiler::cst::error::Error;
-use crate::compiler::util::encoding::decode_bytes_from_string;
+use hexo_io::encoding::decode_bytes_from_string;
 
 pub(crate) struct CstParser {}
 
