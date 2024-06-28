@@ -7,6 +7,5 @@ repository = "https://github.com/lexa-diky/hexo"
 documentation = "https://github.com/lexa-diky/hexo"
 homepage = "https://github.com/lexa-diky/hexo"
 description = "Hexo's IO utility"
-readme = "README.md"
 
 [dependencies]
