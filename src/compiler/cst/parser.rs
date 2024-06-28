@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use crate::compiler::ast::{AstNode, AstNodeType};
+use crate::compiler::cst::error::Error;
 use crate::compiler::cst::node::CstFile;
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
-use crate::compiler::cst::error::Error;
 use hexo_io::encoding::decode_bytes_from_string;
 
 pub(crate) struct CstParser {}
@@ -15,11 +15,7 @@ impl CstParser {
         CstParser {}
     }
 
-    pub(crate) fn parse(
-        &self,
-        path: PathBuf,
-        ast_root: AstNode,
-    ) -> Result<CstFile, Error> {
+    pub(crate) fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
         parse_file(path, &ast_root)
     }
 }
@@ -255,11 +251,9 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Err
         node_type: AstNodeType::AtomHex,
     })?;
 
-    let bytes = decode_bytes_from_string(content.as_str())
-        .map_err(|_| {
-            Error::MalformedNodeValue {
-                message: format!("can't parse bytes {}", content),
-            }
+    let bytes =
+        decode_bytes_from_string(content.as_str()).map_err(|_| Error::MalformedNodeValue {
+            message: format!("can't parse bytes {}", content),
         })?;
 
     for byte in bytes {
@@ -311,12 +305,11 @@ fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<()
         node_type: AstNodeType::AtomBaseNumberBase,
     })?;
 
-
-    let base_value = base_value_str.parse().map_err(|_| {
-        Error::MalformedNodeValue {
+    let base_value = base_value_str
+        .parse()
+        .map_err(|_| Error::MalformedNodeValue {
             message: format!("can't parse base {}", base_value_str),
-        }
-    })?;
+        })?;
 
     let value_str = value.ok_or(Error::MissingContent {
         node_type: AstNodeType::AtomBaseNumberValue,

@@ -8,9 +8,9 @@ use std::time::Duration;
 
 use clap::{Parser, Subcommand};
 use console::style;
-use notify::{Event, RecursiveMode, Watcher};
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
+use notify::{Event, RecursiveMode, Watcher};
 
 pub(crate) use error::Error;
 
@@ -47,16 +47,13 @@ pub(crate) struct Cli {
 }
 
 impl Cli {
-
     pub(crate) fn run() {
         let cli = Cli::parse();
 
         let cli_result: Result<_, Error> = match cli.command {
             None => Err(Error::UnknownCommand),
-            Some(Commands::Watch { source, output }) =>
-                Self::watch(source, output),
-            Some(Commands::Build { source, output }) =>
-                Self::build(source, output),
+            Some(Commands::Watch { source, output }) => Self::watch(source, output),
+            Some(Commands::Build { source, output }) => Self::build(source, output),
         };
 
         Self::handle_cli_error_if_required(cli_result);
@@ -79,7 +76,7 @@ impl Cli {
         let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
             Self::watch_loop(source.clone(), output.clone(), event)
         })
-            .map_err(Error::FileWatcher)?;
+        .map_err(Error::FileWatcher)?;
 
         watcher
             .watch(source_path, RecursiveMode::NonRecursive)

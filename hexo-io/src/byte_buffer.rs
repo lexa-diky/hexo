@@ -65,10 +65,10 @@ impl ByteBuffer {
     pub fn as_usize_unsafe(&self) -> usize {
         let mut padded = self.clone();
         padded.pad_left(4);
-        ((padded.inner[0] as usize) << 24) +
-            ((padded.inner[1] as usize) << 16) +
-            ((padded.inner[2] as usize) <<  8) +
-            (padded.inner[3] as usize)
+        ((padded.inner[0] as usize) << 24)
+            + ((padded.inner[1] as usize) << 16)
+            + ((padded.inner[2] as usize) << 8)
+            + (padded.inner[3] as usize)
     }
 
     /// Clones inner representation of the byte buffer and returns Vec<u8> of it
@@ -89,7 +89,6 @@ impl ByteBuffer {
         }
         bytes
     }
-
 }
 
 impl From<Vec<u8>> for ByteBuffer {
@@ -135,4 +134,3 @@ mod test {
         assert_eq!(buffer.to_vec(), vec![13]);
     }
 }
-

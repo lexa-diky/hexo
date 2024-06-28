@@ -4,9 +4,9 @@ mod compiler;
 mod compiler_context;
 mod compiler_source;
 mod cst;
+mod error;
 mod native_fn;
 mod rst;
-mod error;
 
 pub(crate) use compilation_result::Compilation;
 pub(crate) use compiler::HexoCompiler;

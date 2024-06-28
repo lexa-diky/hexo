@@ -1,6 +1,6 @@
+use lazy_static::lazy_static;
 use std::fmt::{Debug, Display};
 use std::sync::Mutex;
-use lazy_static::lazy_static;
 
 #[derive(Hash, Eq, PartialEq, Clone, Copy)]
 pub struct HexoId {
@@ -25,7 +25,6 @@ lazy_static! {
 }
 
 impl HexoId {
-
     pub fn next() -> HexoId {
         let mut counter = COUNTER.lock().unwrap();
         *counter += 1;
@@ -34,5 +33,4 @@ impl HexoId {
             batch_id: 0,
         }
     }
-
 }

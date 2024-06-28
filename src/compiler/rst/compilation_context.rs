@@ -1,9 +1,9 @@
-use crate::compiler::cst::{CstEmitStatement};
+use crate::compiler::cst::CstEmitStatement;
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConstantBinding {
@@ -43,7 +43,9 @@ impl CompilationContext {
 
     // region constant
     pub(crate) fn bind_local_constant(&mut self, context_id: HexoId, constant: ConstantBinding) {
-        self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
+        self.local_contexts
+            .entry(context_id)
+            .or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
             .local_contexts
@@ -79,7 +81,9 @@ impl CompilationContext {
     // endregion
 
     pub(crate) fn bind_local_function(&mut self, context_id: HexoId, function: FunctionBinding) {
-        self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
+        self.local_contexts
+            .entry(context_id)
+            .or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
             .local_contexts
@@ -117,7 +121,9 @@ impl CompilationContext {
     }
 
     pub(crate) fn bind_parents(&mut self, context_id: HexoId, parents: Vec<HexoId>) {
-        self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
+        self.local_contexts
+            .entry(context_id)
+            .or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
             .local_contexts

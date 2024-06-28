@@ -1,8 +1,8 @@
 use crate::compiler::ast::{AstNode, AstParser};
 use crate::compiler::cst::{CstFile, CstParser};
+use crate::compiler::error::Error;
 use crate::compiler::rst::{HexoFile, RstCompiler};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
-use crate::compiler::error::Error;
 
 pub(crate) struct HexoCompiler {
     context: HexoCompilerContext,
@@ -20,9 +20,7 @@ impl HexoCompiler {
         let ast_parser = AstParser::new();
         let source_text = source.read().map_err(Error::Io)?;
 
-        ast_parser
-            .parse(source_text)
-            .map_err(Error::Ast)
+        ast_parser.parse(source_text).map_err(Error::Ast)
     }
 
     pub(crate) fn compile_cst<TSource: CompilerSource>(
@@ -32,9 +30,7 @@ impl HexoCompiler {
         let ast = self.compile_ast(source)?;
         let cst_parser = CstParser::new();
 
-        cst_parser
-            .parse(source.path(), ast)
-            .map_err(Error::Cst)
+        cst_parser.parse(source.path(), ast).map_err(Error::Cst)
     }
 
     pub(crate) fn compile_rst<TSource: CompilerSource>(
@@ -44,9 +40,7 @@ impl HexoCompiler {
         let cst = self.compile_cst(source)?;
         let rst_compiler = RstCompiler::new(self);
 
-        rst_compiler
-            .compile(&cst)
-            .map_err(Error::Rst)
+        rst_compiler.compile(&cst).map_err(Error::Rst)
     }
 
     pub(crate) fn compile<TSource: CompilerSource>(

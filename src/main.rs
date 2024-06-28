@@ -1,8 +1,8 @@
+use crate::cli::{Cli, Error};
 use std::env::temp_dir;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use crate::cli::{Cli, Error};
 
 mod cli;
 mod compiler;
@@ -46,7 +46,7 @@ fn run_test_cases() {
             input_file.to_str().unwrap().to_string(),
             Some(output_file.to_str().unwrap().to_string()),
         )
-            .unwrap();
+        .unwrap();
 
         let output_buf = read_file(&output_file);
         let expected_output_buf = read_file(&expected_output);

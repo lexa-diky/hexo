@@ -1,7 +1,7 @@
+use hexo_io::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use hexo_io::byte_buffer::ByteBuffer;
 
 use crate::compiler::native_fn::error::Error;
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
@@ -67,11 +67,7 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
 
             let output = std::process::Command::new(command)
                 .output()
-                .map_err(|e|
-                Error::Unknown(
-                    format!("Error executing command: {}", e)
-                )
-                )?;
+                .map_err(|e| Error::Unknown(format!("Error executing command: {}", e)))?;
 
             let buffer = ByteBuffer::from(output.stdout);
 
@@ -88,23 +84,16 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let arg0 = get_argument_at(&arguments, 0, "read_file")?;
 
-            let file_path = arg0.to_string()
+            let file_path = arg0
+                .to_string()
                 .map_err(|e| Error::Unknown(e.to_string()))?;
 
             let mut file = File::open(file_path)
-                .map_err(|e|
-                Error::Unknown(
-                    format!("Error executing command: {}", e)
-                )
-                )?;
+                .map_err(|e| Error::Unknown(format!("Error executing command: {}", e)))?;
 
             let mut buf_string = String::new();
             file.read_to_string(&mut buf_string)
-                .map_err(|e|
-                Error::Unknown(
-                    format!("Error executing command: {}", e)
-                )
-                )?;
+                .map_err(|e| Error::Unknown(format!("Error executing command: {}", e)))?;
 
             let buffer = ByteBuffer::from(buf_string.as_bytes().to_vec());
 
@@ -121,10 +110,9 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
         executor: |arguments: HashMap<String, ByteBuffer>| {
             let mut buffer = get_argument_at(&arguments, 0, "pad")?.clone();
 
-            let left_padding = get_named_argument(&arguments, "left")
-                .map(|b| b.as_usize_unsafe());
-            let right_padding = get_named_argument(&arguments, "right")
-                .map(|b| b.as_usize_unsafe());
+            let left_padding = get_named_argument(&arguments, "left").map(|b| b.as_usize_unsafe());
+            let right_padding =
+                get_named_argument(&arguments, "right").map(|b| b.as_usize_unsafe());
 
             if let Some(size) = left_padding {
                 buffer.pad_left(size);
@@ -138,7 +126,11 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
     };
 }
 
-fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, fn_name: &str) -> Result<&'a ByteBuffer, Error> {
+fn get_argument_at<'a>(
+    arguments: &'a HashMap<String, ByteBuffer>,
+    pos: usize,
+    fn_name: &str,
+) -> Result<&'a ByteBuffer, Error> {
     arguments
         .get(&pos.to_string())
         .ok_or_else(|| Error::MissingArgument {
@@ -148,6 +140,9 @@ fn get_argument_at<'a>(arguments: &'a HashMap<String, ByteBuffer>, pos: usize, f
         })
 }
 
-fn get_named_argument<'a>(arguments: &'a HashMap<String, ByteBuffer>, name: &str) -> Option<&'a ByteBuffer> {
+fn get_named_argument<'a>(
+    arguments: &'a HashMap<String, ByteBuffer>,
+    name: &str,
+) -> Option<&'a ByteBuffer> {
     arguments.get(name)
 }

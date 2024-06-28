@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use std::path::Path;
 use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;
+use std::collections::HashMap;
+use std::path::Path;
 
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
@@ -9,9 +9,9 @@ use crate::compiler::cst::{
 use crate::compiler::rst::compilation_context::{
     CompilationContext, ConstantBinding, FunctionBinding,
 };
+use crate::compiler::rst::error::Error;
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::HexoCompiler;
-use crate::compiler::rst::error::Error;
 
 pub(crate) struct RstCompiler<'a> {
     parent: &'a HexoCompiler,
@@ -28,13 +28,11 @@ impl RstCompiler<'_> {
 
         let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
 
-        Ok(
-            HexoFile {
-                path: cst.path.clone(),
-                context,
-                emits: bb,
-            }
-        )
+        Ok(HexoFile {
+            path: cst.path.clone(),
+            context,
+            emits: bb,
+        })
     }
 
     fn build_bytes(

@@ -1,6 +1,6 @@
 use crate::compiler::rst::compilation_context::CompilationContext;
-use std::path::PathBuf;
 use hexo_io::byte_buffer::ByteBuffer;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub(crate) struct HexoFile {

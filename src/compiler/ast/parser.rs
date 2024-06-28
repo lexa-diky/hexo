@@ -2,8 +2,8 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::compiler::ast::error::Error;
+use crate::compiler::ast::{AstNode, AstNodeType};
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
@@ -29,9 +29,7 @@ impl AstParser {
     }
 }
 
-fn filter_ignored_token(
-    result: Result<Option<AstNode>, Error>,
-) -> Option<Result<AstNode, Error>> {
+fn filter_ignored_token(result: Result<Option<AstNode>, Error>) -> Option<Result<AstNode, Error>> {
     match result {
         Ok(None) => None,
         Ok(Some(value)) => Some(Ok(value)),

@@ -28,16 +28,17 @@ pub(crate) enum AstNodeType {
 
 impl AstNodeType {
     pub(crate) fn must_capture_value(&self) -> bool {
-        matches!(self,
-              AstNodeType::AtomUtf8
-            | AstNodeType::AtomHex
-            | AstNodeType::AtomFnName
-            | AstNodeType::StatementConstName
-            | AstNodeType::AtomBaseNumberBase
-            | AstNodeType::AtomBaseNumberValue
-            | AstNodeType::StatementFnName
-            | AstNodeType::AtomFnParamIdentifier
-            | AstNodeType::AtomConst
+        matches!(
+            self,
+            AstNodeType::AtomUtf8
+                | AstNodeType::AtomHex
+                | AstNodeType::AtomFnName
+                | AstNodeType::StatementConstName
+                | AstNodeType::AtomBaseNumberBase
+                | AstNodeType::AtomBaseNumberValue
+                | AstNodeType::StatementFnName
+                | AstNodeType::AtomFnParamIdentifier
+                | AstNodeType::AtomConst
         )
     }
 }
