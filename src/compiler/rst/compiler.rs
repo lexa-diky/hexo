@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::path::Path;
+use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;
 
 use crate::compiler::cst::{
@@ -9,7 +10,6 @@ use crate::compiler::rst::compilation_context::{
     CompilationContext, ConstantBinding, FunctionBinding,
 };
 use crate::compiler::rst::node::HexoFile;
-use crate::compiler::util::{next_identifier};
 use crate::compiler::HexoCompiler;
 use crate::compiler::rst::error::Error;
 
@@ -23,7 +23,7 @@ impl RstCompiler<'_> {
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
-        let context_id = next_identifier();
+        let context_id = hexo_id::next();
         let mut context = Self::build_context(context_id, &cst.path, &cst.main)?;
 
         let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
@@ -38,7 +38,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_bytes(
-        context_id: u64,
+        context_id: HexoId,
         context: &mut CompilationContext,
         emits: &Vec<CstEmitStatement>,
     ) -> Result<ByteBuffer, Error> {
@@ -52,7 +52,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_bytes_into(
-        context_id: u64,
+        context_id: HexoId,
         context: &mut CompilationContext,
         atoms: &CstAtomVec,
         buffer: &mut ByteBuffer,
@@ -75,7 +75,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_function_into(
-        context_id: u64,
+        context_id: HexoId,
         context: &mut CompilationContext,
         function_name: String,
         params: &Vec<CstActualParameter>,
@@ -130,7 +130,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_constant_into(
-        context_id: u64,
+        context_id: HexoId,
         context: &CompilationContext,
         name: &String,
         buffer: &mut ByteBuffer,
@@ -145,7 +145,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_context(
-        context_id: u64,
+        context_id: HexoId,
         file_path: &Path,
         cst: &CstFunctionStatement,
     ) -> Result<CompilationContext, Error> {
@@ -157,7 +157,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_context_into(
-        context_id: u64,
+        context_id: HexoId,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), Error> {
@@ -167,7 +167,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_context_constants_into(
-        context_id: u64,
+        context_id: HexoId,
         cst: &&CstFunctionStatement,
         context: &mut CompilationContext,
     ) -> Result<(), Error> {
@@ -187,12 +187,12 @@ impl RstCompiler<'_> {
     }
 
     fn build_context_functions_into(
-        context_id: u64,
+        context_id: HexoId,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), Error> {
         for function in &cst.functions {
-            let inner_function_context_id = next_identifier();
+            let inner_function_context_id = hexo_id::next();
             root_context.bind_local_function(
                 context_id,
                 FunctionBinding {

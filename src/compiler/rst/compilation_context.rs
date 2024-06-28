@@ -2,6 +2,7 @@ use crate::compiler::cst::{CstEmitStatement};
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;
 
 #[derive(Clone, Debug)]
@@ -12,7 +13,7 @@ pub(crate) struct ConstantBinding {
 
 #[derive(Clone, Debug)]
 pub(crate) struct FunctionBinding {
-    pub(crate) identifier: u64,
+    pub(crate) identifier: HexoId,
     pub(crate) name: String,
     pub(crate) emits: Vec<CstEmitStatement>,
 }
@@ -21,13 +22,13 @@ pub(crate) struct FunctionBinding {
 pub(crate) struct LocalCompilationContext {
     constant_table: HashMap<String, ConstantBinding>,
     function_table: HashMap<String, FunctionBinding>,
-    parents: Vec<u64>,
+    parents: Vec<HexoId>,
 }
 
 #[derive(Clone, Debug)]
 pub(crate) struct CompilationContext {
     self_path: PathBuf,
-    local_contexts: HashMap<u64, LocalCompilationContext>,
+    local_contexts: HashMap<HexoId, LocalCompilationContext>,
     native_function_index: NativeFunctionIndex,
 }
 
@@ -41,7 +42,7 @@ impl CompilationContext {
     }
 
     // region constant
-    pub(crate) fn bind_local_constant(&mut self, context_id: u64, constant: ConstantBinding) {
+    pub(crate) fn bind_local_constant(&mut self, context_id: HexoId, constant: ConstantBinding) {
         self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
@@ -54,7 +55,7 @@ impl CompilationContext {
 
     pub(crate) fn get_local_constant(
         &self,
-        context_id: u64,
+        context_id: HexoId,
         name: &String,
     ) -> Option<&ConstantBinding> {
         let local_context = self.local_contexts.get(&context_id)?;
@@ -77,7 +78,7 @@ impl CompilationContext {
 
     // endregion
 
-    pub(crate) fn bind_local_function(&mut self, context_id: u64, function: FunctionBinding) {
+    pub(crate) fn bind_local_function(&mut self, context_id: HexoId, function: FunctionBinding) {
         self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
@@ -90,7 +91,7 @@ impl CompilationContext {
 
     pub(crate) fn get_local_function(
         &self,
-        context_id: u64,
+        context_id: HexoId,
         name: &String,
     ) -> Option<&FunctionBinding> {
         let local_context = self.local_contexts.get(&context_id)?;
@@ -115,7 +116,7 @@ impl CompilationContext {
         return self.native_function_index.find(name);
     }
 
-    pub(crate) fn bind_parents(&mut self, context_id: u64, parents: Vec<u64>) {
+    pub(crate) fn bind_parents(&mut self, context_id: HexoId, parents: Vec<HexoId>) {
         self.local_contexts.entry(context_id).or_insert_with(LocalCompilationContext::new);
 
         let local_context: &mut LocalCompilationContext = self
@@ -154,7 +155,7 @@ impl LocalCompilationContext {
         return self.function_table.get(name);
     }
 
-    fn attach_parent(&mut self, parent_id: u64) {
+    fn attach_parent(&mut self, parent_id: HexoId) {
         self.parents.push(parent_id);
     }
 }

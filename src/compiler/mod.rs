@@ -6,7 +6,6 @@ mod compiler_source;
 mod cst;
 mod native_fn;
 mod rst;
-mod util;
 mod error;
 
 pub(crate) use compilation_result::Compilation;
