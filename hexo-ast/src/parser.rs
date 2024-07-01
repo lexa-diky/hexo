@@ -9,12 +9,10 @@ use crate::node::{AstNode, AstNodeType};
 #[grammar = "grammar.pest"]
 struct AstPestParser;
 
+#[derive(Default)]
 pub struct AstParser {}
 
 impl AstParser {
-    pub fn new() -> Self {
-        AstParser {}
-    }
 
     pub fn parse(&self, source: &str) -> Result<AstNode, Error> {
         let pairs = AstPestParser::parse(Rule::file, source)

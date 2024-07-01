@@ -17,7 +17,7 @@ impl HexoCompiler {
         &self,
         source: &TSource,
     ) -> Result<AstNode, Error> {
-        let ast_parser = AstParser::new();
+        let ast_parser = AstParser::default();
         let source_text = source.read().map_err(Error::Io)?;
 
         ast_parser.parse(source_text.as_str()).map_err(Error::Ast)

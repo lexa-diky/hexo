@@ -9,7 +9,7 @@ fn java_file(c: &mut Criterion) {
     source_file.read_to_string(&mut source_buffer).unwrap();
     let source_buffer_str_x1 = source_buffer.as_str();
 
-    let parser = AstParser::new();
+    let parser = AstParser::default();
 
     c.bench_function("java-file", |b| b.iter(|| {
         black_box(parser.parse(source_buffer_str_x1).unwrap());

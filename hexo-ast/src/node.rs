@@ -66,14 +66,14 @@ impl AstNode {
     }
 
     pub fn children(&self) -> &Vec<AstNode> {
-        return &self.children
+        &self.children
     }
 
     pub fn node_type(&self) -> AstNodeType {
-        return self.node_type
+        self.node_type
     }
 
     pub fn content(&self) -> Option<&String> {
-        return self.content.as_ref()
+        self.content.as_ref()
     }
 }
