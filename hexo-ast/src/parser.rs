@@ -16,8 +16,8 @@ impl AstParser {
         AstParser {}
     }
 
-    pub fn parse(&self, source: String) -> Result<AstNode, Error> {
-        let pairs = AstPestParser::parse(Rule::file, source.as_str())
+    pub fn parse(&self, source: &str) -> Result<AstNode, Error> {
+        let pairs = AstPestParser::parse(Rule::file, source)
             .map_err(|e| Error::Pest(Box::new(e)))?;
 
         let children: Result<Vec<AstNode>, _> = pairs

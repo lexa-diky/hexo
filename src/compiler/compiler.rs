@@ -20,7 +20,7 @@ impl HexoCompiler {
         let ast_parser = AstParser::new();
         let source_text = source.read().map_err(Error::Io)?;
 
-        ast_parser.parse(source_text).map_err(Error::Ast)
+        ast_parser.parse(source_text.as_str()).map_err(Error::Ast)
     }
 
     pub(crate) fn compile_cst<TSource: CompilerSource>(
