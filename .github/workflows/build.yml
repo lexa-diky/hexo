@@ -23,6 +23,24 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout repository
+      - uses: Swatinem/rust-cache@v2
+        name: Cache dependencies
+        with:
+          cache-all-crates: true
+          save-if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Run benchmarks
+        run: (cd hexo-ast;cargo bench | tee output.txt)
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'cargo'
+          output-file-path: output.txt
+
   lint:
     runs-on: ubuntu-latest
     steps:
