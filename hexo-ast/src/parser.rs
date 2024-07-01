@@ -2,21 +2,21 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::compiler::ast::error::Error;
-use crate::compiler::ast::{AstNode, AstNodeType};
+use crate::error::Error;
+use crate::node::{AstNode, AstNodeType};
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
-pub(crate) struct AstPestParser;
+struct AstPestParser;
 
-pub(crate) struct AstParser {}
+pub struct AstParser {}
 
 impl AstParser {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         AstParser {}
     }
 
-    pub(crate) fn parse(&self, source: String) -> Result<AstNode, Error> {
+    pub fn parse(&self, source: String) -> Result<AstNode, Error> {
         let pairs = AstPestParser::parse(Rule::file, source.as_str())
             .map_err(|e| Error::Pest(Box::new(e)))?;
 

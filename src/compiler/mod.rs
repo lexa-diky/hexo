@@ -1,4 +1,3 @@
-pub mod ast;
 mod compilation_result;
 mod compiler;
 mod compiler_context;

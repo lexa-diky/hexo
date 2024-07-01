@@ -1,4 +1,4 @@
-use crate::compiler::ast::{AstNode, AstParser};
+use hexo_ast::{AstNode, AstParser};
 use crate::compiler::cst::{CstFile, CstParser};
 use crate::compiler::error::Error;
 use crate::compiler::rst::{HexoFile, RstCompiler};
