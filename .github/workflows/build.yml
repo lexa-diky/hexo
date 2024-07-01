@@ -39,7 +39,7 @@ jobs:
         uses: benchmark-action/github-action-benchmark@v1
         with:
           tool: 'cargo'
-          output-file-path: output.txt
+          output-file-path: hexo-ast/output.txt
 
   lint:
     runs-on: ubuntu-latest
