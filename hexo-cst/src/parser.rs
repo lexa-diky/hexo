@@ -95,13 +95,16 @@ fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, Error> {
 }
 
 fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, Error> {
+    let mut name = None;
     let mut emits = None;
     let mut functions = None;
     let mut constants = None;
 
     for child in node.children() {
         match child.node_type() {
-            AstNodeType::StatementFnName => {}
+            AstNodeType::StatementFnName => {
+                name = Some(parse_value_of(child)?);
+            }
             AstNodeType::StatementFnBody => {
                 let (emits_r, functions_r, constants_r) = parse_function_body(child)?;
                 emits = Some(emits_r);
@@ -119,7 +122,9 @@ fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, Error> {
 
     Ok(
         CstFunctionStatement::new(
-            parse_value_of(&node.children()[0])?,
+            name.ok_or(Error::MissingContent {
+                node_type: AstNodeType::StatementFnName,
+            })?,
             emits.unwrap_or(Vec::new()),
             functions.unwrap_or(Vec::new()),
             constants.unwrap_or(Vec::new()),
