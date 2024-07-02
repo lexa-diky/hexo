@@ -2,7 +2,7 @@ use hexo_ast::AstNodeType;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
-pub(crate) enum Error {
+pub enum Error {
     UnexpectedNode {
         expected: Vec<AstNodeType>,
         actual: AstNodeType,

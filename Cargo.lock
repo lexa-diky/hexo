@@ -409,11 +409,12 @@ dependencies = [
 
 [[package]]
 name = "hexo"
-version = "0.7.7"
+version = "0.7.8"
 dependencies = [
  "clap 4.5.4",
  "console",
  "hexo-ast",
+ "hexo-cst",
  "hexo-id",
  "hexo-io",
  "notify",
@@ -423,7 +424,7 @@ dependencies = [
 
 [[package]]
 name = "hexo-ast"
-version = "0.7.7"
+version = "0.7.8"
 dependencies = [
  "criterion",
  "pest",
@@ -431,15 +432,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "hexo-cst"
+version = "0.7.8"
+dependencies = [
+ "hexo-ast",
+]
+
+[[package]]
 name = "hexo-id"
-version = "0.7.7"
+version = "0.7.8"
 dependencies = [
  "lazy_static",
 ]
 
 [[package]]
 name = "hexo-io"
-version = "0.7.7"
+version = "0.7.8"
 
 [[package]]
 name = "indexmap"

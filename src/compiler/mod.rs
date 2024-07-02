@@ -2,7 +2,6 @@ mod compilation_result;
 mod compiler;
 mod compiler_context;
 mod compiler_source;
-mod cst;
 mod error;
 mod native_fn;
 mod rst;

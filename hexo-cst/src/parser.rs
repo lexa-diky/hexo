@@ -1,20 +1,17 @@
 use std::path::PathBuf;
 
 use hexo_ast::{AstNode, AstNodeType};
-use crate::compiler::cst::error::Error;
-use crate::compiler::cst::node::CstFile;
-use crate::compiler::cst::{
+use crate::Error;
+use crate::node::CstFile;
+use crate::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
 
-pub(crate) struct CstParser {}
+#[derive(Default)]
+pub struct CstParser {}
 
 impl CstParser {
-    pub(crate) fn new() -> CstParser {
-        CstParser {}
-    }
-
-    pub(crate) fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
+    pub fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
         parse_file(path, &ast_root)
     }
 }
@@ -28,13 +25,12 @@ fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, Error> {
     Ok(
         CstFile::new(
             path,
-            CstFunctionStatement {
-                name: MAIN_FUNCTION_NAME.to_string(),
-                params: Vec::new(),
+            CstFunctionStatement::new(
+                MAIN_FUNCTION_NAME.to_string(),
                 emits,
                 functions,
                 constants,
-            },
+            ),
         )
     )
 }
@@ -85,14 +81,16 @@ fn parse_constant(node: &AstNode) -> Result<CstConstantStatement, Error> {
         }
     }
 
-    Ok(CstConstantStatement {
-        name: name
-            .ok_or(Error::MissingContent {
-                node_type: AstNodeType::StatementConstName,
-            })?
-            .to_string(),
-        atoms: atom_buff,
-    })
+    Ok(
+        CstConstantStatement::new(
+            name
+                .ok_or(Error::MissingContent {
+                    node_type: AstNodeType::StatementConstName,
+                })?
+                .to_string(),
+            atom_buff,
+        )
+    )
 }
 
 fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, Error> {
@@ -118,13 +116,14 @@ fn parse_function(node: &AstNode) -> Result<CstFunctionStatement, Error> {
         }
     }
 
-    Ok(CstFunctionStatement {
-        name: parse_value_of(&node.children()[0])?,
-        params: Vec::new(),
-        emits: emits.unwrap_or(Vec::new()),
-        functions: functions.unwrap_or(Vec::new()),
-        constants: constants.unwrap_or(Vec::new()),
-    })
+    Ok(
+        CstFunctionStatement::new(
+            parse_value_of(&node.children()[0])?,
+            emits.unwrap_or(Vec::new()),
+            functions.unwrap_or(Vec::new()),
+            constants.unwrap_or(Vec::new()),
+        )
+    )
 }
 
 fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, Error> {
@@ -135,7 +134,7 @@ fn parse_emit_statement(node: &AstNode) -> Result<CstEmitStatement, Error> {
         parse_atom_into(child, &mut atoms)?
     }
 
-    Ok(CstEmitStatement { atoms })
+    Ok(CstEmitStatement::new(atoms))
 }
 
 fn parse_atom_into(node: &AstNode, buff: &mut Vec<CstAtom>) -> Result<(), Error> {
@@ -236,10 +235,10 @@ fn parse_atom_fn_params(node: &AstNode) -> Result<Vec<CstActualParameter>, Error
             }
         }
 
-        buf.push(CstActualParameter {
-            name: name.unwrap_or(param_counter.to_string()),
+        buf.push(CstActualParameter::new(
+            name.unwrap_or(param_counter.to_string()),
             value,
-        });
+        ));
     }
 
     Ok(buf)
@@ -263,14 +262,20 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Err
     Ok(())
 }
 
-pub fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, ()> {
-    (0..s.len())
-        .step_by(2)
+pub fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, Error> {
+    (0..s.len()).step_by(2)
         .map(|i| {
             if s.len() < 2 {
-                return Err(());
+                return Err(
+                    Error::MalformedNodeValue {
+                        message: format!("can't parse bytes {}", s),
+                    }
+                );
             }
-            u8::from_str_radix(&s[i..i + 2], 16).map_err(|_| ())
+            u8::from_str_radix(&s[i..i + 2], 16)
+                .map_err(|_| Error::MalformedNodeValue {
+                    message: format!("can't parse bytes {}", s),
+                })
         })
         .collect()
 }

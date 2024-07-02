@@ -1,5 +1,5 @@
 use hexo_ast::{AstNode, AstParser};
-use crate::compiler::cst::{CstFile, CstParser};
+use hexo_cst::{CstFile, CstParser};
 use crate::compiler::error::Error;
 use crate::compiler::rst::{HexoFile, RstCompiler};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
@@ -28,7 +28,7 @@ impl HexoCompiler {
         source: &TSource,
     ) -> Result<CstFile, Error> {
         let ast = self.compile_ast(source)?;
-        let cst_parser = CstParser::new();
+        let cst_parser = CstParser::default();
 
         cst_parser.parse(source.path(), ast).map_err(Error::Cst)
     }

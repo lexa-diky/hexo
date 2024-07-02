@@ -3,7 +3,7 @@ use hexo_io::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::path::Path;
 
-use crate::compiler::cst::{
+use hexo_cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
 };
 use crate::compiler::rst::compilation_context::{
@@ -24,12 +24,12 @@ impl RstCompiler<'_> {
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
         let context_id = HexoId::next();
-        let mut context = Self::build_context(context_id, &cst.path, &cst.main)?;
+        let mut context = Self::build_context(context_id, &cst.path(), &cst.main())?;
 
-        let bb = Self::build_bytes(context_id, &mut context, &cst.main.emits)?;
+        let bb = Self::build_bytes(context_id, &mut context, &cst.main().emits())?;
 
         Ok(HexoFile {
-            path: cst.path.clone(),
+            path: cst.path().to_path_buf(),
             context,
             emits: bb,
         })
@@ -43,7 +43,7 @@ impl RstCompiler<'_> {
         let mut byte_buffer = ByteBuffer::new();
 
         for emit in emits {
-            Self::build_bytes_into(context_id, context, &emit.atoms, &mut byte_buffer)?
+            Self::build_bytes_into(context_id, context, &emit.atoms(), &mut byte_buffer)?
         }
 
         Ok(byte_buffer)
@@ -86,10 +86,10 @@ impl RstCompiler<'_> {
 
             for param in params {
                 let mut param_buffer = ByteBuffer::new();
-                Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer)
+                Self::build_bytes_into(context_id, context, param.value(), &mut param_buffer)
                     .unwrap();
 
-                params_buffer.insert(param.name.clone(), param_buffer);
+                params_buffer.insert(param.name().to_string(), param_buffer);
             }
 
             executor(params_buffer.clone())
@@ -108,19 +108,19 @@ impl RstCompiler<'_> {
 
         for param in params {
             let mut param_buffer = ByteBuffer::new();
-            Self::build_bytes_into(context_id, context, &param.value, &mut param_buffer).unwrap();
+            Self::build_bytes_into(context_id, context, &param.value(), &mut param_buffer).unwrap();
 
             context.bind_local_constant(
                 function_binding.identifier,
                 ConstantBinding {
-                    name: param.name.clone(),
+                    name: param.name().to_string(),
                     byte_buffer: param_buffer,
                 },
             );
         }
 
         for emit in &function_binding.emits {
-            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms, buffer)
+            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms(), buffer)
                 .unwrap();
         }
 
@@ -169,13 +169,13 @@ impl RstCompiler<'_> {
         cst: &&CstFunctionStatement,
         context: &mut CompilationContext,
     ) -> Result<(), Error> {
-        for constant in &cst.constants {
+        for constant in cst.constants() {
             let mut buff = ByteBuffer::new();
-            Self::build_bytes_into(context_id, context, &constant.atoms, &mut buff)?;
+            Self::build_bytes_into(context_id, context, constant.atoms(), &mut buff)?;
             context.bind_local_constant(
                 context_id,
                 ConstantBinding {
-                    name: constant.name.clone(),
+                    name: constant.name().to_string(),
                     byte_buffer: buff,
                 },
             )
@@ -189,14 +189,14 @@ impl RstCompiler<'_> {
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), Error> {
-        for function in &cst.functions {
+        for function in cst.functions() {
             let inner_function_context_id = HexoId::next();
             root_context.bind_local_function(
                 context_id,
                 FunctionBinding {
                     identifier: inner_function_context_id,
-                    name: function.name.clone(),
-                    emits: function.emits.clone(),
+                    name: function.name().to_string(),
+                    emits: function.emits().clone(),
                 },
             );
 
