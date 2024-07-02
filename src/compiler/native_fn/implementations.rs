@@ -12,7 +12,7 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
             name: String::from("len"),
         },
         executor: |arguments: HashMap<String, ByteBuffer>| {
-            let mut result = ByteBuffer::new();
+            let mut result = ByteBuffer::default();
             let arg0 = get_named_argument(&arguments, "utf8")
                 .unwrap_or_else(|| get_argument_at(&arguments, 0, "len").unwrap());
 

@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::string::FromUtf8Error;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ByteBuffer {
     inner: Vec<u8>,
 }
@@ -13,9 +13,6 @@ impl Debug for ByteBuffer {
 }
 
 impl ByteBuffer {
-    pub fn new() -> Self {
-        ByteBuffer { inner: Vec::new() }
-    }
 
     pub fn push_byte(&mut self, byte: u8) {
         self.inner.push(byte);

@@ -40,7 +40,7 @@ impl RstCompiler<'_> {
         context: &mut CompilationContext,
         emits: &Vec<CstEmitStatement>,
     ) -> Result<ByteBuffer, Error> {
-        let mut byte_buffer = ByteBuffer::new();
+        let mut byte_buffer = ByteBuffer::default();
 
         for emit in emits {
             Self::build_bytes_into(context_id, context, &emit.atoms(), &mut byte_buffer)?
@@ -85,7 +85,7 @@ impl RstCompiler<'_> {
             let mut params_buffer = HashMap::new();
 
             for param in params {
-                let mut param_buffer = ByteBuffer::new();
+                let mut param_buffer = ByteBuffer::default();
                 Self::build_bytes_into(context_id, context, param.value(), &mut param_buffer)
                     .unwrap();
 
@@ -107,7 +107,7 @@ impl RstCompiler<'_> {
             })?;
 
         for param in params {
-            let mut param_buffer = ByteBuffer::new();
+            let mut param_buffer = ByteBuffer::default();
             Self::build_bytes_into(context_id, context, &param.value(), &mut param_buffer).unwrap();
 
             context.bind_local_constant(
@@ -170,7 +170,7 @@ impl RstCompiler<'_> {
         context: &mut CompilationContext,
     ) -> Result<(), Error> {
         for constant in cst.constants() {
-            let mut buff = ByteBuffer::new();
+            let mut buff = ByteBuffer::default();
             Self::build_bytes_into(context_id, context, constant.atoms(), &mut buff)?;
             context.bind_local_constant(
                 context_id,
