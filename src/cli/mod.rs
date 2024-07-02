@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::fs::File;
 use std::io::Write;
 use std::panic::catch_unwind;

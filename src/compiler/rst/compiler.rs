@@ -24,9 +24,9 @@ impl RstCompiler<'_> {
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
         let context_id = HexoId::next();
-        let mut context = Self::build_context(context_id, &cst.path(), &cst.main())?;
+        let mut context = Self::build_context(context_id, cst.path(), cst.main())?;
 
-        let bb = Self::build_bytes(context_id, &mut context, &cst.main().emits())?;
+        let bb = Self::build_bytes(context_id, &mut context, cst.main().emits())?;
 
         Ok(HexoFile {
             path: cst.path().to_path_buf(),
@@ -43,7 +43,7 @@ impl RstCompiler<'_> {
         let mut byte_buffer = ByteBuffer::default();
 
         for emit in emits {
-            Self::build_bytes_into(context_id, context, &emit.atoms(), &mut byte_buffer)?
+            Self::build_bytes_into(context_id, context, emit.atoms(), &mut byte_buffer)?
         }
 
         Ok(byte_buffer)
@@ -108,7 +108,7 @@ impl RstCompiler<'_> {
 
         for param in params {
             let mut param_buffer = ByteBuffer::default();
-            Self::build_bytes_into(context_id, context, &param.value(), &mut param_buffer).unwrap();
+            Self::build_bytes_into(context_id, context, param.value(), &mut param_buffer).unwrap();
 
             context.bind_local_constant(
                 function_binding.identifier,
@@ -120,7 +120,7 @@ impl RstCompiler<'_> {
         }
 
         for emit in &function_binding.emits {
-            Self::build_bytes_into(function_binding.identifier, context, &emit.atoms(), buffer)
+            Self::build_bytes_into(function_binding.identifier, context, emit.atoms(), buffer)
                 .unwrap();
         }
 

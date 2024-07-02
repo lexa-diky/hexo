@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 pub(crate) struct HexoCompilerContext {}
 
 impl HexoCompilerContext {
