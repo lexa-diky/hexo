@@ -8,5 +8,8 @@ documentation = "https://github.com/lexa-diky/hexo"
 homepage = "https://github.com/lexa-diky/hexo"
 description = "Hexo's IO utility"
 
+[toolchain]
+channel = "nightly"
+
 [dependencies]
 hexo-ast = { path = "../hexo-ast", version = "0.7.8" }

@@ -6,6 +6,7 @@ use crate::node::CstFile;
 use crate::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
+use crate::match_ast;
 
 #[derive(Default)]
 pub struct CstParser {}
@@ -289,53 +290,29 @@ fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Er
 }
 
 fn parse_atom_base_num_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
-    guard_node_type(node, AstNodeType::AtomBaseNumber)?;
-    let mut base = None;
-    let mut value = None;
-
-    for child in node.children() {
-        match child.node_type() {
-            AstNodeType::AtomBaseNumberBase => {
-                guard_empty(base)?;
-                base = Some(parse_value_of(child)?)
-            }
-            AstNodeType::AtomBaseNumberValue => {
-                guard_empty(value)?;
-                value = Some(parse_value_of(child)?)
-            }
-            _ => {
-                return Err(Error::UnexpectedNode {
-                    actual: child.node_type(),
-                    expected: vec![
-                        AstNodeType::AtomBaseNumberBase,
-                        AstNodeType::AtomBaseNumberValue,
-                    ],
-                })
-            }
-        }
+    fn parse_number_base(base: String) -> Result<u32, Error> {
+        let base_value = base.parse()
+            .map_err(|_| Error::MalformedNodeValue {
+                message: format!("can't parse base {}", base),
+            })?;
+        Ok(base_value)
     }
 
-    let base_value_str = base.ok_or(Error::MissingContent {
-        node_type: AstNodeType::AtomBaseNumberBase,
-    })?;
+    match_ast!(
+        node => AtomBaseNumber,
+        AtomBaseNumberBase => base | parse_number_base
+        AtomBaseNumberValue => value | Ok
+    );
 
-    let base_value = base_value_str
-        .parse()
-        .map_err(|_| Error::MalformedNodeValue {
-            message: format!("can't parse base {}", base_value_str),
-        })?;
-
-    let value_str = value.ok_or(Error::MissingContent {
-        node_type: AstNodeType::AtomBaseNumberValue,
-    })?;
-
-    buf.push(CstAtom::Number(
-        u32::from_str_radix(value_str.as_str(), base_value).map_err(|_| {
-            Error::MalformedNodeValue {
-                message: format!("can't parse number {}", value_str),
-            }
-        })?,
-    ));
+    buf.push(
+        CstAtom::Number(
+            u32::from_str_radix(value.as_str(), base).map_err(|_| {
+                Error::MalformedNodeValue {
+                    message: format!("can't parse number {}", value),
+                }
+            })?,
+        )
+    );
 
     Ok(())
 }
