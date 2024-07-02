@@ -251,11 +251,7 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Err
         node_type: AstNodeType::AtomHex,
     })?;
 
-    let bytes =
-        decode_bytes_from_string(content.as_str()).map_err(|_| Error::MalformedNodeValue {
-            message: format!("can't parse bytes {}", content),
-        })?;
-
+    let bytes = decode_bytes_from_string(content.as_str())?;
     for byte in bytes {
         buf.push(CstAtom::Hex(byte))
     }
