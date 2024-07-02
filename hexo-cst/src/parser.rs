@@ -284,12 +284,8 @@ pub fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, Error> {
 
 fn parse_atom_utf8_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Error> {
     guard_node_type(node, AstNodeType::AtomUtf8)?;
-
-    let content = node.content().ok_or(Error::MissingContent {
-        node_type: AstNodeType::AtomUtf8,
-    })?;
-
-    buf.push(CstAtom::String(content.clone()));
+    let content = parse_value_of(node)?;
+    buf.push(CstAtom::String(content));
 
     Ok(())
 }
