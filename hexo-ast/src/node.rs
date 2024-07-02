@@ -46,9 +46,9 @@ impl AstNodeType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AstNode {
-    pub(crate) node_type: AstNodeType,
-    pub(crate) content: Option<String>,
-    pub(crate) children: Vec<AstNode>,
+    node_type: AstNodeType,
+    content: Option<String>,
+    children: Vec<AstNode>,
 }
 
 impl AstNode {
