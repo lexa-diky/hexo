@@ -1,4 +1,4 @@
-use hexo_cst::CstEmitStatement;
+use crate::compiler::cst::CstEmitStatement;
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
 use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;

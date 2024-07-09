@@ -1,5 +1,5 @@
 use hexo_ast::{AstNode, AstParser};
-use hexo_cst::{CstFile, CstParser};
+use crate::compiler::cst::{CstFile, CstParser};
 use crate::compiler::error::Error;
 use crate::compiler::rst::{HexoFile, RstCompiler};
 use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};

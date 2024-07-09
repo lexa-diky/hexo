@@ -5,6 +5,7 @@ mod compiler_source;
 mod error;
 mod native_fn;
 mod rst;
+mod cst;
 
 pub(crate) use compilation_result::Compilation;
 pub(crate) use compiler::HexoCompiler;

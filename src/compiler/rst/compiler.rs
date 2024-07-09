@@ -2,8 +2,7 @@ use hexo_id::HexoId;
 use hexo_io::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::path::Path;
-
-use hexo_cst::{
+use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
 };
 use crate::compiler::rst::compilation_context::{

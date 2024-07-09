@@ -414,7 +414,6 @@ dependencies = [
  "clap 4.5.4",
  "console",
  "hexo-ast",
- "hexo-cst",
  "hexo-id",
  "hexo-io",
  "notify",
@@ -429,13 +428,6 @@ dependencies = [
  "criterion",
  "pest",
  "pest_derive",
-]
-
-[[package]]
-name = "hexo-cst"
-version = "0.7.8"
-dependencies = [
- "hexo-ast",
 ]
 
 [[package]]
