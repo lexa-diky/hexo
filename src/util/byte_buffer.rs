@@ -95,11 +95,11 @@ impl From<Vec<u8>> for ByteBuffer {
 }
 
 mod test {
-    use crate::byte_buffer::ByteBuffer;
+    use crate::util::byte_buffer::ByteBuffer;
 
     #[test]
     fn byte_push() {
-        let mut buffer = ByteBuffer::new();
+        let mut buffer = ByteBuffer::default();
         buffer.push_byte(0x01);
         buffer.push_byte(0x02);
 
@@ -110,7 +110,7 @@ mod test {
 
     #[test]
     fn string_push() {
-        let mut buffer = ByteBuffer::new();
+        let mut buffer = ByteBuffer::default();
         buffer.push_string("hello world".to_string());
 
         assert_eq!(buffer.len(), 11);
@@ -123,7 +123,7 @@ mod test {
 
     #[test]
     fn u32_push() {
-        let mut buffer = ByteBuffer::new();
+        let mut buffer = ByteBuffer::default();
         buffer.push_u32_shrunk(13);
 
         assert_eq!(buffer.len(), 1);

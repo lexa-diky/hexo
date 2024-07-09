@@ -1,5 +1,4 @@
-use hexo_id::HexoId;
-use hexo_io::byte_buffer::ByteBuffer;
+use crate::util::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::path::Path;
 use crate::compiler::cst::{
@@ -11,6 +10,7 @@ use crate::compiler::rst::compilation_context::{
 use crate::compiler::rst::error::Error;
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::HexoCompiler;
+use crate::util::id::HexoId;
 
 pub(crate) struct RstCompiler<'a> {
     parent: &'a HexoCompiler,

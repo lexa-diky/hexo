@@ -1,4 +1,4 @@
-use hexo_io::byte_buffer::ByteBuffer;
+use crate::util::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;

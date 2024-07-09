@@ -1,5 +1,5 @@
 use crate::compiler::rst::compilation_context::CompilationContext;
-use hexo_io::byte_buffer::ByteBuffer;
+use crate::util::byte_buffer::ByteBuffer;
 use std::path::PathBuf;
 
 #[derive(Debug)]

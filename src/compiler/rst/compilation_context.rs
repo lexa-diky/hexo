@@ -1,7 +1,7 @@
 use crate::compiler::cst::CstEmitStatement;
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
-use hexo_id::HexoId;
-use hexo_io::byte_buffer::ByteBuffer;
+use crate::util::id::HexoId;
+use crate::util::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 

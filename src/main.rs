@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 mod cli;
 mod compiler;
+mod util;
 
 fn main() {
     Cli::run();
@@ -21,7 +22,7 @@ fn run_sample() -> Result<(), Error> {
 #[test]
 fn run_test_cases() {
     fn read_file(filename: &PathBuf) -> Vec<u8> {
-        let a = hexo_io::byte_buffer::ByteBuffer::new();
+        let a = util::byte_buffer::ByteBuffer::default();
 
         let mut f = File::open(filename).expect("no file found");
         let metadata = std::fs::metadata(filename).expect("unable to read metadata");
