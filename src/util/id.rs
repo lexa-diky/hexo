@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use std::sync::Mutex;
 
 #[derive(Hash, Eq, PartialEq, Clone, Copy)]
-pub struct HexoId {
+pub(crate) struct HexoId {
     batch_id: u64,
     sequence_id: u64,
 }
@@ -25,7 +25,7 @@ lazy_static! {
 }
 
 impl HexoId {
-    pub fn next() -> HexoId {
+    pub(crate) fn next() -> HexoId {
         let mut counter = COUNTER.lock().unwrap();
         *counter += 1;
         HexoId {

@@ -10,11 +10,11 @@ use crate::compiler::ast::{AstNode, AstNodeType};
 struct AstPestParser;
 
 #[derive(Default)]
-pub struct AstParser {}
+pub(crate) struct AstParser {}
 
 impl AstParser {
 
-    pub fn parse(&self, source: &str) -> Result<AstNode, Error> {
+    pub(crate) fn parse(&self, source: &str) -> Result<AstNode, Error> {
         let pairs = AstPestParser::parse(Rule::file, source)
             .map_err(|e| Error::Pest(Box::new(e)))?;
 

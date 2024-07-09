@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
-pub struct CstFile {
+pub(crate) struct CstFile {
     pub(crate) path: PathBuf,
     pub(crate) main: CstFunctionStatement,
 }
@@ -11,17 +11,17 @@ impl CstFile {
         CstFile { path, main }
     }
 
-    pub fn path(&self) -> &Path {
+    pub(crate) fn path(&self) -> &Path {
         self.path.as_path()
     }
 
-    pub fn main(&self) -> &CstFunctionStatement {
+    pub(crate) fn main(&self) -> &CstFunctionStatement {
         &self.main
     }
 }
 
 #[derive(Clone, Debug)]
-pub enum CstAtom {
+pub(crate) enum CstAtom {
     Hex(u8),
     String(String),
     Number(u32),
@@ -35,66 +35,66 @@ pub enum CstAtom {
 }
 
 #[derive(Clone, Debug)]
-pub struct CstActualParameter {
+pub(crate) struct CstActualParameter {
     name: String,
     value: CstAtomVec,
 }
 
 impl CstActualParameter {
-    pub fn new(name: String, value: CstAtomVec) -> Self {
+    pub(crate) fn new(name: String, value: CstAtomVec) -> Self {
         CstActualParameter { name, value }
     }
 
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn value(&self) -> &CstAtomVec {
+    pub(crate) fn value(&self) -> &CstAtomVec {
         &self.value
     }
 }
 
-pub type CstAtomVec = Vec<CstAtom>;
+pub(crate) type CstAtomVec = Vec<CstAtom>;
 
 #[derive(Clone, Debug)]
-pub struct CstEmitStatement {
+pub(crate) struct CstEmitStatement {
     atoms: CstAtomVec,
 }
 
 impl CstEmitStatement {
 
-    pub fn new(atoms: CstAtomVec) -> Self {
+    pub(crate) fn new(atoms: CstAtomVec) -> Self {
         CstEmitStatement { atoms }
     }
 
-    pub fn atoms(&self) -> &CstAtomVec {
+    pub(crate) fn atoms(&self) -> &CstAtomVec {
         &self.atoms
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct CstConstantStatement {
+pub(crate) struct CstConstantStatement {
     name: String,
     atoms: CstAtomVec,
 }
 
 impl CstConstantStatement {
 
-    pub fn new(name: String, atoms: CstAtomVec) -> Self {
+    pub(crate) fn new(name: String, atoms: CstAtomVec) -> Self {
         CstConstantStatement { name, atoms }
     }
 
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn atoms(&self) -> &CstAtomVec {
+    pub(crate) fn atoms(&self) -> &CstAtomVec {
         &self.atoms
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct CstFunctionStatement {
+pub(crate) struct CstFunctionStatement {
     name: String,
     emits: Vec<CstEmitStatement>,
     functions: Vec<CstFunctionStatement>,
@@ -103,7 +103,7 @@ pub struct CstFunctionStatement {
 
 impl CstFunctionStatement {
 
-    pub fn new(
+    pub(crate) fn new(
         name: String,
         emits: Vec<CstEmitStatement>,
         functions: Vec<CstFunctionStatement>,
@@ -117,19 +117,19 @@ impl CstFunctionStatement {
         }
     }
 
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn emits(&self) -> &Vec<CstEmitStatement> {
+    pub(crate) fn emits(&self) -> &Vec<CstEmitStatement> {
         &self.emits
     }
 
-    pub fn constants(&self) -> &Vec<CstConstantStatement> {
+    pub(crate) fn constants(&self) -> &Vec<CstConstantStatement> {
         &self.constants
     }
 
-    pub fn functions(&self) -> &Vec<CstFunctionStatement> {
+    pub(crate) fn functions(&self) -> &Vec<CstFunctionStatement> {
         &self.functions
     }
 }

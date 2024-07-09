@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunctionSignature {
-    pub name: String,
+    pub(crate) name: String,
 }
 
 type NativeFunctionExecutor = fn(HashMap<String, ByteBuffer>) -> Result<ByteBuffer, Error>;

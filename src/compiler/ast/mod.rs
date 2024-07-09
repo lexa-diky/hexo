@@ -2,6 +2,6 @@ mod error;
 mod node;
 mod parser;
 
-pub use error::Error;
-pub use node::{AstNode, AstNodeType};
-pub use parser::{AstParser};
+pub(crate) use error::Error;
+pub(crate) use node::{AstNode, AstNodeType};
+pub(crate) use parser::{AstParser};

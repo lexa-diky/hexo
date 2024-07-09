@@ -2,7 +2,7 @@ use crate::compiler::ast::AstNodeType;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
-pub enum Error {
+pub(crate) enum Error {
     UnexpectedNode {
         expected: Vec<AstNodeType>,
         actual: AstNodeType,

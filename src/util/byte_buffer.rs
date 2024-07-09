@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::string::FromUtf8Error;
 
 #[derive(Clone, Default)]
-pub struct ByteBuffer {
+pub(crate) struct ByteBuffer {
     inner: Vec<u8>,
 }
 
@@ -14,24 +14,24 @@ impl Debug for ByteBuffer {
 
 impl ByteBuffer {
 
-    pub fn push_byte(&mut self, byte: u8) {
+    pub(crate) fn push_byte(&mut self, byte: u8) {
         self.inner.push(byte);
     }
 
-    pub fn push_string(&mut self, string: String) {
+    pub(crate) fn push_string(&mut self, string: String) {
         self.inner.extend_from_slice(string.as_bytes());
     }
 
-    pub fn push_u32_shrunk(&mut self, num: u32) {
+    pub(crate) fn push_u32_shrunk(&mut self, num: u32) {
         self.inner.extend(Self::_to_shrunk_bytes(num));
     }
 
-    pub fn push_byte_buffer(&mut self, other: &ByteBuffer) {
+    pub(crate) fn push_byte_buffer(&mut self, other: &ByteBuffer) {
         self.inner.extend(other.to_vec());
     }
 
     /// Moves the byte buffer to the left by the specified [size]
-    pub fn pad_left(&mut self, size: usize) {
+    pub(crate) fn pad_left(&mut self, size: usize) {
         let padding = size.checked_sub(self.inner.len());
         if let Some(padding) = padding {
             if padding > 0 {
@@ -43,7 +43,7 @@ impl ByteBuffer {
     }
 
     /// Moves the byte buffer to the right by the specified [size]
-    pub fn pad_right(&mut self, size: usize) {
+    pub(crate) fn pad_right(&mut self, size: usize) {
         let padding = size.checked_sub(self.inner.len());
 
         if let Some(padding) = padding {
@@ -55,11 +55,11 @@ impl ByteBuffer {
     }
 
     /// Returns the length of the byte buffer
-    pub fn len(&self) -> usize {
+    pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
 
-    pub fn as_usize_unsafe(&self) -> usize {
+    pub(crate) fn as_usize_unsafe(&self) -> usize {
         let mut padded = self.clone();
         padded.pad_left(4);
         ((padded.inner[0] as usize) << 24)
@@ -69,11 +69,11 @@ impl ByteBuffer {
     }
 
     /// Clones inner representation of the byte buffer and returns Vec<u8> of it
-    pub fn to_vec(&self) -> Vec<u8> {
+    pub(crate) fn to_vec(&self) -> Vec<u8> {
         self.inner.clone()
     }
 
-    pub fn to_string(&self) -> Result<String, FromUtf8Error> {
+    pub(crate) fn to_string(&self) -> Result<String, FromUtf8Error> {
         String::from_utf8(self.inner.clone())
     }
 

@@ -1,2 +1,2 @@
-pub mod byte_buffer;
-pub mod id;
+pub(crate) mod byte_buffer;
+pub(crate) mod id;

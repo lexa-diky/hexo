@@ -9,10 +9,10 @@ use crate::compiler::cst::{
 use crate::match_ast;
 
 #[derive(Default)]
-pub struct CstParser {}
+pub(crate) struct CstParser {}
 
 impl CstParser {
-    pub fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
+    pub(crate) fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
         parse_file(path, &ast_root)
     }
 }
@@ -264,7 +264,7 @@ fn parse_atom_hex_into(node: &AstNode, buf: &mut Vec<CstAtom>) -> Result<(), Err
     Ok(())
 }
 
-pub fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, Error> {
+pub(crate) fn decode_bytes_from_string(s: &str) -> Result<Vec<u8>, Error> {
     (0..s.len()).step_by(2)
         .map(|i| {
             if s.len() < 2 {

@@ -5,7 +5,7 @@ mod error;
 mod parser;
 mod macros;
 
-pub use node::*;
-pub use error::*;
-pub use parser::*;
-pub use macros::*;
+pub(crate) use node::*;
+pub(crate) use error::*;
+pub(crate) use parser::*;
+pub(crate) use macros::*;

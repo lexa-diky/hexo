@@ -1,5 +1,5 @@
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum AstNodeType {
+pub(crate) enum AstNodeType {
     File,
 
     StatementConst,
@@ -45,7 +45,7 @@ impl AstNodeType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct AstNode {
+pub(crate) struct AstNode {
     node_type: AstNodeType,
     content: Option<String>,
     children: Vec<AstNode>,
@@ -65,15 +65,15 @@ impl AstNode {
         }
     }
 
-    pub fn children(&self) -> &Vec<AstNode> {
+    pub(crate) fn children(&self) -> &Vec<AstNode> {
         &self.children
     }
 
-    pub fn node_type(&self) -> AstNodeType {
+    pub(crate) fn node_type(&self) -> AstNodeType {
         self.node_type
     }
 
-    pub fn content(&self) -> Option<&String> {
+    pub(crate) fn content(&self) -> Option<&String> {
         self.content.as_ref()
     }
 }
