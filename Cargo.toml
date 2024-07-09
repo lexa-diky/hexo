@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [workspace]
-members = ["hexo-ast", "hexo-id", "hexo-io"]
+members = ["hexo-id", "hexo-io"]
 
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
@@ -26,4 +26,3 @@ notify = "6.1.1"
 console = "0.15.8"
 hexo-io = { path = "hexo-io", version = "0.7.8" }
 hexo-id = { path = "hexo-id", version = "0.7.8" }
-hexo-ast = { path = "hexo-ast", version = "0.7.8" }

@@ -2,8 +2,8 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::error::Error;
-use crate::node::{AstNode, AstNodeType};
+use crate::compiler::ast::Error;
+use crate::compiler::ast::{AstNode, AstNodeType};
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]

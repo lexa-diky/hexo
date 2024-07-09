@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use hexo_ast::{AstNode, AstNodeType};
+use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::compiler::cst::Error;
 use crate::compiler::cst::CstFile;
 use crate::compiler::cst::{

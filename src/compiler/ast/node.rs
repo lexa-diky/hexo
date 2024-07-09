@@ -28,7 +28,7 @@ pub enum AstNodeType {
 
 impl AstNodeType {
 
-    pub(super) fn must_capture_value(&self) -> bool {
+    pub(crate) fn must_capture_value(&self) -> bool {
         matches!(
             self,
             AstNodeType::AtomUtf8
@@ -53,7 +53,7 @@ pub struct AstNode {
 
 impl AstNode {
 
-    pub(super) fn new(
+    pub(crate) fn new(
         node_type: AstNodeType,
         content: Option<String>,
         children: Vec<AstNode>,

@@ -1,4 +1,4 @@
-use hexo_ast::AstNodeType;
+use crate::compiler::ast::AstNodeType;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]

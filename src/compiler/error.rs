@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub(crate) enum Error {
     Io(std::io::Error),
-    Ast(hexo_ast::Error),
+    Ast(crate::compiler::ast::Error),
     Cst(crate::compiler::cst::Error),
     Rst(crate::compiler::rst::Error),
 }
