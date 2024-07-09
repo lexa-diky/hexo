@@ -12,7 +12,7 @@ keywords = ["cli-utility", "binary", "hexo", "simple"]
 categories = ["command-line-utilities"]
 exclude = [
     "sample.hexo",
-    "testcases"
+    "samples"
 ]
 
 [dependencies]
