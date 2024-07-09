@@ -16,6 +16,7 @@ pub(crate) use error::Error;
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
 mod error;
+use crate::util::logger;
 
 #[derive(Subcommand)]
 enum Commands {
@@ -114,6 +115,7 @@ impl Cli {
     }
 
     pub(crate) fn build(source: String, output: Option<String>) -> Result<(), Error> {
+        logger::debug!("building: source: {}, output: {:?}", source, output);
         let context = HexoCompilerContext::new();
         let compiler = HexoCompiler::new(context);
 
