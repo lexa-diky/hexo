@@ -19,53 +19,53 @@ pub(crate) struct FunctionBinding {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct LocalCompilationContext {
+pub(crate) struct LocalCompilationScope {
     constant_table: HashMap<String, ConstantBinding>,
     function_table: HashMap<String, FunctionBinding>,
     parents: Vec<HexoId>,
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct CompilationContext {
+pub(crate) struct CompilationScope {
     self_path: PathBuf,
-    local_contexts: HashMap<HexoId, LocalCompilationContext>,
+    local_scopes: HashMap<HexoId, LocalCompilationScope>,
     native_function_index: NativeFunctionIndex,
 }
 
-impl CompilationContext {
-    pub(crate) fn new(path: &Path) -> CompilationContext {
-        CompilationContext {
+impl CompilationScope {
+    pub(crate) fn new(path: &Path) -> CompilationScope {
+        CompilationScope {
             self_path: path.to_path_buf(),
-            local_contexts: HashMap::new(),
+            local_scopes: HashMap::new(),
             native_function_index: NativeFunctionIndex::new(),
         }
     }
 
     // region constant
-    pub(crate) fn bind_local_constant(&mut self, context_id: HexoId, constant: ConstantBinding) {
-        self.local_contexts
-            .entry(context_id)
-            .or_insert_with(LocalCompilationContext::new);
+    pub(crate) fn bind_local_constant(&mut self, scope_id: HexoId, constant: ConstantBinding) {
+        self.local_scopes
+            .entry(scope_id)
+            .or_insert_with(LocalCompilationScope::new);
 
-        let local_context: &mut LocalCompilationContext = self
-            .local_contexts
-            .get_mut(&context_id)
+        let local_scope: &mut LocalCompilationScope = self
+            .local_scopes
+            .get_mut(&scope_id)
             .expect("prechecked but value is still missing");
 
-        local_context.bind_constant(constant);
+        local_scope.bind_constant(constant);
     }
 
     pub(crate) fn get_local_constant(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         name: &String,
     ) -> Option<&ConstantBinding> {
-        let local_context = self.local_contexts.get(&context_id)?;
+        let local_scope = self.local_scopes.get(&scope_id)?;
 
-        let local_constant = local_context.get_constant(name);
+        let local_constant = local_scope.get_constant(name);
 
         if local_constant.is_none() {
-            for parent in &local_context.parents {
+            for parent in &local_scope.parents {
                 let parent_constant = self.get_local_constant(*parent, name);
                 if parent_constant.is_some() {
                     return parent_constant;
@@ -80,30 +80,30 @@ impl CompilationContext {
 
     // endregion
 
-    pub(crate) fn bind_local_function(&mut self, context_id: HexoId, function: FunctionBinding) {
-        self.local_contexts
-            .entry(context_id)
-            .or_insert_with(LocalCompilationContext::new);
+    pub(crate) fn bind_local_function(&mut self, scope_id: HexoId, function: FunctionBinding) {
+        self.local_scopes
+            .entry(scope_id)
+            .or_insert_with(LocalCompilationScope::new);
 
-        let local_context: &mut LocalCompilationContext = self
-            .local_contexts
-            .get_mut(&context_id)
+        let local_scope: &mut LocalCompilationScope = self
+            .local_scopes
+            .get_mut(&scope_id)
             .expect("prechecked but value is still missing");
 
-        local_context.bind_function(function);
+        local_scope.bind_function(function);
     }
 
     pub(crate) fn get_local_function(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         name: &String,
     ) -> Option<&FunctionBinding> {
-        let local_context = self.local_contexts.get(&context_id)?;
+        let local_scope = self.local_scopes.get(&scope_id)?;
 
-        let local_function = local_context.get_function(name);
+        let local_function = local_scope.get_function(name);
 
         if local_function.is_none() {
-            for parent in &local_context.parents {
+            for parent in &local_scope.parents {
                 let parent_function = self.get_local_function(*parent, name);
                 if parent_function.is_some() {
                     return parent_function;
@@ -120,25 +120,25 @@ impl CompilationContext {
         return self.native_function_index.find(name.to_string());
     }
 
-    pub(crate) fn bind_parents(&mut self, context_id: HexoId, parents: Vec<HexoId>) {
-        self.local_contexts
-            .entry(context_id)
-            .or_insert_with(LocalCompilationContext::new);
+    pub(crate) fn bind_parents(&mut self, scope_id: HexoId, parents: Vec<HexoId>) {
+        self.local_scopes
+            .entry(scope_id)
+            .or_insert_with(LocalCompilationScope::new);
 
-        let local_context: &mut LocalCompilationContext = self
-            .local_contexts
-            .get_mut(&context_id)
+        let local_scope: &mut LocalCompilationScope = self
+            .local_scopes
+            .get_mut(&scope_id)
             .expect("prechecked but value is still missing");
 
         for parent in parents {
-            local_context.attach_parent(parent);
+            local_scope.attach_parent(parent);
         }
     }
 }
 
-impl LocalCompilationContext {
-    fn new() -> LocalCompilationContext {
-        LocalCompilationContext {
+impl LocalCompilationScope {
+    fn new() -> LocalCompilationScope {
+        LocalCompilationScope {
             constant_table: HashMap::new(),
             function_table: HashMap::new(),
             parents: Vec::new(),

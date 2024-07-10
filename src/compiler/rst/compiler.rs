@@ -4,8 +4,8 @@ use std::path::Path;
 use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstAtomVec, CstEmitStatement, CstFile, CstFunctionStatement,
 };
-use crate::compiler::rst::compilation_context::{
-    CompilationContext, ConstantBinding, FunctionBinding,
+use crate::compiler::rst::scope::{
+    CompilationScope, ConstantBinding, FunctionBinding,
 };
 use crate::compiler::rst::error::Error;
 use crate::compiler::rst::node::HexoFile;
@@ -23,28 +23,28 @@ impl RstCompiler<'_> {
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
-        let context_id = HexoId::next();
-        let mut context = self.build_context(context_id, cst.path(), cst.main())?;
+        let scope_id = HexoId::next();
+        let mut scope = self.build_scope(scope_id, cst.path(), cst.main())?;
 
-        let bb = self.build_bytes(context_id, &mut context, cst.main().emits())?;
+        let bb = self.build_bytes(scope_id, &mut scope, cst.main().emits())?;
 
         Ok(HexoFile::new(
             cst.path(),
-            context,
+            scope,
             bb,
         ))
     }
 
     fn build_bytes(
         &self,
-        context_id: HexoId,
-        context: &mut CompilationContext,
+        scope_id: HexoId,
+        scope: &mut CompilationScope,
         emits: &Vec<CstEmitStatement>,
     ) -> Result<ByteBuffer, Error> {
         let mut byte_buffer = ByteBuffer::default();
 
         for emit in emits {
-            self.build_bytes_into(context_id, context, emit.atoms(), &mut byte_buffer)?
+            self.build_bytes_into(scope_id, scope, emit.atoms(), &mut byte_buffer)?
         }
 
         Ok(byte_buffer)
@@ -52,8 +52,8 @@ impl RstCompiler<'_> {
 
     fn build_bytes_into(
         &self,
-        context_id: HexoId,
-        context: &mut CompilationContext,
+        scope_id: HexoId,
+        scope: &mut CompilationScope,
         atoms: &CstAtomVec,
         buffer: &mut ByteBuffer,
     ) -> Result<(), Error> {
@@ -63,10 +63,10 @@ impl RstCompiler<'_> {
                 CstAtom::String(string) => buffer.push_string(string.clone()),
                 CstAtom::Number(number) => buffer.push_u32_shrunk(*number),
                 CstAtom::Constant { name } => {
-                    Self::build_constant_into(context_id, context, name, buffer)?
+                    Self::build_constant_into(scope_id, scope, name, buffer)?
                 }
                 CstAtom::Function { name, params } => {
-                    self.build_function_into(context_id, context, name.clone(), params, buffer)?
+                    self.build_function_into(scope_id, scope, name.clone(), params, buffer)?
                 }
             }
         }
@@ -76,13 +76,13 @@ impl RstCompiler<'_> {
 
     fn build_function_into(
         &self,
-        context_id: HexoId,
-        context: &mut CompilationContext,
+        scope_id: HexoId,
+        scope: &mut CompilationScope,
         function_name: String,
         params: &Vec<CstActualParameter>,
         buffer: &mut ByteBuffer,
     ) -> Result<(), Error> {
-        let native_function = context.get_native_function(function_name.as_str());
+        let native_function = scope.get_native_function(function_name.as_str());
         if let Some(native_function) = native_function {
             if self.safe_mode && !native_function.signature().is_safe() {
                 return Err(
@@ -97,7 +97,7 @@ impl RstCompiler<'_> {
 
             for param in params {
                 let mut param_buffer = ByteBuffer::default();
-                self.build_bytes_into(context_id, context, param.value(), &mut param_buffer)?;
+                self.build_bytes_into(scope_id, scope, param.value(), &mut param_buffer)?;
 
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }
@@ -109,18 +109,18 @@ impl RstCompiler<'_> {
             return Ok(());
         }
 
-        let binding = context.clone();
+        let binding = scope.clone();
         let function_binding = binding
-            .get_local_function(context_id, &function_name)
+            .get_local_function(scope_id, &function_name)
             .ok_or(Error::UnresolvedFunction {
                 name: function_name.clone(),
             })?;
 
         for param in params {
             let mut param_buffer = ByteBuffer::default();
-            self.build_bytes_into(context_id, context, param.value(), &mut param_buffer).unwrap();
+            self.build_bytes_into(scope_id, scope, param.value(), &mut param_buffer).unwrap();
 
-            context.bind_local_constant(
+            scope.bind_local_constant(
                 function_binding.identifier,
                 ConstantBinding {
                     name: param.name().to_string(),
@@ -130,7 +130,7 @@ impl RstCompiler<'_> {
         }
 
         for emit in &function_binding.emits {
-            self.build_bytes_into(function_binding.identifier, context, emit.atoms(), buffer)
+            self.build_bytes_into(function_binding.identifier, scope, emit.atoms(), buffer)
                 .unwrap();
         }
 
@@ -138,13 +138,13 @@ impl RstCompiler<'_> {
     }
 
     fn build_constant_into(
-        context_id: HexoId,
-        context: &CompilationContext,
+        scope_id: HexoId,
+        scope: &CompilationScope,
         name: &String,
         buffer: &mut ByteBuffer,
     ) -> Result<(), Error> {
-        let constant_binding = context
-            .get_local_constant(context_id, name)
+        let constant_binding = scope
+            .get_local_constant(scope_id, name)
             .ok_or(Error::UnresolvedConstant { name: name.clone() })?;
 
         buffer.push_byte_buffer(&constant_binding.byte_buffer);
@@ -152,41 +152,41 @@ impl RstCompiler<'_> {
         Ok(())
     }
 
-    fn build_context(
+    fn build_scope(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         file_path: &Path,
         cst: &CstFunctionStatement,
-    ) -> Result<CompilationContext, Error> {
-        let mut root_context = CompilationContext::new(file_path);
+    ) -> Result<CompilationScope, Error> {
+        let mut root_scope = CompilationScope::new(file_path);
 
-        self.build_context_into(context_id, &cst, &mut root_context)?;
+        self.build_scope_into(scope_id, &cst, &mut root_scope)?;
 
-        Ok(root_context)
+        Ok(root_scope)
     }
 
-    fn build_context_into(
+    fn build_scope_into(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         cst: &&CstFunctionStatement,
-        root_context: &mut CompilationContext,
+        root_scope: &mut CompilationScope,
     ) -> Result<(), Error> {
-        self.build_context_constants_into(context_id, cst, root_context)?;
-        self.build_context_functions_into(context_id, cst, root_context)?;
+        self.build_scope_constants_into(scope_id, cst, root_scope)?;
+        self.build_scope_functions_into(scope_id, cst, root_scope)?;
         Ok(())
     }
 
-    fn build_context_constants_into(
+    fn build_scope_constants_into(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         cst: &&CstFunctionStatement,
-        context: &mut CompilationContext,
+        scope: &mut CompilationScope,
     ) -> Result<(), Error> {
         for constant in cst.constants() {
             let mut buff = ByteBuffer::default();
-            self.build_bytes_into(context_id, context, constant.atoms(), &mut buff)?;
-            context.bind_local_constant(
-                context_id,
+            self.build_bytes_into(scope_id, scope, constant.atoms(), &mut buff)?;
+            scope.bind_local_constant(
+                scope_id,
                 ConstantBinding {
                     name: constant.name().to_string(),
                     byte_buffer: buff,
@@ -197,26 +197,26 @@ impl RstCompiler<'_> {
         Ok(())
     }
 
-    fn build_context_functions_into(
+    fn build_scope_functions_into(
         &self,
-        context_id: HexoId,
+        scope_id: HexoId,
         cst: &&CstFunctionStatement,
-        root_context: &mut CompilationContext,
+        root_scope: &mut CompilationScope,
     ) -> Result<(), Error> {
         for function in cst.functions() {
-            let inner_function_context_id = HexoId::next();
-            root_context.bind_local_function(
-                context_id,
+            let inner_function_scope_id = HexoId::next();
+            root_scope.bind_local_function(
+                scope_id,
                 FunctionBinding {
-                    identifier: inner_function_context_id,
+                    identifier: inner_function_scope_id,
                     name: function.name().to_string(),
                     emits: function.emits().clone(),
                 },
             );
 
-            self.build_context_into(inner_function_context_id, &function, root_context)?;
+            self.build_scope_into(inner_function_scope_id, &function, root_scope)?;
 
-            root_context.bind_parents(inner_function_context_id, vec![context_id]);
+            root_scope.bind_parents(inner_function_scope_id, vec![scope_id]);
         }
 
         Ok(())

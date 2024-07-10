@@ -1,4 +1,4 @@
-mod compilation_context;
+mod scope;
 mod compiler;
 mod error;
 mod node;
