@@ -11,9 +11,9 @@ pub(crate) struct HexoFile {
 
 impl HexoFile {
 
-    pub(crate) fn new(path: PathBuf, context: CompilationContext, emits: ByteBuffer) -> HexoFile {
+    pub(crate) fn new(path: &Path, context: CompilationContext, emits: ByteBuffer) -> HexoFile {
         HexoFile {
-            path,
+            path: path.to_path_buf(),
             context,
             emits,
         }

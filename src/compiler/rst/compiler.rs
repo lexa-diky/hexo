@@ -28,7 +28,7 @@ impl RstCompiler<'_> {
         let bb = self.build_bytes(context_id, &mut context, cst.main().emits())?;
 
         Ok(HexoFile::new(
-            cst.path().to_path_buf(),
+            cst.path(),
             context,
             bb,
         ))

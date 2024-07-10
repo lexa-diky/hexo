@@ -15,8 +15,8 @@ pub(crate) struct FileCompilerSource {
 }
 
 impl FileCompilerSource {
-    pub(crate) fn new(path: PathBuf) -> FileCompilerSource {
-        FileCompilerSource { path }
+    pub(crate) fn new(path: &Path) -> FileCompilerSource {
+        FileCompilerSource { path: path.to_path_buf() }
     }
 }
 
