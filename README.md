@@ -152,3 +152,7 @@ Yes, safety is no goal of Hexo, please don't run untrusted code with it.
 
 You can use safe mode to disable `cmd` and `eval` functions.
 Please add `--safe` flag before command to enable it.
+
+#### Why unsafe mode is default?
+As Hexo is designed for quick and dirty tasks, we decided to make it as flexible as possible.
+Thus safe by default approach will only complicate workflow without adding any meaningful value.
