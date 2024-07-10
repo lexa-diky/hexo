@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::compiler::ast::{AstNode, AstNodeType};
 use crate::compiler::cst::Error;
@@ -12,20 +12,20 @@ use crate::match_ast;
 pub(crate) struct CstParser {}
 
 impl CstParser {
-    pub(crate) fn parse(&self, path: PathBuf, ast_root: AstNode) -> Result<CstFile, Error> {
+    pub(crate) fn parse(&self, path: &Path, ast_root: AstNode) -> Result<CstFile, Error> {
         parse_file(path, &ast_root)
     }
 }
 
 const MAIN_FUNCTION_NAME: &str = "main";
 
-fn parse_file(path: PathBuf, node: &AstNode) -> Result<CstFile, Error> {
+fn parse_file(path: &Path, node: &AstNode) -> Result<CstFile, Error> {
     guard_node_type(node, AstNodeType::File)?;
     let (emits, functions, constants) = parse_function_body(node)?;
 
     Ok(
         CstFile::new(
-            path,
+            path.to_path_buf(),
             CstFunctionStatement::new(
                 MAIN_FUNCTION_NAME.to_string(),
                 emits,

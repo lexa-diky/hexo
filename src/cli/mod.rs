@@ -18,7 +18,7 @@ use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
 mod error;
 use crate::util::{defer, logger};
-use crate::util::logger::{debug, LogLevel};
+use crate::util::logger::{LogLevel};
 
 #[derive(Subcommand)]
 enum Commands {

@@ -1,3 +1,5 @@
+#![feature(test)]
+
 use std::io::Read;
 
 use crate::cli::Cli;
@@ -12,18 +14,19 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-
     #[cfg(test)]
     mod integration {
         use std::env::temp_dir;
         use std::fs::{create_dir_all, File};
         use crate::cli::{Cli};
         use std::io::Read;
+        use crate::util::logger::{HexoLogger, LogLevel};
 
         macro_rules! integration_test_case {
             ($case:ident) => {
                 #[test]
                 fn $case() {
+                    HexoLogger::set_level(LogLevel::None);
                     let case_name = stringify!($case);
 
                     let input_file_path = format!("samples/{case_name}/input.hexo");

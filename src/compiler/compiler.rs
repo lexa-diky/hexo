@@ -1,8 +1,8 @@
+use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 use crate::compiler::ast::{AstNode, AstParser};
 use crate::compiler::cst::{CstFile, CstParser};
 use crate::compiler::error::Error;
 use crate::compiler::rst::{HexoFile, RstCompiler};
-use crate::compiler::{Compilation, CompilerSource, HexoCompilerContext};
 
 pub(crate) struct HexoCompiler {
     context: HexoCompilerContext,
@@ -50,5 +50,31 @@ impl HexoCompiler {
         let rst = self.compile_rst(source)?;
 
         Ok(Compilation::from(rst.emits.to_vec()))
+    }
+}
+
+#[cfg(test)]
+mod benchmarks {
+    extern crate test;
+
+    use test::bench::*;
+    use crate::compiler::compiler_source::tests::EagerCompilerSource;
+    use super::*;
+
+    #[bench]
+    fn compilation(b: &mut Bencher) {
+        let compiler = HexoCompiler::new(
+            HexoCompilerContext::new()
+        );
+
+        let source = EagerCompilerSource::new(
+            "samples/java_object/input.hexo"
+        ).unwrap();
+
+        b.iter(|| {
+            black_box(
+                compiler.compile(&source).unwrap()
+            )
+        });
     }
 }

@@ -1,11 +1,11 @@
 use std::fs::File;
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub(crate) trait CompilerSource {
     fn read(&self) -> Result<String, std::io::Error>;
 
-    fn path(&self) -> PathBuf;
+    fn path(&self) -> &Path;
 }
 
 pub(crate) struct FileCompilerSource {
@@ -27,7 +27,44 @@ impl CompilerSource for FileCompilerSource {
         Ok(buff)
     }
 
-    fn path(&self) -> PathBuf {
-        self.path.clone()
+    fn path(&self) -> &Path {
+        self.path.as_path()
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use std::fs::File;
+    use std::io::Read;
+    use std::path::{Path, PathBuf};
+    use crate::compiler::CompilerSource;
+
+    pub(crate) struct EagerCompilerSource {
+        content: String,
+        path: PathBuf,
+    }
+
+    impl CompilerSource for EagerCompilerSource {
+        fn read(&self) -> Result<String, std::io::Error> {
+            Ok(self.content.clone())
+        }
+
+        fn path(&self) -> &Path {
+            return self.path.as_path();
+        }
+    }
+
+    impl EagerCompilerSource {
+
+        pub(crate) fn new<P: AsRef<Path>>(path: P) -> Result<Self, std::io::Error> {
+            let pat_ref = path.as_ref();
+            let mut source_file = File::open(pat_ref)?;
+            let mut content = String::new();
+            source_file.read_to_string(&mut content)?;
+
+            Ok(
+                EagerCompilerSource { content: content, path: pat_ref.to_path_buf() }
+            )
+        }
     }
 }
