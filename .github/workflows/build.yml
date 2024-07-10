@@ -44,7 +44,12 @@ jobs:
           cache-all-crates: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
       - name: Run benchmarks
-        run: cargo bench --verbose
+        run: cargo bench --verbose | tee output.txt
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'cargo'
+          output-file-path: output.txt
 
   lint:
     runs-on: ubuntu-latest
