@@ -14,7 +14,7 @@ impl NativeFunctionIndex {
     }
 
     pub(crate) fn find(&self, name: String) -> Option<&NativeFunction> {
-        return self.functions.iter().find(|f| f.signature.name == name);
+        return self.functions.iter().find(|f| f.signature().name == name);
     }
 
     fn create_native_functions() -> Vec<NativeFunction> {

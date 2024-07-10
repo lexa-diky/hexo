@@ -7,9 +7,9 @@ use crate::compiler::native_fn::error::Error;
 use crate::compiler::native_fn::signature::{NativeFunction, NativeFunctionSignature};
 
 pub(crate) fn create_len_native_function() -> NativeFunction {
-    NativeFunction {
-        signature: NativeFunctionSignature::new("len"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("len"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let mut result = ByteBuffer::default();
             let arg0 = get_named_argument(&arguments, "utf8")
                 .unwrap_or_else(|| get_argument_at(&arguments, 0, "len").unwrap());
@@ -18,13 +18,13 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
             result.push_u32_shrunk(len);
             Ok(result)
         },
-    }
+    )
 }
 
 pub(crate) fn create_pad_left_native_function() -> NativeFunction {
-    NativeFunction {
-        signature: NativeFunctionSignature::new("pad_left"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("pad_left"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let mut arg0 = get_argument_at(&arguments, 0, "pad_left")?.clone();
             let arg1 = get_argument_at(&arguments, 1, "pad_left")?;
 
@@ -32,13 +32,13 @@ pub(crate) fn create_pad_left_native_function() -> NativeFunction {
 
             Ok(arg0.clone())
         },
-    }
+    )
 }
 
 pub(crate) fn create_pad_right_native_function() -> NativeFunction {
-    NativeFunction {
-        signature: NativeFunctionSignature::new("pad_right"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("pad_right"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let mut arg0: ByteBuffer = get_argument_at(&arguments, 0, "pad_right")?.clone();
             let arg1 = get_argument_at(&arguments, 1, "pad_right")?;
 
@@ -46,13 +46,13 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
 
             Ok(arg0.clone())
         },
-    }
+    )
 }
 
 pub(crate) fn create_cmd_native_function() -> NativeFunction {
-    NativeFunction {
-        signature: NativeFunctionSignature::new("cmd"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("cmd"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let command = get_argument_at(&arguments, 0, "cmd")?
                 .to_string()
                 .map_err(|e| Error::Unknown(e.to_string()))?;
@@ -65,13 +65,13 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
 
             Ok(buffer)
         },
-    }
+    )
 }
 
 pub(crate) fn create_read_file_native_function() -> NativeFunction {
-    return NativeFunction {
-        signature: NativeFunctionSignature::new("read_file"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("read_file"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let arg0 = get_argument_at(&arguments, 0, "read_file")?;
 
             let file_path = arg0
@@ -89,13 +89,13 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
 
             Ok(buffer)
         },
-    };
+    )
 }
 
 pub(crate) fn create_pad_native_function() -> NativeFunction {
-    return NativeFunction {
-        signature: NativeFunctionSignature::new("pad"),
-        executor: |arguments: HashMap<String, ByteBuffer>, _| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("pad"),
+        |arguments: HashMap<String, ByteBuffer>, _| {
             let mut buffer = get_argument_at(&arguments, 0, "pad")?.clone();
 
             let left_padding = get_named_argument(&arguments, "left").map(|b| b.as_usize_unsafe());
@@ -111,13 +111,13 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
 
             Ok(buffer)
         },
-    };
+    )
 }
 
 pub(crate) fn create_eval_native_function() -> NativeFunction {
-    return NativeFunction {
-        signature: NativeFunctionSignature::new("eval"),
-        executor: |arguments: HashMap<String, ByteBuffer>, compiler| {
+    NativeFunction::new(
+        NativeFunctionSignature::new("eval"),
+        |arguments: HashMap<String, ByteBuffer>, compiler| {
             let buffer = get_argument_at(&arguments, 0, "eval")?.clone();
             let source = LiteralCompilerSource::anonymous(
                 buffer.to_string()
@@ -127,7 +127,7 @@ pub(crate) fn create_eval_native_function() -> NativeFunction {
                 .map_err(|e| Error::Unknown(e.to_string()))?;
             Ok(ByteBuffer::from(result.content))
         },
-    };
+    )
 }
 
 fn get_argument_at<'a>(

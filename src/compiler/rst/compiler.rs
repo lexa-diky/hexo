@@ -27,11 +27,11 @@ impl RstCompiler<'_> {
 
         let bb = self.build_bytes(context_id, &mut context, cst.main().emits())?;
 
-        Ok(HexoFile {
-            path: cst.path().to_path_buf(),
+        Ok(HexoFile::new(
+            cst.path().to_path_buf(),
             context,
-            emits: bb,
-        })
+            bb,
+        ))
     }
 
     fn build_bytes(
@@ -83,7 +83,7 @@ impl RstCompiler<'_> {
     ) -> Result<(), Error> {
         let native_function = context.get_native_function(function_name.clone());
         if native_function.is_some() {
-            let executor = native_function.unwrap().executor;
+            let executor = native_function.unwrap().executor();
             let mut params_buffer = HashMap::new();
 
             for param in params {

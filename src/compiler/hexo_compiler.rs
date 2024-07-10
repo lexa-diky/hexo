@@ -49,7 +49,7 @@ impl HexoCompiler {
     ) -> Result<Compilation, Error> {
         let rst = self.compile_rst(source)?;
 
-        Ok(Compilation::from(rst.emits.to_vec()))
+        Ok(Compilation::from(rst.emits().to_vec()))
     }
 }
 

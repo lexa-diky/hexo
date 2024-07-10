@@ -3,5 +3,5 @@ pub(crate) mod id;
 pub(crate) mod logger;
 mod defer;
 
-pub use defer::*;
+pub(crate) use defer::*;
 

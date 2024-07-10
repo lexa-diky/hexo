@@ -4,7 +4,7 @@ pub(crate) struct Deferred<F: FnMut()> {
 
 impl<F: FnMut()> Deferred<F> {
     pub(crate) fn new(f: F) -> Self {
-        Deferred { f: f }
+        Deferred { f }
     }
 }
 
@@ -17,7 +17,7 @@ impl<F: FnMut()> Drop for Deferred<F> {
 macro_rules! defer {
     ($e:stmt) => (
         use crate::util::Deferred;
-        let _deferred = Deferred::new(|| -> () { $e; });
+        let _deferred = Deferred::new(|| -> () { $e });
     )
 }
 

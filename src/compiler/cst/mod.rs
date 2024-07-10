@@ -1,5 +1,3 @@
-#![feature(concat_idents)]
-
 pub(crate) use error::*;
 pub(crate) use node::*;
 pub(crate) use parser::*;

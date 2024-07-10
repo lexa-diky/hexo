@@ -31,7 +31,7 @@
         }
 
         $(
-        let mut $holder = $holder.ok_or(Error::MissingContent {
+        let $holder = $holder.ok_or(Error::MissingContent {
             node_type: AstNodeType::$option,
         })?;
         )+

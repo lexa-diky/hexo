@@ -20,6 +20,23 @@ type NativeFunctionExecutor = fn(HashMap<String, ByteBuffer>, &HexoCompiler) -> 
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunction {
-    pub(crate) signature: NativeFunctionSignature,
-    pub(crate) executor: NativeFunctionExecutor,
+    signature: NativeFunctionSignature,
+    executor: NativeFunctionExecutor,
+}
+
+impl NativeFunction {
+    pub(crate) fn new(signature: NativeFunctionSignature, executor: NativeFunctionExecutor) -> NativeFunction {
+        NativeFunction {
+            signature: signature,
+            executor: executor,
+        }
+    }
+
+    pub(crate) fn signature(&self) -> &NativeFunctionSignature {
+        &self.signature
+    }
+
+    pub(crate) fn executor(&self) -> NativeFunctionExecutor {
+        self.executor
+    }
 }

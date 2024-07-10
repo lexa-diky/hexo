@@ -1,6 +1,5 @@
 #![feature(test)]
 
-use std::io::Read;
 
 use crate::cli::Cli;
 
