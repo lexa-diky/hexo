@@ -109,14 +109,17 @@ impl Cli {
     }
 
     fn watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
-        if let Ok(e) = event {
-            if let Modify(ModifyKind::Data(_)) = e.kind {
-                logger::debug!("rebuilding...");
-                let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
-                logger::debug!(" done!");
+        match event {
+            Ok(e) => {
+                if let Modify(ModifyKind::Data(_)) = e.kind {
+                    logger::debug!("rebuilding...");
+                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
+                    logger::debug!(" done!");
+                }
             }
-        } else {
-            Self::print_error(event.unwrap_err().into());
+            Err(e) => {
+                Self::print_error(e.into());
+            }
         }
     }
 

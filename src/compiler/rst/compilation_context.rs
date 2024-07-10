@@ -116,8 +116,8 @@ impl CompilationContext {
         None
     }
 
-    pub(crate) fn get_native_function(&self, name: String) -> Option<&NativeFunction> {
-        return self.native_function_index.find(name);
+    pub(crate) fn get_native_function(&self, name: &str) -> Option<&NativeFunction> {
+        return self.native_function_index.find(name.to_string());
     }
 
     pub(crate) fn bind_parents(&mut self, context_id: HexoId, parents: Vec<HexoId>) {

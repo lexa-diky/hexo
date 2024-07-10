@@ -16,7 +16,7 @@ impl NativeFunctionSignature {
     }
 }
 
-type NativeFunctionExecutor = fn(HashMap<String, ByteBuffer>, &HexoCompiler) -> Result<ByteBuffer, Error>;
+type NativeFunctionExecutor = fn(&HashMap<String, ByteBuffer>, &HexoCompiler) -> Result<ByteBuffer, Error>;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunction {

@@ -17,7 +17,11 @@ cargo install hexo
 
 ## CLI
 
-### build
+Use `hexo -h` to get complete CLI manual.
+
+### Commands
+
+#### build
 
 Takes `source` file in hexo format and compiles it to binary file `output`
 
@@ -25,7 +29,7 @@ Takes `source` file in hexo format and compiles it to binary file `output`
 hexo build --source <path to source> --output <path to output>
 ```
 
-### watch
+#### watch
 
 Takes `source` file in hexo format and compiles it to binary file `output`. Will recompile on `source` file change
 
@@ -38,7 +42,7 @@ hexo watch --source <path to source> --output <path to output>
 
 ### Emitter
 
-To emit a byte use glyph '>' fallowed by byte value:
+To emit a byte use glyph `>` fallowed by byte value:
 
 ```hexo
 > 0a // by default numbers are interpreted as hexadecimal, will emit decimal 10
@@ -48,13 +52,13 @@ To emit a byte use glyph '>' fallowed by byte value:
 
 ### Constants
 
-To declare a constant use glyph '$' fallowed by constant name and value:
+To declare a constant use glyph `$` fallowed by constant name and value:
 
 ```hexo
 $ class_name 'HelloWorld'
 ```
 
-Then you can use it as if you used hex or binary string by prefixing it with '$':
+Then you can use it as if you used hex or binary string by prefixing it with `$`:
 
 ```hexo
 > $class_name
@@ -62,7 +66,7 @@ Then you can use it as if you used hex or binary string by prefixing it with '$'
 
 ### Declaring Functions
 
-You can declare arbitrary functions using glyph '#' fallowed by function name and body:
+You can declare arbitrary functions using glyph `#` fallowed by function name and body:
 
 ```hexo
 # class_declaration {
@@ -76,7 +80,7 @@ Function arguments are referenced by their index: `$0`, `$1`, `$2`, ...
 
 ### Calling Functions
 
-To call a function use glyph '#' fallowed by function name and arguments:
+To call a function use glyph `#` fallowed by function name and arguments:
 
 ```hexo
 // String functions

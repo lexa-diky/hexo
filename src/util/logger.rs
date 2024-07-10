@@ -81,7 +81,7 @@ lazy_static!(
 macro_rules! debug {
     ($($arg:tt)*) => {
         {
-            let  instance = crate::util::logger::INSTANCE.lock().unwrap();
+            let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Debug {
                 instance.debug(
                     format!(
@@ -98,7 +98,7 @@ macro_rules! debug {
 macro_rules! error {
     ($($arg:tt)*) => {
         {
-            let  instance = crate::util::logger::INSTANCE.lock().unwrap();
+            let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Error {
                 instance.error(
                     format!(
@@ -115,7 +115,7 @@ macro_rules! error {
 macro_rules! info {
     ($($arg:tt)*) => {
         {
-            let  instance = crate::util::logger::INSTANCE.lock().unwrap();
+            let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Info {
                 instance.info(
                     format!(
@@ -132,7 +132,7 @@ macro_rules! info {
 macro_rules! warning {
     ($($arg:tt)*) => {
         {
-            let  instance = crate::util::logger::INSTANCE.lock().unwrap();
+            let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Warn {
                 instance.warn(
                     format!(
@@ -148,7 +148,7 @@ macro_rules! warning {
 
 macro_rules! output {
     ($($arg:tt)*) => {
-        let  instance = crate::util::logger::INSTANCE.lock().unwrap();
+        let instance = crate::util::logger::INSTANCE.lock().unwrap();
         instance.output(
             format!($($arg)*).as_str()
         );

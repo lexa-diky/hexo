@@ -81,9 +81,9 @@ impl RstCompiler<'_> {
         params: &Vec<CstActualParameter>,
         buffer: &mut ByteBuffer,
     ) -> Result<(), Error> {
-        let native_function = context.get_native_function(function_name.clone());
-        if native_function.is_some() {
-            let executor = native_function.unwrap().executor();
+        let native_function = context.get_native_function(function_name.as_str());
+        if let Some(native_function) = native_function {
+            let executor = native_function.executor();
             let mut params_buffer = HashMap::new();
 
             for param in params {
@@ -94,7 +94,7 @@ impl RstCompiler<'_> {
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }
 
-            executor(params_buffer.clone(), self.parent)
+            executor(&&params_buffer, self.parent)
                 .map(|bb| buffer.push_byte_buffer(&bb))
                 .map_err(Error::NativeFunctionExecution)?;
 
