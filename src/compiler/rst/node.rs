@@ -20,7 +20,7 @@ impl HexoFile {
     }
 
     pub(crate) fn path(&self) -> &Path {
-        &self.path.as_path()
+        &self.path
     }
 
     pub(crate) fn context(&self) -> &CompilationContext {

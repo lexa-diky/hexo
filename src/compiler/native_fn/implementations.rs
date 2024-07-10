@@ -11,8 +11,8 @@ pub(crate) fn create_len_native_function() -> NativeFunction {
         NativeFunctionSignature::new("len"),
         |arguments, _| {
             let mut result = ByteBuffer::default();
-            let arg0 = get_named_argument(&arguments, "utf8")
-                .unwrap_or_else(|| get_argument_at(&arguments, 0, "len").unwrap());
+            let arg0 = get_named_argument(arguments, "utf8")
+                .unwrap_or_else(|| get_argument_at(arguments, 0, "len").unwrap());
 
             let len = arg0.len() as u32;
             result.push_u32_shrunk(len);
@@ -25,8 +25,8 @@ pub(crate) fn create_pad_left_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new("pad_left"),
         |arguments, _| {
-            let mut arg0 = get_argument_at(&arguments, 0, "pad_left")?.clone();
-            let arg1 = get_argument_at(&arguments, 1, "pad_left")?;
+            let mut arg0 = get_argument_at(arguments, 0, "pad_left")?.clone();
+            let arg1 = get_argument_at(arguments, 1, "pad_left")?;
 
             arg0.pad_left(arg1.as_usize_unsafe());
 
@@ -39,8 +39,8 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new("pad_right"),
         |arguments, _| {
-            let mut arg0: ByteBuffer = get_argument_at(&arguments, 0, "pad_right")?.clone();
-            let arg1 = get_argument_at(&arguments, 1, "pad_right")?;
+            let mut arg0: ByteBuffer = get_argument_at(arguments, 0, "pad_right")?.clone();
+            let arg1 = get_argument_at(arguments, 1, "pad_right")?;
 
             arg0.pad_right(arg1.as_usize_unsafe());
 
@@ -53,7 +53,7 @@ pub(crate) fn create_cmd_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new_unsafe("cmd"),
         |arguments, _| {
-            let command = get_argument_at(&arguments, 0, "cmd")?
+            let command = get_argument_at(arguments, 0, "cmd")?
                 .to_string()
                 .map_err(|e| Error::Unknown(e.to_string()))?;
 
@@ -72,7 +72,7 @@ pub(crate) fn create_read_file_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new("read_file"),
         |arguments, _| {
-            let arg0 = get_argument_at(&arguments, 0, "read_file")?;
+            let arg0 = get_argument_at(arguments, 0, "read_file")?;
 
             let file_path = arg0
                 .to_string()
@@ -96,11 +96,11 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new("pad"),
         |arguments, _| {
-            let mut buffer = get_argument_at(&arguments, 0, "pad")?.clone();
+            let mut buffer = get_argument_at(arguments, 0, "pad")?.clone();
 
-            let left_padding = get_named_argument(&arguments, "left").map(|b| b.as_usize_unsafe());
+            let left_padding = get_named_argument(arguments, "left").map(|b| b.as_usize_unsafe());
             let right_padding =
-                get_named_argument(&arguments, "right").map(|b| b.as_usize_unsafe());
+                get_named_argument(arguments, "right").map(|b| b.as_usize_unsafe());
 
             if let Some(size) = left_padding {
                 buffer.pad_left(size);
@@ -118,7 +118,7 @@ pub(crate) fn create_eval_native_function() -> NativeFunction {
     NativeFunction::new(
         NativeFunctionSignature::new_unsafe("eval"),
         |arguments, compiler| {
-            let buffer = get_argument_at(&arguments, 0, "eval")?.clone();
+            let buffer = get_argument_at(arguments, 0, "eval")?.clone();
             let source = LiteralCompilerSource::anonymous(
                 buffer.to_string()
                     .map_err(|e| Error::Unknown(e.to_string()))?,

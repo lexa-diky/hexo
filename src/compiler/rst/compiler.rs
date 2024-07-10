@@ -102,7 +102,7 @@ impl RstCompiler<'_> {
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }
 
-            executor(&&params_buffer, self.parent)
+            executor(&params_buffer, self.parent)
                 .map(|bb| buffer.push_byte_buffer(&bb))
                 .map_err(Error::NativeFunctionExecution)?;
 
