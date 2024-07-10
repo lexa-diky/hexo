@@ -1,1 +1,2 @@
-> #eval(#read_file('samples/java_object/input.hexo'))
+> #eval(#read_file('samples/java_object/input.hex'))
+

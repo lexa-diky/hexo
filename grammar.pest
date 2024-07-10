@@ -1,18 +1,27 @@
+// default symbols
 WHITESPACE = _{ " "+ }
 COMMENT = _{ "//" ~ (!"\n" ~ ANY)+ }
 
+// language custom symbols
+GL_EMIT = _{ ">" }
+GL_CONST = _{ "$" }
+GL_FN = _{ "#" }
+SY_BRO = _{ "(" }
+SY_BRC = _{ ")" }
+SY_UNDERSCORE = _{ "_" }
+
 // IDENTIFIER
-identifier = _{ (ASCII_ALPHANUMERIC | "_")+ }
+identifier = _{ (ASCII_ALPHANUMERIC | SY_UNDERSCORE)+ }
 
 
 file = _{ SOI ~ body ~ EOI }
-body = _{ "\n"* ~ (statement ~ "\n"+) * ~ statement? }
+body = _{ NEWLINE* ~ (statement ~ NEWLINE+) * ~ statement? }
 
 statement = _{ const_statement | emit_statement | fn_statement }
-	emit_statement = { ">" ~ atomic_strip }
-    const_statement = { "$" ~ const_statement_name ~ atomic_strip }
+	emit_statement = { GL_EMIT ~ atomic_strip }
+    const_statement = { GL_CONST ~ const_statement_name ~ atomic_strip }
         const_statement_name = @{ identifier }
-    fn_statement = { "#" ~ fn_statement_name ~ fn_statement_body }
+    fn_statement = { GL_FN ~ fn_statement_name ~ fn_statement_body }
         fn_statement_name = @{ identifier }
         fn_statement_body = { "{" ~ body ~ "}" }
 
@@ -27,9 +36,9 @@ atom = _{ atom_body ~ WHITESPACE? }
     atom_utf8 = { ( "''" | (!"'" ~ ANY) )* }
    		atom_utf8_decor = _{ "'" ~ atom_utf8 ~ "'" }
     atom_const = @{ identifier }
-		atom_const_decor = _{ "$" ~ atom_const }
+		atom_const_decor = _{ GL_CONST ~ atom_const }
 
-	atom_fn = { "#" ~ atom_fn_name ~ "(" ~ atom_fn_params? ~ ")" }
+	atom_fn = { GL_FN ~ atom_fn_name ~ SY_BRO ~ atom_fn_params? ~ SY_BRC }
     	atom_fn_name = { identifier }
         atom_fn_params = { (atom_fn_param ~ ",")* ~ atom_fn_param }
         atom_fn_param_identifier = { identifier }

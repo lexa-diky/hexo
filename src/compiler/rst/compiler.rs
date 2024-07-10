@@ -88,8 +88,7 @@ impl RstCompiler<'_> {
 
             for param in params {
                 let mut param_buffer = ByteBuffer::default();
-                self.build_bytes_into(context_id, context, param.value(), &mut param_buffer)
-                    .unwrap();
+                self.build_bytes_into(context_id, context, param.value(), &mut param_buffer)?;
 
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }

@@ -49,7 +49,7 @@ impl HexoLogger {
     }
 
     pub(crate) fn error(&self, message: &str) {
-        eprintln!("{message}");
+        eprintln!("{}", style(message).red());
     }
 
     pub(crate) fn info(&self, message: &str) {
