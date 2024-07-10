@@ -1,7 +1,11 @@
-pub(crate) struct HexoCompilerContext {}
+pub(crate) struct HexoCompilerContext {
+    safe_mode: bool
+}
 
 impl HexoCompilerContext {
-    pub(crate) fn new() -> Self {
-        HexoCompilerContext {}
+    pub(crate) fn new(safe_mode: bool) -> Self {
+        HexoCompilerContext {
+            safe_mode
+        }
     }
 }

@@ -44,24 +44,24 @@ impl HexoLogger {
         &self.level
     }
 
-    pub(crate) fn set_level(level: LogLevel) {
-        INSTANCE.lock().unwrap().level = level;
+    pub(crate) fn set_level(level: &LogLevel) {
+        INSTANCE.lock().unwrap().level = level.clone();
     }
 
-    pub(crate) fn error(&self, message: &str) {
-        eprintln!("{}", style(message).red());
+    pub(crate) fn error(&self, location: &str, message: &str) {
+        eprintln!("{} {}", style(location).blue(), style(message).red());
     }
 
-    pub(crate) fn info(&self, message: &str) {
-        eprintln!("{message}");
+    pub(crate) fn info(&self, location: &str, message: &str) {
+        eprintln!("{} {}", style(location).blue(), style(message).blue());
     }
 
-    pub(crate) fn debug(&self, message: &str) {
-        println!("{}", style(message).dim());
+    pub(crate) fn debug(&self, location: &str, message: &str) {
+        println!("{} {}", style(location).blue().dim(), style(message).dim());
     }
 
-    pub(crate) fn warn(&self, message: &str) {
-        println!("{}", style(message).yellow());
+    pub(crate) fn warn(&self, location: &str, message: &str) {
+        println!("{} {}", style(location).blue(), style(message).yellow());
     }
 
     pub(crate) fn output(&self, message: &str) {
@@ -84,11 +84,8 @@ macro_rules! debug {
             let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Debug {
                 instance.debug(
-                    format!(
-                        "{}: {}",
-                        module_path!(),
-                        format!($($arg)*).as_str()
-                    ).as_str()
+                    module_path!(),
+                    format!($($arg)*).as_str()
                 );
             }
         }
@@ -101,11 +98,8 @@ macro_rules! error {
             let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Error {
                 instance.error(
-                    format!(
-                        "{}: {}",
-                        module_path!(),
-                        format!($($arg)*).as_str()
-                    ).as_str()
+                    module_path!(),
+                    format!($($arg)*).as_str()
                 );
             }
         }
@@ -118,11 +112,8 @@ macro_rules! info {
             let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Info {
                 instance.info(
-                    format!(
-                        "{}: {}",
-                        module_path!(),
-                        format!($($arg)*).as_str()
-                    ).as_str()
+                    module_path!(),
+                    format!($($arg)*).as_str()
                 );
             }
         }
@@ -135,11 +126,8 @@ macro_rules! warning {
             let instance = crate::util::logger::INSTANCE.lock().unwrap();
             if *instance.level() <= crate::util::logger::LogLevel::Warn {
                 instance.warn(
-                    format!(
-                        "{}: {}",
-                        module_path!(),
-                        format!($($arg)*).as_str()
-                    ).as_str()
+                    module_path!(),
+                    format!($($arg)*).as_str()
                 );
             }
         }

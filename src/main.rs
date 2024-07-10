@@ -36,6 +36,7 @@ mod test {
                     Cli::build(
                         input_file_path,
                         Some(actual_file_path.to_string_lossy().to_string()),
+,
                     ).unwrap();
 
                     let mut expected_file = File::open(expected_file_path).unwrap();

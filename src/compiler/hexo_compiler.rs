@@ -64,7 +64,7 @@ mod benchmarks {
     #[bench]
     fn compilation(b: &mut Bencher) {
         let compiler = HexoCompiler::new(
-            HexoCompilerContext::new()
+            HexoCompilerContext::new(false)
         );
 
         let source = EagerCompilerSource::new(

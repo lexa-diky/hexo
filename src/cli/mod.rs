@@ -49,6 +49,14 @@ pub(crate) struct Cli {
 
     #[arg(short, long, default_value_t = LogLevel::Info)]
     log_level: LogLevel,
+
+    #[arg(short, long, default_value_t = false)]
+    safe: bool,
+}
+
+#[derive(Copy, Clone, Debug)]
+struct CliCompilerArguments {
+    safe_mode: bool,
 }
 
 impl Cli {
@@ -57,14 +65,33 @@ impl Cli {
 
         let cli = Cli::parse();
 
-        logger::HexoLogger::set_level(cli.log_level);
+        logger::HexoLogger::set_level(&cli.log_level);
+
+        cli.log_debug_interface_arguments();
+
+        let compiler_arguments = cli.cli_compiler_arguments();
         let cli_result: Result<_, Error> = match cli.command {
             None => Err(Error::UnknownCommand),
-            Some(Commands::Watch { source, output }) => Self::watch(source, output),
-            Some(Commands::Build { source, output }) => Self::build(source, output),
+            Some(Commands::Watch { source, output }) => Self::watch(source, output, compiler_arguments),
+            Some(Commands::Build { source, output }) => Self::build(source, output, compiler_arguments),
         };
 
         Self::handle_cli_error_if_required(cli_result, build_started);
+    }
+
+    fn cli_compiler_arguments(&self) -> CliCompilerArguments {
+        CliCompilerArguments {
+            safe_mode: self.safe
+        }
+    }
+
+    fn log_debug_interface_arguments(&self) {
+        logger::debug!("initialized cli interface with arguments:\
+            \n  --log-level = {}\
+            \n  --safe = {}",
+            &self.log_level,
+            &self.safe
+        );
     }
 
     fn handle_cli_error_if_required(
@@ -88,12 +115,12 @@ impl Cli {
         logger::error!("{error}");
     }
 
-    fn watch(source: String, output: Option<String>) -> Result<(), Error> {
+    fn watch(source: String, output: Option<String>, compiler_arguments: CliCompilerArguments) -> Result<(), Error> {
         let source_path_clone = source.clone();
         let source_path = source_path_clone.as_ref();
 
         let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
-            Self::watch_loop(source.clone(), output.clone(), event)
+            Self::watch_loop(source.clone(), output.clone(), compiler_arguments, event)
         })
             .map_err(Error::FileWatcher)?;
 
@@ -108,12 +135,17 @@ impl Cli {
         Ok(())
     }
 
-    fn watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
+    fn watch_loop(
+        source: String,
+        output: Option<String>,
+        compiler_arguments: CliCompilerArguments,
+        event: Result<Event, notify::Error>,
+    ) {
         match event {
             Ok(e) => {
                 if let Modify(ModifyKind::Data(_)) = e.kind {
                     logger::debug!("rebuilding...");
-                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
+                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone(), compiler_arguments));
                     logger::debug!(" done!");
                 }
             }
@@ -123,11 +155,17 @@ impl Cli {
         }
     }
 
-    pub(crate) fn build(source: String, output: Option<String>) -> Result<(), Error> {
+    pub(crate) fn build(
+        source: String,
+        output: Option<String>,
+        compiler_arguments: CliCompilerArguments
+    ) -> Result<(), Error> {
         defer!(logger::debug!("BUILDING, done"));
         logger::debug!("BUILDING, source: {}, output: {:?}", source, output);
 
-        let context = HexoCompilerContext::new();
+        let context = HexoCompilerContext::new(
+            compiler_arguments.safe_mode
+        );
         let compiler = HexoCompiler::new(context);
 
         let source_path = Path::new(&source);
