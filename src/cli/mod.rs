@@ -55,8 +55,16 @@ pub(crate) struct Cli {
 }
 
 #[derive(Copy, Clone, Debug)]
-struct CliCompilerArguments {
+pub(crate) struct CliCompilerArguments {
     safe_mode: bool,
+}
+
+impl CliCompilerArguments {
+    pub(crate) fn new(safe_mode: bool) -> CliCompilerArguments {
+        CliCompilerArguments {
+            safe_mode
+        }
+    }
 }
 
 impl Cli {
@@ -80,9 +88,7 @@ impl Cli {
     }
 
     fn cli_compiler_arguments(&self) -> CliCompilerArguments {
-        CliCompilerArguments {
-            safe_mode: self.safe
-        }
+        CliCompilerArguments::new(self.safe)
     }
 
     fn log_debug_interface_arguments(&self) {

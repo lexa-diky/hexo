@@ -25,7 +25,7 @@ mod test {
             ($case:ident) => {
                 #[test]
                 fn $case() {
-                    HexoLogger::set_level(LogLevel::None);
+                    HexoLogger::set_level(&LogLevel::None);
                     let case_name = stringify!($case);
 
                     let input_file_path = format!("samples/{case_name}/input.hexo");
@@ -36,7 +36,7 @@ mod test {
                     Cli::build(
                         input_file_path,
                         Some(actual_file_path.to_string_lossy().to_string()),
-,
+                        crate::cli::CliCompilerArguments::new(false),
                     ).unwrap();
 
                     let mut expected_file = File::open(expected_file_path).unwrap();
