@@ -5,7 +5,8 @@ use std::path::PathBuf;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
+use clap::builder::PossibleValue;
 use console::style;
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
@@ -17,6 +18,7 @@ use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
 mod error;
 use crate::util::{defer, logger};
+use crate::util::logger::{debug, LogLevel};
 
 #[derive(Subcommand)]
 enum Commands {
@@ -44,6 +46,9 @@ enum Commands {
 pub(crate) struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
+
+    #[arg(short, long, default_value_t = LogLevel::Info)]
+    log_level: LogLevel,
 }
 
 impl Cli {
@@ -52,6 +57,7 @@ impl Cli {
 
         let cli = Cli::parse();
 
+        logger::HexoLogger::set_level(cli.log_level);
         let cli_result: Result<_, Error> = match cli.command {
             None => Err(Error::UnknownCommand),
             Some(Commands::Watch { source, output }) => Self::watch(source, output),
@@ -70,16 +76,16 @@ impl Cli {
         } else {
             let build_duration = Instant::now() - build_started;
 
-            println!(
+            logger::output!(
                 "{} {:?}",
                 style("hexo compilation finished in:").green(),
-                style(build_duration)
+                build_duration
             );
         }
     }
 
     fn print_error(error: Box<dyn std::error::Error>) {
-        eprintln!("{}", style(error).red());
+        logger::error!("{error}");
     }
 
     fn watch(source: String, output: Option<String>) -> Result<(), Error> {
@@ -89,13 +95,13 @@ impl Cli {
         let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
             Self::watch_loop(source.clone(), output.clone(), event)
         })
-        .map_err(Error::FileWatcher)?;
+            .map_err(Error::FileWatcher)?;
 
         watcher
             .watch(source_path, RecursiveMode::NonRecursive)
             .map_err(Error::FileWatcher)?;
 
-        println!("watcher started");
+        logger::debug!("watcher started");
 
         sleep(Duration::MAX);
 
@@ -105,9 +111,9 @@ impl Cli {
     fn watch_loop(source: String, output: Option<String>, event: Result<Event, notify::Error>) {
         if let Ok(e) = event {
             if let Modify(ModifyKind::Data(_)) = e.kind {
-                println!("rebuilding...");
+                logger::debug!("rebuilding...");
                 let _ = catch_unwind(|| Self::build(source.clone(), output.clone()));
-                println!(" done!");
+                logger::debug!(" done!");
             }
         } else {
             Self::print_error(event.unwrap_err().into());
@@ -133,5 +139,25 @@ impl Cli {
             .map_err(Error::CantCrateOutputFile)?
             .write_all(compilation_result.content.iter().as_slice())
             .map_err(Error::CantCrateOutputFile)
+    }
+}
+
+impl ValueEnum for LogLevel {
+    fn value_variants<'a>() -> &'a [Self] {
+        return &[Self::Debug, Self::Info, Self::Warn, Self::Error, Self::None]
+    }
+
+    fn to_possible_value(&self) -> Option<PossibleValue> {
+        let name = match self {
+            LogLevel::Debug => { "debug" }
+            LogLevel::Info => { "info" }
+            LogLevel::Warn => { "warn" }
+            LogLevel::Error => { "error" }
+            LogLevel::None => { "none" }
+        };
+
+        return Some(
+            PossibleValue::new(name)
+        )
     }
 }
