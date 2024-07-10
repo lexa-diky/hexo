@@ -25,7 +25,7 @@ fn parse_file(path: &Path, node: &AstNode) -> Result<CstFile, Error> {
 
     Ok(
         CstFile::new(
-            path.to_path_buf(),
+            path,
             CstFunctionStatement::new(
                 MAIN_FUNCTION_NAME.to_string(),
                 emits,

@@ -7,8 +7,8 @@ pub(crate) struct CstFile {
 }
 
 impl CstFile {
-    pub(super) fn new(path: PathBuf, main: CstFunctionStatement) -> Self {
-        CstFile { path, main }
+    pub(super) fn new(path: &Path, main: CstFunctionStatement) -> Self {
+        CstFile { path: path.to_path_buf(), main: main }
     }
 
     pub(crate) fn path(&self) -> &Path {
