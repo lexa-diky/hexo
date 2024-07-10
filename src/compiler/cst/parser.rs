@@ -7,12 +7,14 @@ use crate::compiler::cst::{
     CstActualParameter, CstAtom, CstConstantStatement, CstEmitStatement, CstFunctionStatement,
 };
 use crate::match_ast;
+use crate::util::logger;
 
 #[derive(Default)]
 pub(crate) struct CstParser {}
 
 impl CstParser {
     pub(crate) fn parse(&self, path: &Path, ast_root: AstNode) -> Result<CstFile, Error> {
+        logger::debug!("Parsing CST of {:?}", path);
         parse_file(path, &ast_root)
     }
 }

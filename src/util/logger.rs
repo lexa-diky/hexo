@@ -41,7 +41,7 @@ pub(crate) struct HexoLogger {
 
 impl HexoLogger {
     pub(crate) fn level(&self) -> &LogLevel {
-        return &self.level;
+        &self.level
     }
 
     pub(crate) fn set_level(level: LogLevel) {

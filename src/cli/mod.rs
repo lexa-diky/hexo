@@ -144,7 +144,7 @@ impl Cli {
 
 impl ValueEnum for LogLevel {
     fn value_variants<'a>() -> &'a [Self] {
-        return &[Self::Debug, Self::Info, Self::Warn, Self::Error, Self::None]
+        &[Self::Debug, Self::Info, Self::Warn, Self::Error, Self::None]
     }
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
@@ -156,7 +156,7 @@ impl ValueEnum for LogLevel {
             LogLevel::None => { "none" }
         };
 
-        return Some(
+        Some(
             PossibleValue::new(name)
         )
     }
