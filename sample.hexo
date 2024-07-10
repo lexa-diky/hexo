@@ -1,1 +1,1 @@
-> #pad('AA', left: 10x4, right: 10x8)
+> #eval(#read_file('samples/java_object/input.hexo'))

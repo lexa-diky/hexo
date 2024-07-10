@@ -23,9 +23,9 @@ impl RstCompiler<'_> {
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
         let context_id = HexoId::next();
-        let mut context = Self::build_context(context_id, cst.path(), cst.main())?;
+        let mut context = self.build_context(context_id, cst.path(), cst.main())?;
 
-        let bb = Self::build_bytes(context_id, &mut context, cst.main().emits())?;
+        let bb = self.build_bytes(context_id, &mut context, cst.main().emits())?;
 
         Ok(HexoFile {
             path: cst.path().to_path_buf(),
@@ -35,6 +35,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_bytes(
+        &self,
         context_id: HexoId,
         context: &mut CompilationContext,
         emits: &Vec<CstEmitStatement>,
@@ -42,13 +43,14 @@ impl RstCompiler<'_> {
         let mut byte_buffer = ByteBuffer::default();
 
         for emit in emits {
-            Self::build_bytes_into(context_id, context, emit.atoms(), &mut byte_buffer)?
+            self.build_bytes_into(context_id, context, emit.atoms(), &mut byte_buffer)?
         }
 
         Ok(byte_buffer)
     }
 
     fn build_bytes_into(
+        &self,
         context_id: HexoId,
         context: &mut CompilationContext,
         atoms: &CstAtomVec,
@@ -63,7 +65,7 @@ impl RstCompiler<'_> {
                     Self::build_constant_into(context_id, context, name, buffer)?
                 }
                 CstAtom::Function { name, params } => {
-                    Self::build_function_into(context_id, context, name.clone(), params, buffer)?
+                    self.build_function_into(context_id, context, name.clone(), params, buffer)?
                 }
             }
         }
@@ -72,6 +74,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_function_into(
+        &self,
         context_id: HexoId,
         context: &mut CompilationContext,
         function_name: String,
@@ -85,13 +88,13 @@ impl RstCompiler<'_> {
 
             for param in params {
                 let mut param_buffer = ByteBuffer::default();
-                Self::build_bytes_into(context_id, context, param.value(), &mut param_buffer)
+                self.build_bytes_into(context_id, context, param.value(), &mut param_buffer)
                     .unwrap();
 
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }
 
-            executor(params_buffer.clone())
+            executor(params_buffer.clone(), self.parent)
                 .map(|bb| buffer.push_byte_buffer(&bb))
                 .map_err(Error::NativeFunctionExecution)?;
 
@@ -107,7 +110,7 @@ impl RstCompiler<'_> {
 
         for param in params {
             let mut param_buffer = ByteBuffer::default();
-            Self::build_bytes_into(context_id, context, param.value(), &mut param_buffer).unwrap();
+            self.build_bytes_into(context_id, context, param.value(), &mut param_buffer).unwrap();
 
             context.bind_local_constant(
                 function_binding.identifier,
@@ -119,7 +122,7 @@ impl RstCompiler<'_> {
         }
 
         for emit in &function_binding.emits {
-            Self::build_bytes_into(function_binding.identifier, context, emit.atoms(), buffer)
+            self.build_bytes_into(function_binding.identifier, context, emit.atoms(), buffer)
                 .unwrap();
         }
 
@@ -142,35 +145,38 @@ impl RstCompiler<'_> {
     }
 
     fn build_context(
+        &self,
         context_id: HexoId,
         file_path: &Path,
         cst: &CstFunctionStatement,
     ) -> Result<CompilationContext, Error> {
         let mut root_context = CompilationContext::new(file_path);
 
-        Self::build_context_into(context_id, &cst, &mut root_context)?;
+        self.build_context_into(context_id, &cst, &mut root_context)?;
 
         Ok(root_context)
     }
 
     fn build_context_into(
+        &self,
         context_id: HexoId,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
     ) -> Result<(), Error> {
-        Self::build_context_constants_into(context_id, cst, root_context)?;
-        Self::build_context_functions_into(context_id, cst, root_context)?;
+        self.build_context_constants_into(context_id, cst, root_context)?;
+        self.build_context_functions_into(context_id, cst, root_context)?;
         Ok(())
     }
 
     fn build_context_constants_into(
+        &self,
         context_id: HexoId,
         cst: &&CstFunctionStatement,
         context: &mut CompilationContext,
     ) -> Result<(), Error> {
         for constant in cst.constants() {
             let mut buff = ByteBuffer::default();
-            Self::build_bytes_into(context_id, context, constant.atoms(), &mut buff)?;
+            self.build_bytes_into(context_id, context, constant.atoms(), &mut buff)?;
             context.bind_local_constant(
                 context_id,
                 ConstantBinding {
@@ -184,6 +190,7 @@ impl RstCompiler<'_> {
     }
 
     fn build_context_functions_into(
+        &self,
         context_id: HexoId,
         cst: &&CstFunctionStatement,
         root_context: &mut CompilationContext,
@@ -199,7 +206,7 @@ impl RstCompiler<'_> {
                 },
             );
 
-            Self::build_context_into(inner_function_context_id, &function, root_context)?;
+            self.build_context_into(inner_function_context_id, &function, root_context)?;
 
             root_context.bind_parents(inner_function_context_id, vec![context_id]);
         }

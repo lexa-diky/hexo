@@ -1,8 +1,5 @@
 use crate::compiler::native_fn::signature::NativeFunction;
-use crate::compiler::native_fn::{
-    create_cmd_native_function, create_len_native_function, create_pad_left_native_function,
-    create_pad_native_function, create_pad_right_native_function, create_read_file_native_function,
-};
+use crate::compiler::native_fn::{create_cmd_native_function, create_eval_native_function, create_len_native_function, create_pad_left_native_function, create_pad_native_function, create_pad_right_native_function, create_read_file_native_function};
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunctionIndex {
@@ -28,6 +25,7 @@ impl NativeFunctionIndex {
             create_cmd_native_function(),
             create_read_file_native_function(),
             create_pad_native_function(),
+            create_eval_native_function()
         ]
     }
 }

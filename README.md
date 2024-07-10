@@ -90,6 +90,9 @@ To call a function use glyph '#' fallowed by function name and arguments:
 > #pad_left(AA, 4) // will emit '00 00 00 AA'
 > #pad_right(AA, 4) // will emit 'AA 00 00 00'
 > #pad('AA', left: 10x4, right: 10x8) // wil pad left by 4 bytes and right by 8 bytes
+
+// Hexo compiler
+> #eval('> 01 02 03') // will evaluate passed argument and return resulting compilation
 ```
 
 ### Example
