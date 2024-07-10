@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use crate::util::logger;
 
 pub(crate) trait CompilerSource {
     fn read(&self) -> Result<String, std::io::Error>;
@@ -20,6 +21,7 @@ impl FileCompilerSource {
 
 impl CompilerSource for FileCompilerSource {
     fn read(&self) -> Result<String, std::io::Error> {
+        logger::debug!("Reading source file: {:?}", self.path);
         let mut p = File::open(self.path.clone())?;
         let mut buff = String::new();
         p.read_to_string(&mut buff)?;
