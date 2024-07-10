@@ -38,7 +38,7 @@ impl HexoCompiler {
         source: &TSource,
     ) -> Result<HexoFile, Error> {
         let cst = self.compile_cst(source)?;
-        let rst_compiler = RstCompiler::new(self);
+        let rst_compiler = RstCompiler::new(self, self.context.safe_mode());
 
         rst_compiler.compile(&cst).map_err(Error::Rst)
     }

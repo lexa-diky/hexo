@@ -8,4 +8,8 @@ impl HexoCompilerContext {
             safe_mode
         }
     }
+
+    pub(crate) fn safe_mode(&self) -> bool {
+        self.safe_mode
+    }
 }

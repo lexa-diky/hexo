@@ -51,7 +51,7 @@ pub(crate) fn create_pad_right_native_function() -> NativeFunction {
 
 pub(crate) fn create_cmd_native_function() -> NativeFunction {
     NativeFunction::new(
-        NativeFunctionSignature::new("cmd"),
+        NativeFunctionSignature::new_unsafe("cmd"),
         |arguments, _| {
             let command = get_argument_at(&arguments, 0, "cmd")?
                 .to_string()
@@ -116,7 +116,7 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
 
 pub(crate) fn create_eval_native_function() -> NativeFunction {
     NativeFunction::new(
-        NativeFunctionSignature::new("eval"),
+        NativeFunctionSignature::new_unsafe("eval"),
         |arguments, compiler| {
             let buffer = get_argument_at(&arguments, 0, "eval")?.clone();
             let source = LiteralCompilerSource::anonymous(

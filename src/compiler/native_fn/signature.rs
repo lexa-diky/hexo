@@ -5,14 +5,31 @@ use crate::compiler::HexoCompiler;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunctionSignature {
-    pub(crate) name: String,
+    name: String,
+    is_safe: bool
 }
 
 impl NativeFunctionSignature {
     pub(crate) fn new(name: &str) -> NativeFunctionSignature {
         NativeFunctionSignature {
             name: String::from(name),
+            is_safe: true
         }
+    }
+
+    pub(crate) fn new_unsafe(name: &str) -> NativeFunctionSignature {
+        NativeFunctionSignature {
+            name: String::from(name),
+            is_safe: false
+        }
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub(crate) fn is_safe(&self) -> bool {
+        self.is_safe
     }
 }
 

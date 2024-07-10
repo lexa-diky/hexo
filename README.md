@@ -19,6 +19,14 @@ cargo install hexo
 
 Use `hexo -h` to get complete CLI manual.
 
+### Arguments
+
+- `log-level`
+  : Set log level, possible values: `debug`, `info`, `warn`, `error`, `none`. Default: `info`.
+
+- `safe`
+  : Enable safe mode, will disable unsafe functions like `cmd` and `eval`. Default: `false`
+
 ### Commands
 
 #### build
@@ -36,7 +44,6 @@ Takes `source` file in hexo format and compiles it to binary file `output`. Will
 ```bash
 hexo watch --source <path to source> --output <path to output>
 ```
-
 
 ## Syntax
 
@@ -142,4 +149,6 @@ Not currently, but this is planned for future releases.
 ### Isn't `cmd` function highly unsafe?
 
 Yes, safety is no goal of Hexo, please don't run untrusted code with it.
-Safe mode might be implemented in the future is there is enough demand for it.
+
+You can use safe mode to disable `cmd` and `eval` functions.
+Please add `--safe` flag before command to enable it.

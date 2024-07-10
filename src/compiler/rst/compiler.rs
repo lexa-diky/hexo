@@ -14,11 +14,12 @@ use crate::util::id::HexoId;
 
 pub(crate) struct RstCompiler<'a> {
     parent: &'a HexoCompiler,
+    safe_mode: bool,
 }
 
 impl RstCompiler<'_> {
-    pub(crate) fn new(parent: &HexoCompiler) -> RstCompiler {
-        RstCompiler { parent }
+    pub(crate) fn new(parent: &HexoCompiler, safe_mode: bool) -> RstCompiler {
+        RstCompiler { parent, safe_mode }
     }
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
@@ -83,6 +84,14 @@ impl RstCompiler<'_> {
     ) -> Result<(), Error> {
         let native_function = context.get_native_function(function_name.as_str());
         if let Some(native_function) = native_function {
+            if self.safe_mode && !native_function.signature().is_safe() {
+                return Err(
+                    Error::NativeFunctionIsUnsafe {
+                        name: native_function.signature().name().to_string()
+                    }
+                )
+            }
+
             let executor = native_function.executor();
             let mut params_buffer = HashMap::new();
 
