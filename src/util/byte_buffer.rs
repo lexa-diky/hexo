@@ -95,7 +95,7 @@ impl From<Vec<u8>> for ByteBuffer {
 }
 
 mod test {
-    use crate::util::byte_buffer::ByteBuffer;
+    use super::ByteBuffer;
 
     #[test]
     fn byte_push() {

@@ -1,9 +1,10 @@
+use std::collections::HashMap;
+use std::path::Path;
+
 use crate::compiler::cst::CstEmitStatement;
 use crate::compiler::native_fn::{NativeFunction, NativeFunctionIndex};
-use crate::util::id::HexoId;
 use crate::util::byte_buffer::ByteBuffer;
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use crate::util::id::HexoId;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConstantBinding {
@@ -27,7 +28,6 @@ pub(crate) struct LocalCompilationScope {
 
 #[derive(Clone, Debug)]
 pub(crate) struct CompilationScope {
-    self_path: PathBuf,
     local_scopes: HashMap<HexoId, LocalCompilationScope>,
     native_function_index: NativeFunctionIndex,
 }
@@ -35,7 +35,6 @@ pub(crate) struct CompilationScope {
 impl CompilationScope {
     pub(crate) fn new(path: &Path) -> CompilationScope {
         CompilationScope {
-            self_path: path.to_path_buf(),
             local_scopes: HashMap::new(),
             native_function_index: NativeFunctionIndex::new(),
         }

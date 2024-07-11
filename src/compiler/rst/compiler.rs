@@ -28,11 +28,7 @@ impl RstCompiler<'_> {
 
         let bb = self.build_bytes(scope_id, &mut scope, cst.main().emits())?;
 
-        Ok(HexoFile::new(
-            cst.path(),
-            scope,
-            bb,
-        ))
+        Ok(HexoFile::new(bb))
     }
 
     fn build_bytes(
@@ -89,7 +85,7 @@ impl RstCompiler<'_> {
                     Error::NativeFunctionIsUnsafe {
                         name: native_function.signature().name().to_string()
                     }
-                )
+                );
             }
 
             let executor = native_function.executor();

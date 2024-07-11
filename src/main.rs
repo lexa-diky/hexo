@@ -1,5 +1,7 @@
 #![feature(test)]
-
+#![allow(
+    redundant_field_names
+)]
 
 use crate::cli::Cli;
 

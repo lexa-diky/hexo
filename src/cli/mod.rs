@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 use std::panic::catch_unwind;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -175,7 +175,7 @@ impl Cli {
         let compiler = HexoCompiler::new(context);
 
         let source_path = Path::new(&source);
-        let compiler_source = FileCompilerSource::new(&source_path);
+        let compiler_source = FileCompilerSource::new(source_path);
 
         let compilation_result = compiler
             .compile(&compiler_source)
