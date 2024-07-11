@@ -2,6 +2,7 @@ mod error;
 mod implementations;
 mod index;
 mod signature;
+pub(crate) mod implementation;
 
 pub(crate) use error::Error;
 pub(crate) use implementations::*;

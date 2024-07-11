@@ -57,3 +57,7 @@ impl NativeFunction {
         self.executor
     }
 }
+
+pub(crate) trait NativeFunctionDefinition {
+    fn create(&self) -> NativeFunction;
+}

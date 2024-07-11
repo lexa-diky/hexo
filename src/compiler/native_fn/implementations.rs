@@ -114,23 +114,7 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
     )
 }
 
-pub(crate) fn create_eval_native_function() -> NativeFunction {
-    NativeFunction::new(
-        NativeFunctionSignature::new_unsafe("eval"),
-        |arguments, compiler| {
-            let buffer = get_argument_at(arguments, 0, "eval")?.clone();
-            let source = LiteralCompilerSource::anonymous(
-                buffer.to_string()
-                    .map_err(|e| Error::Unknown(e.to_string()))?,
-            );
-            let result = compiler.compile(&source)
-                .map_err(|e| Error::Unknown(e.to_string()))?;
-            Ok(ByteBuffer::from(result.content))
-        },
-    )
-}
-
-fn get_argument_at<'a>(
+pub(crate) fn get_argument_at<'a>(
     arguments: &'a HashMap<String, ByteBuffer>,
     pos: usize,
     fn_name: &str,
@@ -144,7 +128,7 @@ fn get_argument_at<'a>(
         })
 }
 
-fn get_named_argument<'a>(
+pub(crate) fn get_named_argument<'a>(
     arguments: &'a HashMap<String, ByteBuffer>,
     name: &str,
 ) -> Option<&'a ByteBuffer> {
