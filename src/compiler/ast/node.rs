@@ -27,7 +27,6 @@ pub(crate) enum AstNodeType {
 }
 
 impl AstNodeType {
-
     pub(crate) fn must_capture_value(&self) -> bool {
         matches!(
             self,
@@ -52,7 +51,6 @@ pub(crate) struct AstNode {
 }
 
 impl AstNode {
-
     pub(crate) fn new(
         node_type: AstNodeType,
         content: Option<String>,

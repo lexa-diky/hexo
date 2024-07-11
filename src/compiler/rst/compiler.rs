@@ -10,6 +10,7 @@ use crate::compiler::rst::scope::{
 use crate::compiler::rst::error::Error;
 use crate::compiler::rst::node::HexoFile;
 use crate::compiler::HexoCompiler;
+use crate::compiler::native_fn::NativeFunctionArguments;
 use crate::util::id::HexoId;
 
 pub(crate) struct RstCompiler<'a> {
@@ -98,7 +99,8 @@ impl RstCompiler<'_> {
                 params_buffer.insert(param.name().to_string(), param_buffer);
             }
 
-            executor(&params_buffer, self.parent)
+            let arguments = NativeFunctionArguments::new(&params_buffer);
+            executor(arguments, self.parent)
                 .map(|bb| buffer.push_byte_buffer(&bb))
                 .map_err(Error::NativeFunctionExecution)?;
 

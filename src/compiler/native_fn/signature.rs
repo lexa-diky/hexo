@@ -2,6 +2,7 @@ use crate::compiler::native_fn::error::Error;
 use crate::util::byte_buffer::ByteBuffer;
 use std::collections::HashMap;
 use crate::compiler::HexoCompiler;
+use crate::compiler::native_fn::arguments::NativeFunctionArguments;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunctionSignature {
@@ -33,7 +34,7 @@ impl NativeFunctionSignature {
     }
 }
 
-type NativeFunctionExecutor = fn(&HashMap<String, ByteBuffer>, &HexoCompiler) -> Result<ByteBuffer, Error>;
+type NativeFunctionExecutor = fn(NativeFunctionArguments, &HexoCompiler) -> Result<ByteBuffer, Error>;
 
 #[derive(Clone, Debug)]
 pub(crate) struct NativeFunction {

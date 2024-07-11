@@ -4,4 +4,4 @@ mod parser;
 
 pub(crate) use error::Error;
 pub(crate) use node::{AstNode, AstNodeType};
-pub(crate) use parser::{AstParser};
+pub(crate) use parser::AstParser;

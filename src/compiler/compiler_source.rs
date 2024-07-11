@@ -1,8 +1,8 @@
+use crate::util::id::HexoId;
+use crate::util::logger;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use crate::util::id::HexoId;
-use crate::util::logger;
 
 pub(crate) trait CompilerSource {
     fn read(&self) -> Result<String, std::io::Error>;
@@ -16,7 +16,9 @@ pub(crate) struct FileCompilerSource {
 
 impl FileCompilerSource {
     pub(crate) fn new(path: &Path) -> FileCompilerSource {
-        FileCompilerSource { path: path.to_path_buf() }
+        FileCompilerSource {
+            path: path.to_path_buf(),
+        }
     }
 }
 
@@ -54,20 +56,17 @@ impl LiteralCompilerSource {
     pub(crate) fn anonymous(content: String) -> LiteralCompilerSource {
         LiteralCompilerSource {
             content: content,
-            path: Path::new(
-                format!("hexo://anonymous/{}", HexoId::next()).as_str()
-            ).to_path_buf(),
+            path: Path::new(format!("hexo://anonymous/{}", HexoId::next()).as_str()).to_path_buf(),
         }
     }
 }
 
-
 #[cfg(test)]
 pub(crate) mod tests {
+    use crate::compiler::CompilerSource;
     use std::fs::File;
     use std::io::Read;
     use std::path::{Path, PathBuf};
-    use crate::compiler::CompilerSource;
 
     pub(crate) struct EagerCompilerSource {
         content: String,
@@ -91,9 +90,10 @@ pub(crate) mod tests {
             let mut content = String::new();
             source_file.read_to_string(&mut content)?;
 
-            Ok(
-                EagerCompilerSource { content: content, path: pat_ref.to_path_buf() }
-            )
+            Ok(EagerCompilerSource {
+                content: content,
+                path: pat_ref.to_path_buf(),
+            })
         }
     }
 }

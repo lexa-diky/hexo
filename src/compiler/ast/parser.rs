@@ -13,10 +13,9 @@ struct AstPestParser;
 pub(crate) struct AstParser {}
 
 impl AstParser {
-
     pub(crate) fn parse(&self, source: &str) -> Result<AstNode, Error> {
-        let pairs = AstPestParser::parse(Rule::file, source)
-            .map_err(|e| Error::Pest(Box::new(e)))?;
+        let pairs =
+            AstPestParser::parse(Rule::file, source).map_err(|e| Error::Pest(Box::new(e)))?;
 
         let children: Result<Vec<AstNode>, _> = pairs
             .map(parse_ast_pair)

@@ -12,7 +12,7 @@ impl NativeFunctionDefinition for EvalNativeFunctionDef {
         NativeFunction::new(
             NativeFunctionSignature::new_unsafe("eval"),
             |arguments, compiler| {
-                let buffer = get_argument_at(arguments, 0, "eval")?.clone();
+                let buffer = arguments.get_argument_at(0, "eval")?.clone();
                 let source = LiteralCompilerSource::anonymous(
                     buffer
                         .to_string()

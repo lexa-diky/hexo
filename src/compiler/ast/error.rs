@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use crate::compiler::ast::parser::Rule;
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub(crate) enum Error {

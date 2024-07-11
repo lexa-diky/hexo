@@ -1,4 +1,5 @@
-#[macro_export] macro_rules! match_ast {
+#[macro_export]
+macro_rules! match_ast {
     ($node:expr => $node_expected:ident, $($option:ident => $holder:ident | $transform:expr)+) => {
         guard_node_type($node, AstNodeType::$node_expected)?;
 

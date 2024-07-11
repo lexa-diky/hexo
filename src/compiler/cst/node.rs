@@ -8,7 +8,10 @@ pub(crate) struct CstFile {
 
 impl CstFile {
     pub(super) fn new(path: &Path, main: CstFunctionStatement) -> Self {
-        CstFile { path: path.to_path_buf(), main: main }
+        CstFile {
+            path: path.to_path_buf(),
+            main: main,
+        }
     }
 
     pub(crate) fn path(&self) -> &Path {
@@ -62,7 +65,6 @@ pub(crate) struct CstEmitStatement {
 }
 
 impl CstEmitStatement {
-
     pub(crate) fn new(atoms: CstAtomVec) -> Self {
         CstEmitStatement { atoms }
     }
@@ -79,7 +81,6 @@ pub(crate) struct CstConstantStatement {
 }
 
 impl CstConstantStatement {
-
     pub(crate) fn new(name: String, atoms: CstAtomVec) -> Self {
         CstConstantStatement { name, atoms }
     }
@@ -102,7 +103,6 @@ pub(crate) struct CstFunctionStatement {
 }
 
 impl CstFunctionStatement {
-
     pub(crate) fn new(
         name: String,
         emits: Vec<CstEmitStatement>,

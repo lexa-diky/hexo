@@ -5,8 +5,8 @@ use std::path::Path;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use clap::{Parser, Subcommand, ValueEnum};
 use clap::builder::PossibleValue;
+use clap::{Parser, Subcommand, ValueEnum};
 use console::style;
 use notify::event::ModifyKind;
 use notify::EventKind::Modify;
@@ -17,8 +17,8 @@ pub(crate) use error::Error;
 use crate::compiler::{FileCompilerSource, HexoCompiler, HexoCompilerContext};
 
 mod error;
+use crate::util::logger::LogLevel;
 use crate::util::{defer, logger};
-use crate::util::logger::{LogLevel};
 
 #[derive(Subcommand)]
 enum Commands {
@@ -61,9 +61,7 @@ pub(crate) struct CliCompilerArguments {
 
 impl CliCompilerArguments {
     pub(crate) fn new(safe_mode: bool) -> CliCompilerArguments {
-        CliCompilerArguments {
-            safe_mode
-        }
+        CliCompilerArguments { safe_mode }
     }
 }
 
@@ -80,8 +78,12 @@ impl Cli {
         let compiler_arguments = cli.cli_compiler_arguments();
         let cli_result: Result<_, Error> = match cli.command {
             None => Err(Error::UnknownCommand),
-            Some(Commands::Watch { source, output }) => Self::watch(source, output, compiler_arguments),
-            Some(Commands::Build { source, output }) => Self::build(source, output, compiler_arguments),
+            Some(Commands::Watch { source, output }) => {
+                Self::watch(source, output, compiler_arguments)
+            }
+            Some(Commands::Build { source, output }) => {
+                Self::build(source, output, compiler_arguments)
+            }
         };
 
         Self::handle_cli_error_if_required(cli_result, build_started);
@@ -92,7 +94,8 @@ impl Cli {
     }
 
     fn log_debug_interface_arguments(&self) {
-        logger::debug!("initialized cli interface with arguments:\
+        logger::debug!(
+            "initialized cli interface with arguments:\
             \n  --log-level = {}\
             \n  --safe = {}",
             &self.log_level,
@@ -100,10 +103,7 @@ impl Cli {
         );
     }
 
-    fn handle_cli_error_if_required(
-        cli_result: Result<(), Error>,
-        build_started: Instant,
-    ) {
+    fn handle_cli_error_if_required(cli_result: Result<(), Error>, build_started: Instant) {
         if let Err(e) = cli_result {
             Self::print_error(e.into());
         } else {
@@ -121,14 +121,18 @@ impl Cli {
         logger::error!("{error}");
     }
 
-    fn watch(source: String, output: Option<String>, compiler_arguments: CliCompilerArguments) -> Result<(), Error> {
+    fn watch(
+        source: String,
+        output: Option<String>,
+        compiler_arguments: CliCompilerArguments,
+    ) -> Result<(), Error> {
         let source_path_clone = source.clone();
         let source_path = source_path_clone.as_ref();
 
         let mut watcher = notify::recommended_watcher(move |event: Result<Event, _>| {
             Self::watch_loop(source.clone(), output.clone(), compiler_arguments, event)
         })
-            .map_err(Error::FileWatcher)?;
+        .map_err(Error::FileWatcher)?;
 
         watcher
             .watch(source_path, RecursiveMode::NonRecursive)
@@ -151,7 +155,9 @@ impl Cli {
             Ok(e) => {
                 if let Modify(ModifyKind::Data(_)) = e.kind {
                     logger::debug!("rebuilding...");
-                    let _ = catch_unwind(|| Self::build(source.clone(), output.clone(), compiler_arguments));
+                    let _ = catch_unwind(|| {
+                        Self::build(source.clone(), output.clone(), compiler_arguments)
+                    });
                     logger::debug!(" done!");
                 }
             }
@@ -164,14 +170,12 @@ impl Cli {
     pub(crate) fn build(
         source: String,
         output: Option<String>,
-        compiler_arguments: CliCompilerArguments
+        compiler_arguments: CliCompilerArguments,
     ) -> Result<(), Error> {
         defer!(logger::debug!("BUILDING, done"));
         logger::debug!("BUILDING, source: {}, output: {:?}", source, output);
 
-        let context = HexoCompilerContext::new(
-            compiler_arguments.safe_mode
-        );
+        let context = HexoCompilerContext::new(compiler_arguments.safe_mode);
         let compiler = HexoCompiler::new(context);
 
         let source_path = Path::new(&source);
@@ -197,15 +201,13 @@ impl ValueEnum for LogLevel {
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
         let name = match self {
-            LogLevel::Debug => { "debug" }
-            LogLevel::Info => { "info" }
-            LogLevel::Warn => { "warn" }
-            LogLevel::Error => { "error" }
-            LogLevel::None => { "none" }
+            LogLevel::Debug => "debug",
+            LogLevel::Info => "info",
+            LogLevel::Warn => "warn",
+            LogLevel::Error => "error",
+            LogLevel::None => "none",
         };
 
-        Some(
-            PossibleValue::new(name)
-        )
+        Some(PossibleValue::new(name))
     }
 }
