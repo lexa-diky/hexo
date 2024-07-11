@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
@@ -111,25 +110,4 @@ pub(crate) fn create_pad_native_function() -> NativeFunction {
             Ok(buffer)
         },
     )
-}
-
-pub(crate) fn get_argument_at<'a>(
-    arguments: &'a HashMap<String, ByteBuffer>,
-    pos: usize,
-    fn_name: &str,
-) -> Result<&'a ByteBuffer, Error> {
-    arguments
-        .get(&pos.to_string())
-        .ok_or_else(|| Error::MissingArgument {
-            name: pos.to_string(),
-            available_arguments: arguments.keys().cloned().collect(),
-            function_name: fn_name.to_string(),
-        })
-}
-
-pub(crate) fn get_named_argument<'a>(
-    arguments: &'a HashMap<String, ByteBuffer>,
-    name: &str,
-) -> Option<&'a ByteBuffer> {
-    arguments.get(name)
 }

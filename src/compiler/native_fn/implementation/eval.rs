@@ -1,6 +1,6 @@
 use crate::compiler::compiler_source::LiteralCompilerSource;
 use crate::compiler::native_fn::{
-    get_argument_at, Error, NativeFunction, NativeFunctionDefinition, NativeFunctionSignature,
+    Error, NativeFunction, NativeFunctionDefinition, NativeFunctionSignature,
 };
 use crate::util::byte_buffer::ByteBuffer;
 
