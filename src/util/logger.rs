@@ -49,19 +49,19 @@ impl HexoLogger {
     }
 
     pub(crate) fn error(&self, location: &str, message: &str) {
-        eprintln!("{} {}", style(location).blue(), style(message).red());
+        eprintln!("{} :> {} {}", style("error").bright(), style(location).blue(), style(message).red());
     }
 
     pub(crate) fn info(&self, location: &str, message: &str) {
-        eprintln!("{} {}", style(location).blue(), style(message).blue());
+        eprintln!("{} :> {} {}", style("info").bright(), style(location).blue(), style(message).blue());
     }
 
     pub(crate) fn debug(&self, location: &str, message: &str) {
-        println!("{} {}", style(location).blue().dim(), style(message).dim());
+        println!("{} :> {} {}", style("debug").bright(),style(location).blue(), style(message));
     }
 
     pub(crate) fn warn(&self, location: &str, message: &str) {
-        println!("{} {}", style(location).blue(), style(message).yellow());
+        println!("{} :> {} {}", style("warn").bright(),style(location).blue(), style(message).yellow());
     }
 
     pub(crate) fn output(&self, message: &str) {

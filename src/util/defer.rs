@@ -16,8 +16,7 @@ impl<F: FnMut()> Drop for Deferred<F> {
 
 macro_rules! defer {
     ($e:stmt) => (
-        use crate::util::Deferred;
-        let _deferred = Deferred::new(|| -> () { $e });
+        let _deferred = crate::util::Deferred::new(|| -> () { $e });
     )
 }
 
