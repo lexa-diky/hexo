@@ -25,7 +25,7 @@ impl RstCompiler<'_> {
 
     pub(crate) fn compile(&self, cst: &CstFile) -> Result<HexoFile, Error> {
         let scope_id = HexoId::next();
-        let mut scope = self.build_scope(scope_id, cst.path(), cst.main())?;
+        let mut scope = self.build_scope(scope_id, cst.main())?;
 
         let bb = self.build_bytes(scope_id, &mut scope, cst.main().emits())?;
 
@@ -153,10 +153,9 @@ impl RstCompiler<'_> {
     fn build_scope(
         &self,
         scope_id: HexoId,
-        file_path: &Path,
         cst: &CstFunctionStatement,
     ) -> Result<CompilationScope, Error> {
-        let mut root_scope = CompilationScope::new(file_path);
+        let mut root_scope = CompilationScope::default();
 
         self.build_scope_into(scope_id, &cst, &mut root_scope)?;
 

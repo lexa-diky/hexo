@@ -19,32 +19,26 @@ pub(crate) struct FunctionBinding {
     pub(crate) emits: Vec<CstEmitStatement>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct LocalCompilationScope {
     constant_table: HashMap<String, ConstantBinding>,
     function_table: HashMap<String, FunctionBinding>,
     parents: Vec<HexoId>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct CompilationScope {
     local_scopes: HashMap<HexoId, LocalCompilationScope>,
     native_function_index: NativeFunctionIndex,
 }
 
 impl CompilationScope {
-    pub(crate) fn new(path: &Path) -> CompilationScope {
-        CompilationScope {
-            local_scopes: HashMap::new(),
-            native_function_index: NativeFunctionIndex::new(),
-        }
-    }
 
     // region constant
     pub(crate) fn bind_local_constant(&mut self, scope_id: HexoId, constant: ConstantBinding) {
         self.local_scopes
             .entry(scope_id)
-            .or_insert_with(LocalCompilationScope::new);
+            .or_insert_with(LocalCompilationScope::default);
 
         let local_scope: &mut LocalCompilationScope = self
             .local_scopes
@@ -82,7 +76,7 @@ impl CompilationScope {
     pub(crate) fn bind_local_function(&mut self, scope_id: HexoId, function: FunctionBinding) {
         self.local_scopes
             .entry(scope_id)
-            .or_insert_with(LocalCompilationScope::new);
+            .or_insert_with(LocalCompilationScope::default);
 
         let local_scope: &mut LocalCompilationScope = self
             .local_scopes
@@ -122,7 +116,7 @@ impl CompilationScope {
     pub(crate) fn bind_parents(&mut self, scope_id: HexoId, parents: Vec<HexoId>) {
         self.local_scopes
             .entry(scope_id)
-            .or_insert_with(LocalCompilationScope::new);
+            .or_insert_with(LocalCompilationScope::default);
 
         let local_scope: &mut LocalCompilationScope = self
             .local_scopes
@@ -136,13 +130,6 @@ impl CompilationScope {
 }
 
 impl LocalCompilationScope {
-    fn new() -> LocalCompilationScope {
-        LocalCompilationScope {
-            constant_table: HashMap::new(),
-            function_table: HashMap::new(),
-            parents: Vec::new(),
-        }
-    }
 
     fn bind_constant(&mut self, constant: ConstantBinding) {
         self.constant_table.insert(constant.name.clone(), constant);

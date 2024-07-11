@@ -6,13 +6,15 @@ pub(crate) struct NativeFunctionIndex {
     functions: Vec<NativeFunction>,
 }
 
-impl NativeFunctionIndex {
-
-    pub(crate) fn new() -> NativeFunctionIndex {
+impl Default for NativeFunctionIndex {
+    fn default() -> Self {
         NativeFunctionIndex {
             functions: Self::create_native_functions(),
         }
     }
+}
+
+impl NativeFunctionIndex {
 
     pub(crate) fn find(&self, name: String) -> Option<&NativeFunction> {
         return self.functions.iter().find(|f| f.signature().name() == name);
